@@ -38,6 +38,8 @@ MEX_DEFINE(delete) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 	Session<Visualizer>::destroy(input.get(0));
 }
 
+
+
 }
 
 MEX_DISPATCH
