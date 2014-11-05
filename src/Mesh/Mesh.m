@@ -1,12 +1,11 @@
 classdef Mesh < handle
-%DATABASE Hypothetical Matlab database API.
+
 properties (Access = private)
   id_ % ID of the session instance.
 end
 
 methods
   function this = Mesh(boundary, min_area)
-  %DATABASE Create a new database.
     assert(isnumeric(boundary));
     this.id_ = Mesh_('new', boundary, min_area);
   end
