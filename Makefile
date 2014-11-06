@@ -94,6 +94,15 @@ $(BOD)%_.mexa64: %.bod.o
 	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 	
 	
+SLR = $(SRC)Solver/private/
+SLR_SRCS = $(wildcard $(SLR)*.cc)
+SLR_OBJS = $(patsubst $(SLR)%.cc, %.slr.o, $(SLR_SRCS))
+SLR_BINS = $(patsubst $(SLR)%.cc, $(SLR)%_.mexa64, $(SLR_SRCS))
+
+%.slr.o: $(SLR)%.cc
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
+$(SLR)%_.mexa64: %.slr.o
+	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 	
 ##############################################################
 # ILUPACK make
@@ -117,7 +126,7 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 
 ##############################################################	
 # The action starts here.
-all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(ILUPACK_BINS)
+all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS)
 
 clean:
-	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(TRIANGLELIB)triangle.o $(ILUPACK_PATH)*.mexa64 
+	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(TRIANGLELIB)triangle.o $(ILUPACK_PATH)*.mexa64 

@@ -1,7 +1,7 @@
 function  FEM = test(prec, min_area)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
-
+addpath(genpath('~/Documents/github/femex'));
 FEM = fem(prec, min_area);
 num_elems = size(FEM.Promoted.elems, 2);
 num_fqnodes = size(FEM.Facet.Qnodes, 2);
@@ -45,6 +45,10 @@ v = FEM.Promoted.nodes(1,:).^3;
 R = S+Q;
 % apply Dirichlet
 LoadVector = LoadVector + R*FEM.Solution;
+
+%solver = Solver(0, 1);
+%FEM.Solution(dofs) = solver.solve(R(dofs, dofs), LoadVector(dofs));
+
 FEM.Solution(dofs) = -R(dofs, dofs)\LoadVector(dofs);
 % trimesh(FEM.TriMesh', FEM.Promoted.nodes(1,1:numofnodes), ...
 %     FEM.Promoted.nodes(2, 1:numofnodes), FEM.Solution(1:numofnodes));
