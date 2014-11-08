@@ -1,4 +1,4 @@
-classdef fem < handle
+classdef FEM < handle
     %FEM Calculated Finite Element Method
     %   Provided constructors and many methods
     
@@ -27,7 +27,7 @@ classdef fem < handle
     end
     
     methods
-        function this = fem(prec, min_area)
+        function this = FEM(prec, min_area)
             this.Ref_mesh = Mesh([0 0 1 0 0 1]', 0.5);
             [this.Ref_points, ~, ~] = this.Ref_mesh.promote(prec);
             
