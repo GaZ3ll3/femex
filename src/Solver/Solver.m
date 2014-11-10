@@ -36,18 +36,21 @@ end
 function [x] = solve(this, A, b)
 
 if (this.ilu == 1)
+	% not parallelized, faster than MATLAB's gmres
     disp('solver uses ilu'); 
     options = AMGinit(A);
     [Prec, options] = AMGfactor(A, options);
     [x, ~] = AMGsolver(A, Prec, options,  b);
 
 elseif (this.umfpack == 1)
-    disp('solver uses umfpack');
-    x = A\b;
-else
-	% use gmres
+    % use gmres
+    % parallelized with internal MATLAB
 	disp('solver uses gmres');
     x = gmres(A, b,30, 1e-12, 4000);
+else
+	% parallelized with internal MATLAB
+    disp('solver uses umfpack');
+    x = A\b;
 end
 
 
