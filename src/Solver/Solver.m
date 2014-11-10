@@ -6,7 +6,7 @@ end
 
 properties (Access = public)
 ilu
-umfpack
+gmres
 end
 
 
@@ -15,13 +15,13 @@ methods
 function this = Solver(type)
     if strcmp(type, 'ilu')
         this.ilu = 1;
-        this.umfpack = 0;
-    elseif (strcmp(type, 'umfpack'))
+        this.gmres= 0;
+    elseif (strcmp(type, 'gmres'))
         this.ilu = 0;
-        this.umfpack = 1;
+        this.gmres = 1;
     else 
     	this.ilu = 0;
-        this.umfpack = 0;
+        this.gmres = 0;
     end
 this.id_ = Solver_('new');
 end
@@ -42,7 +42,7 @@ if (this.ilu == 1)
     [Prec, options] = AMGfactor(A, options);
     [x, ~] = AMGsolver(A, Prec, options,  b);
 
-elseif (this.umfpack == 1)
+elseif (this.gmres == 1)
     % use gmres
     % parallelized with internal MATLAB
 	disp('solver uses gmres');
