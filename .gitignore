@@ -20,6 +20,14 @@
 *.lai
 *.la
 *.a
+!libamd.a
+!libblaslike.a
+!liblapack.a
+!libmumps.a
+!libblas.a
+!libilupack.a
+!libmetis.a
+!libsparspak.a
 *.lib
 
 # Executables
