@@ -47,23 +47,24 @@ R = S+Q;
 % apply Dirichlet
 LoadVector = LoadVector + R*fem.Solution;
 
+% 
+% solver = Solver('ilu');
+% tic;
+% fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
+% toc;
+% solver.delete();
+% disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
-solver = Solver('ilu');
-tic;
-fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
-toc;
-solver.delete();
-disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
 % solver = Solver('umfpack');
-solver = Solver('gmres');
-
-tic;
-fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
-toc;
-solver.delete();
-
-disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
+% solver = Solver('gmres');
+% 
+% tic;
+% fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
+% toc;
+% solver.delete();
+% 
+% disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 solver = Solver('umfpack');
 % solver = Solver('gmres');
 

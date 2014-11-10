@@ -47,7 +47,7 @@ elseif (this.umfpack == 1)
 else
 	% use gmres
 	disp('solver uses gmres');
-    x = gmres(A, b,20, 1e-12, 4000);
+    x = gmres(A, b,30, 1e-12, 4000);
 end
 
 
