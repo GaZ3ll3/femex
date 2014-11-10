@@ -1,4 +1,6 @@
 CXX = g++
+CC  = gcc
+FF  = gfortran
 
 Opt = -Ofast
 
@@ -91,11 +93,40 @@ BOD_BINS = $(patsubst $(BOD)%.cc, $(BOD)%_.mexa64, $(BOD_SRCS))
 $(BOD)%_.mexa64: %.bod.o
 	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 	
+	
+SLR = $(SRC)Solver/private/
+SLR_SRCS = $(wildcard $(SLR)*.cc)
+SLR_OBJS = $(patsubst $(SLR)%.cc, %.slr.o, $(SLR_SRCS))
+SLR_BINS = $(patsubst $(SLR)%.cc, $(SLR)%_.mexa64, $(SLR_SRCS))
+
+%.slr.o: $(SLR)%.cc
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
+$(SLR)%_.mexa64: %.slr.o
+	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
+	
+##############################################################
+# ILUPACK make
+ILUPACK_ROOT = ./$(SRC)Solver/private/ilupack/
+ILUPACK = ./$(SRC)Solver/private/ilupack/matlabsrc/
+ILUPACK_PATH = ./$(SRC)Solver/private/ilupack/mex/
+ILUPACK_FLAGS = -c  -I$(ILUPACK_ROOT)include -I/usr/local/MATLAB/MATLAB_Production_Server/R2013a/extern/include -I/usr/local/MATLAB/MATLAB_Production_Server/R2013a/simulink/include -DMATLAB_MEX_FILE -ansi -D_GNU_SOURCE  -fexceptions -fPIC -fno-omit-frame-pointer -pthread  -D_LONG_INTEGER_ -D_MUMPS_MATCHING_ -D__UNDERSCORE__ -O -DNDEBUG  
+
+ILUPACK_LINKS =  -O -pthread -shared -Wl,--version-script,/usr/local/MATLAB/MATLAB_Production_Server/R2013a/extern/lib/glnxa64/mexFunction.map -Wl,--no-undefined -o 
+ILUPACK_LIBS  =  -L$(ILUPACK_ROOT)lib/GNU64_long -lilupack -lmumps -lamd -lsparspak -lblaslike -lmwlapack -lmwblas -lmetis -lm -lc -lgfortran -Wl,-rpath-link,/usr/local/MATLAB/MATLAB_Production_Server/R2013a/bin/glnxa64 -L/usr/local/MATLAB/MATLAB_Production_Server/R2013a/bin/glnxa64 -lmx -lmex -lmat -lm -lstdc++
+
+
+ILUPACK_SRCS = $(wildcard $(ILUPACK)*.c)
+ILUPACK_OBJS = $(patsubst $(ILUPACK)%.c, $(ILUPACK_PATH)%.o, $(ILUPACK_SRCS))
+ILUPACK_BINS = $(patsubst $(ILUPACK)%.c, $(ILUPACK_PATH)%.mexa64, $(ILUPACK_SRCS))
+
+$(ILUPACK_PATH)%.o: $(ILUPACK)%.c
+	$(CC) $(ILUPACK_FLAGS) $< -o $@
+$(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
+	$(FF) $(ILUPACK_LINKS) $@ $< $(ILUPACK_LIBS)
+
+##############################################################	
 # The action starts here.
-
-# all: $(BIN)MeshGen.mexa64 $(SRC)triangle.o $(BIN)MatrixAssem.mexa64 $(BIN)BCAssem.mexa64 clean
-
-all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS)
+all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS)
 
 clean:
-	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(TRIANGLELIB)triangle.o
+	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(TRIANGLELIB)triangle.o $(ILUPACK_PATH)*.mexa64 

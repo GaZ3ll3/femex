@@ -1,12 +1,11 @@
 classdef Integrator < handle
-%DATABASE Hypothetical Matlab database API.
+
 properties (Access = private)
   id_ % ID of the session instance.
 end
 
 methods
   function this = Integrator(dim, degree)
-  %DATABASE Create a new database.
     assert(isnumeric(degree));
     this.id_ = Integrator_('new', dim, degree);
   end

@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+*.mexa64
+
+# settings
+.settings/
+.cproject
+.project

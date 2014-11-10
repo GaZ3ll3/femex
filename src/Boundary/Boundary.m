@@ -1,12 +1,11 @@
 classdef Boundary < handle
-%DATABASE Hypothetical Matlab database API.
+
 properties (Access = private)
   id_ % ID of the session instance.
 end
 
 methods
   function this = Boundary(edge)
-  %DATABASE Create a new database.
     this.id_ = Boundary_('new', edge);
   end
 
