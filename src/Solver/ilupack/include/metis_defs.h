@@ -13,7 +13,7 @@
  * $Id: defs.h,v 1.1 1998/11/27 17:59:13 karypis Exp $
  *
  */
-#include "../../../ilupack/include/long_integer.h"
+#include "long_integer.h"
 
 #define METISTITLE              "  METIS 4.0.1 Copyright 1998, Regents of the University of Minnesota\n\n"
 #define MAXLINE			1280000

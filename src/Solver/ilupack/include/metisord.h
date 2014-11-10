@@ -14,8 +14,11 @@
  * $Id: metis.h,v 1.1 1998/11/27 17:59:21 karypis Exp $
  */
 
-#include "../../../ilupack/include/long_integer.h"
-#include "../../../ilupack/include/metis_idxtype.h"
+#include "long_integer.h"
+
+
+/* Undefine the following #define in order to use short integer as the idxtype */
+#include "metis_idxtype.h"
 
 void METIS_EdgeND(integer *, idxtype *, idxtype *, integer *, integer *, idxtype *, idxtype *); 
 void METIS_NodeND(integer *, idxtype *, idxtype *, integer *, integer *, idxtype *, idxtype *); 

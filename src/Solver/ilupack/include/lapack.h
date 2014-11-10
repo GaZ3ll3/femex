@@ -2,9 +2,9 @@
 #define _LAPACK_H
 
 /************ nameslapack.h einbinden, falls noch nicht geschehen *********/
+#include <nameslapack.h>
+
 #include "long_integer.h"
-#include "../../../ilupack/include/long_integer.h"
-#include "../../../ilupack/include/nameslapack.h"
 
 void cbdsqr(character *uplo, integer *n, integer *ncvt, integer *nru, integer *ncc, real *d, real *e, complex *vt, integer *ldvt, complex *u, integer *ldu, complex *c, integer *ldc, real *rwork, integer *info, ftnlen uplolen);
 void cgbbrd(character *vect, integer *m, integer *n, integer *ncc, integer *kl, integer *ku, complex *ab, integer *ldab, real *d, real *e, complex *q, integer *ldq, complex *pt, integer *ldpt, complex *c, integer *ldc, complex *work, real *rwork, integer *info, ftnlen vectlen);

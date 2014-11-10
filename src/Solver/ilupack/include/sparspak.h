@@ -2,9 +2,9 @@
 #define _SPARSPAK_H
 
 /************ namessparspack.h einbinden, falls noch nicht geschehen *********/
+#include "namessparspak.h"
+
 #include "long_integer.h"
-#include "../../../ilupack/include/long_integer.h"
-#include "../../../ilupack/include/namessparspak.h"
 
 /* Common Block Declarations */
 extern struct 

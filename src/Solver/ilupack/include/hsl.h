@@ -2,9 +2,9 @@
 #define _HSL_H
 
 /**************** include nameshsl.h if necessary *********/
+#include "nameshsl.h"
+
 #include "long_integer.h"
-#include "../../../ilupack/include/long_integer.h"
-#include "../../../ilupack/include/nameshsl.h"
 
 /* Common Block Declarations and Initialized Data */
 

@@ -106,9 +106,9 @@ $(SLR)%_.mexa64: %.slr.o
 	
 ##############################################################
 # ILUPACK make
-ILUPACK_ROOT = ./$(SRC)Solver/private/ilupack/
-ILUPACK = ./$(SRC)Solver/private/ilupack/matlabsrc/
-ILUPACK_PATH = ./$(SRC)Solver/private/ilupack/mex/
+ILUPACK_ROOT = ./$(SRC)Solver/ilupack/
+ILUPACK = ./$(SRC)Solver/ilupack/matlabsrc/
+ILUPACK_PATH = ./$(SRC)Solver/ilupack/mex/
 ILUPACK_FLAGS = -c  -I$(ILUPACK_ROOT)include -I/usr/local/MATLAB/MATLAB_Production_Server/R2013a/extern/include -I/usr/local/MATLAB/MATLAB_Production_Server/R2013a/simulink/include -DMATLAB_MEX_FILE -ansi -D_GNU_SOURCE  -fexceptions -fPIC -fno-omit-frame-pointer -pthread  -D_LONG_INTEGER_ -D_MUMPS_MATCHING_ -D__UNDERSCORE__ -O -DNDEBUG  
 
 ILUPACK_LINKS =  -O -pthread -shared -Wl,--version-script,/usr/local/MATLAB/MATLAB_Production_Server/R2013a/extern/lib/glnxa64/mexFunction.map -Wl,--no-undefined -o 

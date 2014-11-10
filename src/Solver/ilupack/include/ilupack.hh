@@ -3,6 +3,6 @@
 
 #define _CPP_PREFIX   extern "C"
 
-#include "../../../ilupack/include/ilupack1.h"
+#include <ilupack1.h>
 
 #endif

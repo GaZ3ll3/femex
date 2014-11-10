@@ -3,10 +3,12 @@
 #include <string.h>
 #include <math.h>
 
-#include "../../../ilupack/include/blas.h"
-#include "../../../ilupack/include/ilupack.h"
-#include "../../../ilupack/include/ilupackmacros.h"
-#include "../../../ilupack/samples/symswitches.c"
+#include <blas.h>
+#include <ilupack.h>
+
+#include <ilupackmacros.h>
+
+#include "symswitches.c"
 
 
 #define MAX_LINE        255
@@ -171,7 +173,7 @@ int main(int argc, char **argv)
 	-  n:  same as A.nr,A.nc
 	-  nz:  number of nonzero entries
      */
-#include "../../../ilupack/samples/readmatrix.c"
+#include "readmatrix.c"
     // if right hand sides are provided, then run AMGSOLVER for any of these
     // right hand sides. Otherwise use own set of right hand sides
 
@@ -376,7 +378,7 @@ int main(int argc, char **argv)
 
 
     // print some messages that give information about flags and reorderings
-#include "../../../ilupack/samples/symmessages.c"
+#include "symmessages.c"
        
     evaluate_time(&time_start,&systime);
     ierr=MYSYMAMGFACTOR(&AS, &PRE, &nlev, &param, perm0,perm, permf);
@@ -535,7 +537,7 @@ int main(int argc, char **argv)
 
     // print some statistics about the levels, their size and the 
     // computation time
-#include "../../../ilupack/samples/symprintperformance.c"
+#include "symprintperformance.c"
 
 
     
@@ -558,7 +560,7 @@ int main(int argc, char **argv)
     sumtime=0.0;
     sumit=0;
     for (l=0; l<mynrhs; l++) {
-#include "../../../ilupack/samples/initvectors.c"
+#include "initvectors.c"
 
         evaluate_time(&time_start,&systime);
 	/* left  preconditionig:                   param.ipar[21]=1
@@ -627,7 +629,7 @@ int main(int argc, char **argv)
 	   - about the true current residual of the computed solution and
 	   - the relative error in the solution though the exact solution is known
 	*/
-#include "../../../ilupack/samples/finalres.c"
+#include "finalres.c"
     } // end for l
     fclose(fo);
 
@@ -700,7 +702,7 @@ int main(int argc, char **argv)
     // ------------------------------------------------------------------------
 
     
-#include "../../../ilupack/samples/readmatrix.c"
+#include "readmatrix.c"
     // if right hand sides are provided, then run AMGSOLVER for any of these
     // right hand sides. Otherwise use own set of right hand sides
 
@@ -798,7 +800,7 @@ int main(int argc, char **argv)
 
 
     // print some messages that give information about flags and reorderings
-#include "../../../ilupack/samples/symmessages.c"
+#include "symmessages.c"
        
     evaluate_time(&time_start,&systime);
     ierr=MYSYMAMGFACTOR(&AS, &PRE, &nlev, &param, perm0,perm, permf);
@@ -956,7 +958,7 @@ int main(int argc, char **argv)
 
     // print some statistics about the levels, their size and the 
     // computation time
-#include "../../../ilupack/samples/symprintperformance.c"
+#include "symprintperformance.c"
 
 
     
@@ -979,7 +981,7 @@ int main(int argc, char **argv)
     sumtime=0.0;
     sumit=0;
     for (l=0; l<mynrhs; l++) {
-#include "../../../ilupack/samples/initvectors.c"
+#include "initvectors.c"
 
         evaluate_time(&time_start,&systime);
 	/* left  preconditionig:                   param.ipar[21]=1
@@ -1048,7 +1050,7 @@ int main(int argc, char **argv)
 	   - about the true current residual of the computed solution and
 	   - the relative error in the solution though the exact solution is known
 	*/
-#include "../../../ilupack/samples/finalres.c"
+#include "finalres.c"
     } // end for l
     fclose(fo);
 
@@ -1122,7 +1124,7 @@ int main(int argc, char **argv)
 
 
     
-#include "../../../ilupack/samples/readmatrix.c"
+#include "readmatrix.c"
     // if right hand sides are provided, then run AMGSOLVER for any of these
     // right hand sides. Otherwise use own set of right hand sides
 
@@ -1220,7 +1222,7 @@ int main(int argc, char **argv)
 
 
     // print some messages that give information about flags and reorderings
-#include "../../../ilupack/samples/symmessages.c"
+#include "symmessages.c"
        
     evaluate_time(&time_start,&systime);
     ierr=MYSYMAMGFACTOR(&AS, &PRE, &nlev, &param, perm0,perm, permf);
@@ -1378,7 +1380,7 @@ int main(int argc, char **argv)
 
     // print some statistics about the levels, their size and the 
     // computation time
-#include "../../../ilupack/samples/symprintperformance.c"
+#include "symprintperformance.c"
 
 
     
@@ -1401,7 +1403,7 @@ int main(int argc, char **argv)
     sumtime=0.0;
     sumit=0;
     for (l=0; l<mynrhs; l++) {
-#include "../../../ilupack/samples/initvectors.c"
+#include "initvectors.c"
 
         evaluate_time(&time_start,&systime);
 	/* left  preconditionig:                   param.ipar[21]=1
@@ -1470,7 +1472,7 @@ int main(int argc, char **argv)
 	   - about the true current residual of the computed solution and
 	   - the relative error in the solution though the exact solution is known
 	*/
-#include "../../../ilupack/samples/finalres.c"
+#include "finalres.c"
     } // end for l
     fclose(fo);
 

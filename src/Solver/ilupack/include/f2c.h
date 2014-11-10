@@ -3,7 +3,7 @@
 #ifndef __F2C__
 #define __F2C__
 
-#include "../../../ilupack/include/long_integer.h"
+#include "long_integer.h"
 
 #define logical                     integer
 #define ftnlen                      integer

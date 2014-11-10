@@ -3,9 +3,10 @@
 #include <string.h>
 #include <math.h>
 
-#include "../../../ilupack/include/blas.h"
-#include "../../../ilupack/include/ilupack.h"
-#include "../../../ilupack/include/ilupackmacros.h"
+#include <blas.h>
+#include <ilupack.h>
+
+#include <ilupackmacros.h>
 
 
 #define STDERR          stdout
@@ -90,7 +91,7 @@ int main(int argc, char **argv)
 	-  n:  same as A.nr,A.nc
 	-  nz:  number of nonzero entries
      */
-#include "../../../ilupack/samples/readmatrix.c"
+#include "readmatrix.c"
     // if right hand sides are provided, then run AMGSOLVER for any of these
     // right hand sides. Otherwise use own set of right hand sides
 
@@ -338,7 +339,7 @@ int main(int argc, char **argv)
     param.mixedprecision=1;
 
     // print some messages that give information about your specific settings
-#include "../../../ilupack/samples/messages.c"
+#include "messages.c"
 
     evaluate_time(&time_start,&systime);
     ierr=AMGFACTOR(&A, &PRE, &param);
@@ -397,7 +398,7 @@ int main(int argc, char **argv)
 
     // print some statistics about the levels, their size and the 
     // computation time
-#include "../../../ilupack/samples/printperformance.c"
+#include "printperformance.c"
 
     /* some decisions about the right hand side, the exact solution and the 
        initial guess
@@ -417,7 +418,7 @@ int main(int argc, char **argv)
     sumtime=0.0;
     sumit=0;
     for (l=0; l<mynrhs; l++) {
-#include "../../../ilupack/samples/initvectors.c"
+#include "initvectors.c"
 
         evaluate_time(&time_start,&systime);
 	ierr=AMGSOLVER(&A, &PRE, &param, rhs+A.nr*l, sol+A.nr*l);
@@ -479,7 +480,7 @@ int main(int argc, char **argv)
 	   - about the true current residual of the computed solution and
 	   - the relative error in the solution though the exact solution is known
 	*/
-#include "../../../ilupack/samples/finalres.c"
+#include "finalres.c"
     } // end for l
     fclose(fo);
 

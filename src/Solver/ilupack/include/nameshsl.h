@@ -1,7 +1,7 @@
 #ifndef _NAMESHSL_H
 #define _NAMESHSL_H
 
-#include "../../../ilupack/include/f2c.h"
+#include "f2c.h"
 
 /* on several architectures names of fortran routines are passed to C in 
    different ways. To cover this different architectures use in C only lower

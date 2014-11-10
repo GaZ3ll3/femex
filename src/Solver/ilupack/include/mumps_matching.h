@@ -2,9 +2,9 @@
 #define _MUMPS_MATCHING_H
 
 /**************** include nameshsl.h if necessary *********/
+#include "namesmumps_matching.h"
+
 #include "long_integer.h"
-#include "../../../ilupack/include/long_integer.h"
-#include "../../../ilupack/include/namesmumps_matching.h"
 
 void dmumps_match(integer *, integer *, integer *, 
 		  integer *, integer *, doubleprecision *, 

@@ -3,11 +3,12 @@
 #include <string.h>
 #include <math.h>
 
-#include "../../../ilupack/include/blas.h"
-#include "../../../ilupack/include/ilupack.h"
-#include "../../../ilupack/include/ilupackmacros.h"
-#include "../../../ilupack/include/sparspak.h"
-#include "../../../ilupack/samples/symswitches.c"
+#include <blas.h>
+#include <sparspak.h>
+#include <ilupack.h>
+
+#include <ilupackmacros.h>
+#include "symswitches.c"
 
 //#define PRINT_INFO
 #define STDERR          stdout
@@ -104,7 +105,7 @@ int main(int argc, char **argv)
 	-  n:  same as A.nr,A.nc
 	-  nz:  number of nonzero entries
      */
-#include "../../../ilupack/samples/spdreadmatrix.c"
+#include "spdreadmatrix.c"
     fprintf(fo,"\n");
     fflush(fo);
     fclose(fo);

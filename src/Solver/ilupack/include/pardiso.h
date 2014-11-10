@@ -29,8 +29,8 @@ extern "C" {
 
 /* -------------------------------------------------------------------------------------------- */
 
-#include "../../../ilupack/include/long_integer.h"
-#include "../../../ilupack/include/namespardiso.h"
+#include "long_integer.h"
+#include "namespardiso.h"
 
 #define pint integer
 

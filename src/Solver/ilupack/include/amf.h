@@ -1,8 +1,8 @@
 #ifndef _AMF_H
 #define _AMF_H
 
-#include "../../../ilupack/include/long_integer.h"
-#include "../../../ilupack/include/namesamf.h"
+#include "namesamf.h"
+#include "long_integer.h"
 
 //   ------   not distributed  parts   -----
 void r2hamdf4(integer *, integer *, integer *, integer *, integer *, integer *, integer *, integer *, 

@@ -14,7 +14,7 @@
  *
  */
 
-#include "../../../ilupack/include/long_integer.h"
+#include "long_integer.h"
 
 /*************************************************************************
 * The following macro returns a random number in the specified range

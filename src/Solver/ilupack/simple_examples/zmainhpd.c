@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "../../../ilupack/include/ilupack.h"
+#include <ilupack.h>
 
 
 

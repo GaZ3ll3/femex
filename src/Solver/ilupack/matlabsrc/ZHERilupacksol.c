@@ -49,8 +49,7 @@
 #include "matrix.h"
 #include <string.h>
 #include <stdlib.h>
-
-#include "../../../ilupack/include/ilupack.h"
+#include <ilupack.h>
 
 #define MAX(A,B) (((A)>=(B))?(A):(B))
 

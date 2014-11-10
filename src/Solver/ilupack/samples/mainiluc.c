@@ -4,10 +4,11 @@
 #include <math.h>
 
 
-#include "../../../ilupack/include/blas.h"
-#include "../../../ilupack/include/ilupack.h"
-#include "../../../ilupack/include/ilupackmacros.h"
-#include "../../../ilupack/include/sparspak.h"
+#include <blas.h>
+#include <sparspak.h>
+#include <ilupack.h>
+
+#include <ilupackmacros.h>
 
 
 

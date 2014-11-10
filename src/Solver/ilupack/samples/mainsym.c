@@ -3,10 +3,17 @@
 #include <string.h>
 #include <math.h>
 
-#include "../../../ilupack/include/blas.h"
-#include "../../../ilupack/include/ilupack.h"
-#include "../../../ilupack/include/ilupackmacros.h"
-#include "../../../ilupack/samples/symswitches.c"
+#include <blas.h>
+#include <ilupack.h>
+
+#include <ilupackmacros.h>
+
+
+
+
+// some special macros to capture complex symmetrix and complex
+// Hermitian systems at the same time
+#include "symswitches.c"
 
 
 #define STDERR          stdout
@@ -98,7 +105,7 @@ int main(int argc, char **argv)
 	-  n:  same as A.nr,A.nc
 	-  nz:  number of nonzero entries
     */
-#include "../../../ilupack/samples/spdreadmatrix.c"
+#include "spdreadmatrix.c"
 
     // if right hand sides are provided, then run AMGSOLVER for any of these
     // right hand sides. Otherwise use own set of right hand sides
@@ -340,7 +347,7 @@ int main(int argc, char **argv)
     // param.mixedprecision=1;
 
     // Also print some messages about flags and reorderings
-#include "../../../ilupack/samples/symmessages.c"
+#include "symmessages.c"
 
     evaluate_time(&time_start,&systime);
     if (!strcmp(param.typetv,"static") || !strcmp(param.typetv,"none")) {
@@ -414,7 +421,7 @@ int main(int argc, char **argv)
 
     // print some statistics about the levels, their size and the 
     // computation time
-#include "../../../ilupack/samples/symprintperformance.c"
+#include "symprintperformance.c"
 
 
 
@@ -435,7 +442,7 @@ int main(int argc, char **argv)
     sumtime=0.0;
     sumit=0;
     for (l=0; l<mynrhs; l++) {
-#include "../../../ilupack/samples/syminitvectors.c"
+#include "syminitvectors.c"
 
 
         evaluate_time(&time_start,&systime);
@@ -497,7 +504,7 @@ int main(int argc, char **argv)
 	   - about the true current residual of the computed solution and
 	   - the relative error in the solution though the exact solution is known
 	*/
-#include "../../../ilupack/samples/symfinalres.c"
+#include "symfinalres.c"
     } // end for l
     fclose(fo);
 

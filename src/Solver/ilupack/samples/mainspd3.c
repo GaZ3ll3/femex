@@ -3,9 +3,10 @@
 #include <string.h>
 #include <math.h>
 
-#include "../../../ilupack/include/blas.h"
-#include "../../../ilupack/include/ilupack.h"
-#include "../../../ilupack/include/ilupackmacros.h"
+#include <blas.h>
+#include <ilupack.h>
+
+#include <ilupackmacros.h>
 
 
 
@@ -88,7 +89,7 @@ int main(int argc, char **argv)
 	-  n:  same as A.nr,A.nc
 	-  nz:  number of nonzero entries
      */
-#include "../../../ilupack/samples/spdreadmatrix.c"
+#include "spdreadmatrix.c"
     // if right hand sides are provided, then run AMGSOLVER for any of these
     // right hand sides. Otherwise use own set of right hand sides
 
@@ -307,7 +308,7 @@ int main(int argc, char **argv)
 
 
     // print some messages that give information about flags and reorderings
-#include "../../../ilupack/samples/spdmessages.c"
+#include "spdmessages.c"
 
     evaluate_time(&time_start,&systime);
     ierr=SPDAMGFACTOR(&A, &PRE, &param);
@@ -364,7 +365,7 @@ int main(int argc, char **argv)
 
     // print some statistics about the levels, their size and the 
     // computation time
-#include "../../../ilupack/samples/spdprintperformance.c"
+#include "spdprintperformance.c"
 
 
 
@@ -385,7 +386,7 @@ int main(int argc, char **argv)
     sumtime=0.0;
     sumit=0;
     for (l=0; l<mynrhs; l++) {
-#include "../../../ilupack/samples/spdinitvectors.c"
+#include "spdinitvectors.c"
          
         evaluate_time(&time_start,&systime);
 	ierr=SPDAMGSOLVER(&A, &PRE, &param, rhs+A.nr*l, sol+A.nr*l);
@@ -446,7 +447,7 @@ int main(int argc, char **argv)
 	   - about the true current residual of the computed solution and
 	   - the relative error in the solution though the exact solution is known
 	*/
-#include "../../../ilupack/samples/spdfinalres.c"
+#include "spdfinalres.c"
     } // end for l
     fclose(fo);
 
@@ -519,7 +520,7 @@ int main(int argc, char **argv)
     // ------------------------------------------------------------------------
 
     
-#include "../../../ilupack/samples/spdreadmatrix.c"
+#include "spdreadmatrix.c"
     // if right hand sides are provided, then run AMGSOLVER for any of these
     // right hand sides. Otherwise use own set of right hand sides
 
@@ -528,7 +529,7 @@ int main(int argc, char **argv)
 
 
     // print some messages that give information about flags and reorderings
-#include "../../../ilupack/samples/spdmessages.c"
+#include "spdmessages.c"
 
     evaluate_time(&time_start,&systime);
     ierr=SPDAMGFACTOR(&A, &PRE, &param);
@@ -585,7 +586,7 @@ int main(int argc, char **argv)
 
     // print some statistics about the levels, their size and the 
     // computation time
-#include "../../../ilupack/samples/spdprintperformance.c"
+#include "spdprintperformance.c"
 
 
 
@@ -606,7 +607,7 @@ int main(int argc, char **argv)
     sumtime=0.0;
     sumit=0;
     for (l=0; l<mynrhs; l++) {
-#include "../../../ilupack/samples/spdinitvectors.c"
+#include "spdinitvectors.c"
          
         evaluate_time(&time_start,&systime);
 	ierr=SPDAMGSOLVER(&A, &PRE, &param, rhs+A.nr*l, sol+A.nr*l);
@@ -667,7 +668,7 @@ int main(int argc, char **argv)
 	   - about the true current residual of the computed solution and
 	   - the relative error in the solution though the exact solution is known
 	*/
-#include "../../../ilupack/samples/spdfinalres.c"
+#include "spdfinalres.c"
     } // end for l
     fclose(fo);
 
@@ -744,7 +745,7 @@ int main(int argc, char **argv)
 
     
 
-#include "../../../ilupack/samples/spdreadmatrix.c"
+#include "spdreadmatrix.c"
     // if right hand sides are provided, then run AMGSOLVER for any of these
     // right hand sides. Otherwise use own set of right hand sides
 
@@ -757,7 +758,7 @@ int main(int argc, char **argv)
 
 
     // print some messages that give information about flags and reorderings
-#include "../../../ilupack/samples/spdmessages.c"
+#include "spdmessages.c"
 
     evaluate_time(&time_start,&systime);
     ierr=SPDAMGFACTOR(&A, &PRE, &param);
@@ -814,7 +815,7 @@ int main(int argc, char **argv)
 
     // print some statistics about the levels, their size and the 
     // computation time
-#include "../../../ilupack/samples/spdprintperformance.c"
+#include "spdprintperformance.c"
 
 
 
@@ -835,7 +836,7 @@ int main(int argc, char **argv)
     sumtime=0.0;
     sumit=0;
     for (l=0; l<mynrhs; l++) {
-#include "../../../ilupack/samples/spdinitvectors.c"
+#include "spdinitvectors.c"
          
         evaluate_time(&time_start,&systime);
 	ierr=SPDAMGSOLVER(&A, &PRE, &param, rhs+A.nr*l, sol+A.nr*l);
@@ -896,7 +897,7 @@ int main(int argc, char **argv)
 	   - about the true current residual of the computed solution and
 	   - the relative error in the solution though the exact solution is known
 	*/
-#include "../../../ilupack/samples/spdfinalres.c"
+#include "spdfinalres.c"
     } // end for l
     fclose(fo);
 

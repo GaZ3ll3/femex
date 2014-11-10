@@ -14,7 +14,7 @@
  *
  */
 
-#include "../../../ilupack/include/long_integer.h"
+#include "long_integer.h"
 
 
 

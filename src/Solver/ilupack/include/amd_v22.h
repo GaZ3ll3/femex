@@ -45,7 +45,7 @@ extern "C" {
 #include <stddef.h>
 
 /* define UF_long */
-#include "../../../ilupack/include/UFconfig.h"
+#include "UFconfig.h"
 
 int amd_order		    /* returns AMD_OK, AMD_OK_BUT_JUMBLED,
 			     * AMD_INVALID, or AMD_OUT_OF_MEMORY */

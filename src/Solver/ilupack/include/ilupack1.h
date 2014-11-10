@@ -6,14 +6,13 @@
 */
 #ifndef _ILU_PACK_H
 #define _ILU_PACK_H
-
 #define USE_LAPACK_DRIVER
 
 
 #include <stdlib.h>
 
-#include "../../../ilupack/include/long_integer.h"
-#include "../../../ilupack/include/namesilupack.h"
+#include "long_integer.h"
+#include "namesilupack.h"
 
 
 

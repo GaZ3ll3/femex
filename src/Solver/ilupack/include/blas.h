@@ -1,8 +1,8 @@
 #ifndef _BLAS_H
 #define _BLAS_H
 
-#include "../../../ilupack/include/long_integer.h"
-#include "../../../ilupack/include/namesblas.h"
+#include "namesblas.h"
+#include "long_integer.h"
 
 complex              cdotc(integer *,complex *,integer *,complex *,integer *),
                      cdotu(integer *,complex *,integer *,complex *,integer *);

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-#include "../../../ilupack/include/ilupack.hh"
+#include <ilupack.hh>
 
 
 

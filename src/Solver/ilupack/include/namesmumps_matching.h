@@ -1,7 +1,7 @@
 #ifndef _NAMES_MUMPS_MATCHING_H
 #define _NAMES_MUMPS_MATCHING_H
 
-#include "../../../ilupack/include/f2c.h"
+#include "f2c.h"
 
 /* on several architectures names of fortran routines are passed to C in 
    different ways. To cover this different architectures use in C only lower

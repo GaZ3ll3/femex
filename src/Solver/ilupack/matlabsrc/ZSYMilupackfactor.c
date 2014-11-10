@@ -44,9 +44,8 @@
 #include "matrix.h"
 #include <string.h>
 #include <stdlib.h>
-
-#include "../../../ilupack/include/ilupack.h"
-#include "../../../ilupack/include/lapack.h"
+#include <ilupack.h>
+#include <lapack.h>
 
 #define MAX(A,B) (((A)>=(B))?(A):(B))
 #define MAX_FIELDS 100

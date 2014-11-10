@@ -1,4 +1,3 @@
-
 #if !defined _DOUBLE_REAL_ &&   !defined _SINGLE_REAL_
 #define _COMPLEX_SYMMETRIC_
 #endif
@@ -8,13 +7,13 @@
 #include <string.h>
 #include <math.h>
 
-#include "../../../ilupack/include/blas.h"
-#include "../../../ilupack/include/ilupack.h"
+#include <blas.h>
+#include <ilupack.h>
 
-#include "../../../ilupack/include/ilupackmacros.h"
+#include <ilupackmacros.h>
 
 
-#include "../../../ilupack/samples/symswitches.c"
+#include "symswitches.c"
 
 
 
@@ -544,7 +543,7 @@ int main(int argc, char **argv)
     // param.typecoarse="ilu";
 
     // print some messages that give information about flags and reorderings
-#include "../../../ilupack/samples/symmessages.c"
+#include "symmessages.c"
        
     evaluate_time(&time_start,&systime);
     ierr=MYSYMAMGFACTOR(&ilutmat, &PRE, &param);
@@ -700,7 +699,7 @@ int main(int argc, char **argv)
 
     // print some statistics about the levels, their size and the 
     // computation time
-#include "../../../ilupack/samples/symprintperformance.c"
+#include "symprintperformance.c"
 
 
 

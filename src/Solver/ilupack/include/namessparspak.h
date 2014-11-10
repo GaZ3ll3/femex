@@ -1,7 +1,7 @@
 #ifndef _NAMESSPARSPAK_H
 #define _NAMESSPARSPAK_H
 
-#include "../../../ilupack/include/f2c.h"
+#include "f2c.h"
 
 
 /* on several architectures names of fortran routines are passed to C in 

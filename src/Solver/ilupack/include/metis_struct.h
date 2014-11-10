@@ -14,8 +14,8 @@
  */
 
 /* Undefine the following #define in order to use short integer as the idxtype */
-#include "../../../ilupack/include/long_integer.h"
-#include "../../../ilupack/include/metis_idxtype.h"
+#include "long_integer.h"
+#include "metis_idxtype.h"
 
 /*************************************************************************
 * The following data structure stores key-value pair
