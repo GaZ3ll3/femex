@@ -1016,7 +1016,7 @@ void mexFunction
 		     /* factorize diagonal block */
 		     k=blocksize*blocksize;
 		     dsytrf("u",&blocksize,Dbuff,&blocksize,
-			    Ibuff,Dbuff+k,&k,&l,1);
+			    Ibuff,Dbuff+k,(long *)&k,(long *)&l,1);
 		     if (l<0) {
 		        mexPrintf("_SYTRF: argument %d has an illegal value",-l);
 			return ;
@@ -1028,7 +1028,7 @@ void mexFunction
 		     /* invert diagonal block */
 		     k=blocksize*blocksize;
 		     dsytri("u",&blocksize,Dbuff,&blocksize,
-			    Ibuff,Dbuff+k,&l,1);
+			    Ibuff,Dbuff+k,(long*)&l,1);
 		     if (l<0) {
 		        mexPrintf("_SYTRI: argument %d has an illegal value",-l);
 			return ;
@@ -1394,7 +1394,7 @@ void mexFunction
 		     /* factorize diagonal block */
 		     k=blocksize*blocksize;
 		     dsytrf("u",&blocksize,Dbuff,&blocksize,
-			    Ibuff,Dbuff+k,&k,&l,1);
+			    Ibuff,Dbuff+k,(long*)&k,(long*)&l,1);
 		     if (l<0) {
 		        mexPrintf("_SYTRF: argument %d has an illegal value",-l);
 			return ;
@@ -1406,7 +1406,7 @@ void mexFunction
 		     /* invert diagonal block */
 		     k=blocksize*blocksize;
 		     dsytri("u",&blocksize,Dbuff,&blocksize,
-			    Ibuff,Dbuff+k,&l,1);
+			    Ibuff,Dbuff+k,(long*)&l,1);
 		     if (l<0) {
 		        mexPrintf("_SYTRI: argument %d has an illegal value",-l);
 			return ;
