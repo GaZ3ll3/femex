@@ -42,7 +42,7 @@ MEX_DEFINE(new)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
 	InputArguments input(nrhs, prhs, 1);
 	OutputArguments output(nlhs, plhs, 1);
 	output.set(0, Session<DirichletBC>::create(new DirichletBC(
-			const_cast<MatlabPtr>(input.get(0))
+			CAST(input.get(0))
 						)));
 }
 

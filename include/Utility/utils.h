@@ -21,6 +21,8 @@ using namespace std;
     mexErrMsgTxt(#condition " not true.")
 
 
+#define CAST(PTR) const_cast<MatlabPtr>(PTR)
+
 template <typename T> T* Matlab_Cast(MatlabPtr _ptr){
 	return static_cast<T*> (mxGetData(_ptr));
 }

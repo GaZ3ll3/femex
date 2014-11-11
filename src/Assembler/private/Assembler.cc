@@ -570,7 +570,7 @@ MEX_DEFINE(reference2D)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs
 	plhs[1] = mxCreateNumericMatrix(numberofpoints, numberofqpoints, mxDOUBLE_CLASS, mxREAL);
 	plhs[2] = mxCreateNumericMatrix(numberofpoints, numberofqpoints, mxDOUBLE_CLASS, mxREAL);
 
-	assembler->Reference(plhs[0], plhs[1], plhs[2], const_cast<MatlabPtr>(prhs[1]), const_cast<MatlabPtr>(prhs[2]));
+	assembler->Reference(plhs[0], plhs[1], plhs[2], CAST(prhs[1]), CAST(prhs[2]));
 
 
 }
@@ -580,13 +580,13 @@ MEX_DEFINE(reference1D)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs
 	OutputArguments output(nlhs, plhs, 2);
 	Assembler* assembler = Session<Assembler>::get(input.get(0));
 
-	size_t numberofpoints = static_cast<size_t>(*Matlab_Cast<Real_t>(const_cast<MatlabPtr>(prhs[1])) + 1);
+	size_t numberofpoints = static_cast<size_t>(*Matlab_Cast<Real_t>(CAST(prhs[1])) + 1);
 
 	size_t numberofqpoints = mxGetN(prhs[2]);
 
 	plhs[0] = mxCreateNumericMatrix(numberofpoints, numberofqpoints, mxDOUBLE_CLASS, mxREAL);
 	plhs[1] = mxCreateNumericMatrix(numberofpoints, numberofqpoints, mxDOUBLE_CLASS, mxREAL);
-	assembler->Reference(plhs[0], plhs[1], const_cast<MatlabPtr>(prhs[1]), const_cast<MatlabPtr>(prhs[2]));
+	assembler->Reference(plhs[0], plhs[1], CAST(prhs[1]), CAST(prhs[2]));
 
 }
 
@@ -609,10 +609,10 @@ MEX_DEFINE(assems)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
 	plhs[2] = mxCreateNumericMatrix(numberofnodesperelem * numberofnodesperelem * numberofelem, 1, mxDOUBLE_CLASS, mxREAL);
 	Real_t* pV = mxGetPr(plhs[2]);
 
-	assembler->AssembleStiff(pI, pJ, pV, const_cast<MatlabPtr>(prhs[1]),
-			const_cast<MatlabPtr>(prhs[2]), const_cast<MatlabPtr>(prhs[3]),
-			const_cast<MatlabPtr>(prhs[4]), const_cast<MatlabPtr>(prhs[5]),
-			const_cast<MatlabPtr>(prhs[6]));
+	assembler->AssembleStiff(pI, pJ, pV, CAST(prhs[1]),
+			CAST(prhs[2]), CAST(prhs[3]),
+			CAST(prhs[4]), CAST(prhs[5]),
+			CAST(prhs[6]));
 
 
 
@@ -636,9 +636,9 @@ MEX_DEFINE(assema)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
 	plhs[2] = mxCreateNumericMatrix(numberofnodesperelem * numberofnodesperelem * numberofelem, 1,  mxDOUBLE_CLASS, mxREAL);
 	Real_t* pV = mxGetPr(plhs[2]);
 
-	assembler->AssembleMass(pI, pJ, pV, const_cast<MatlabPtr>(prhs[1]),
-			const_cast<MatlabPtr>(prhs[2]), const_cast<MatlabPtr>(prhs[3]),
-			const_cast<MatlabPtr>(prhs[4]), const_cast<MatlabPtr>(prhs[5]));
+	assembler->AssembleMass(pI, pJ, pV, CAST(prhs[1]),
+			CAST(prhs[2]), CAST(prhs[3]),
+			CAST(prhs[4]), CAST(prhs[5]));
 
 
 }
@@ -661,10 +661,10 @@ MEX_DEFINE(asseml) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 
 	plhs[0] = mxCreateNumericMatrix(numberofnodes,1,  mxDOUBLE_CLASS, mxREAL);
 	Real_t* pLoad = mxGetPr(plhs[0]);
-	assembler->AssembleLoad(pLoad, const_cast<MatlabPtr>(prhs[1]),
-			const_cast<MatlabPtr>(prhs[2]), const_cast<MatlabPtr>(prhs[3]),
-			const_cast<MatlabPtr>(prhs[4]), const_cast<MatlabPtr>(prhs[5]),
-			const_cast<MatlabPtr>(prhs[6]));
+	assembler->AssembleLoad(pLoad, CAST(prhs[1]),
+			CAST(prhs[2]), CAST(prhs[3]),
+			CAST(prhs[4]), CAST(prhs[5]),
+			CAST(prhs[6]));
 
 }
 
@@ -679,8 +679,8 @@ MEX_DEFINE(qnodes2D)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	plhs[0] = mxCreateNumericMatrix(2, numberofelem * numberofqnodes,  mxDOUBLE_CLASS, mxREAL);
 	Real_t* Coords = mxGetPr(plhs[0]);
-	assembler->Qnodes2D(Coords,const_cast<MatlabPtr>(prhs[1]), const_cast<MatlabPtr>(prhs[2]),
-			const_cast<MatlabPtr>(prhs[3]));
+	assembler->Qnodes2D(Coords,CAST(prhs[1]), CAST(prhs[2]),
+			CAST(prhs[3]));
 }
 
 MEX_DEFINE(qnodes1D)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
@@ -694,8 +694,8 @@ MEX_DEFINE(qnodes1D)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	plhs[0] = mxCreateNumericMatrix(mxGetM(prhs[1]), numberofedges * numberofqnodes,  mxDOUBLE_CLASS, mxREAL);
 	Real_t* Coords = mxGetPr(plhs[0]);
-	assembler->Qnodes1D(Coords,const_cast<MatlabPtr>(prhs[1]), const_cast<MatlabPtr>(prhs[2]),
-			const_cast<MatlabPtr>(prhs[3]));
+	assembler->Qnodes1D(Coords,CAST(prhs[1]), CAST(prhs[2]),
+			CAST(prhs[3]));
 }
 
 MEX_DEFINE(assemrbc) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
@@ -707,10 +707,10 @@ MEX_DEFINE(assemrbc) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]
 
 	plhs[0] = mxCreateNumericMatrix(numberofnodes,1,  mxDOUBLE_CLASS, mxREAL);
 	Real_t* pNeumann = mxGetPr(plhs[0]);
-	assembler->AssembleBC(pNeumann, const_cast<MatlabPtr>(prhs[1]),
-			const_cast<MatlabPtr>(prhs[2]), const_cast<MatlabPtr>(prhs[3]),
-			const_cast<MatlabPtr>(prhs[4]), const_cast<MatlabPtr>(prhs[5]),
-			const_cast<MatlabPtr>(prhs[6]));
+	assembler->AssembleBC(pNeumann, CAST(prhs[1]),
+			CAST(prhs[2]), CAST(prhs[3]),
+			CAST(prhs[4]), CAST(prhs[5]),
+			CAST(prhs[6]));
 
 }
 
@@ -729,9 +729,9 @@ MEX_DEFINE(assemlbc) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]
 	Real_t* pI = mxGetPr(plhs[0]);
 	Real_t* pJ = mxGetPr(plhs[1]);
 	Real_t* pV = mxGetPr(plhs[2]);
-	assembler->AssembleBC(pI, pJ, pV,  const_cast<MatlabPtr>(prhs[1]),
-			const_cast<MatlabPtr>(prhs[2]), const_cast<MatlabPtr>(prhs[3]),
-			const_cast<MatlabPtr>(prhs[4]), const_cast<MatlabPtr>(prhs[5]));
+	assembler->AssembleBC(pI, pJ, pV,  CAST(prhs[1]),
+			CAST(prhs[2]), CAST(prhs[3]),
+			CAST(prhs[4]), CAST(prhs[5]));
 
 }
 
