@@ -1,8 +1,9 @@
 CXX = g++
 CC  = gcc
 FF  = gfortran
-
 Opt = -Ofast
+
+MATLAB_ROOT = /usr/local/MATLAB/MATLAB_Production_Server/R2013a/
 
 CXX_FLAGS = -DMATLAB_MEX_FILE -std=c++11 -fopenmp -march=native \
 			-D_GNU_SOURCE -fPIC -fno-omit-frame-pointer -Wno-write-strings -pthread\
@@ -11,16 +12,16 @@ CXX_FLAGS = -DMATLAB_MEX_FILE -std=c++11 -fopenmp -march=native \
 CXX_INCLUDE = -I./include/mexplus \
 			  -I./include/pprint \
 			  -I./include/Utility \
-			  -I/usr/local/MATLAB/MATLAB_Production_Server/R2013a/extern/include \
-			  -I/usr/local/MATLAB/MATLAB_Production_Server/R2013a/simulink/include
+			  -I$(MATLAB_ROOT)extern/include \
+			  -I$(MATLAB_ROOT)simulink/include
 
 
 MATLAB_LINKS = $(Opt) -pthread -shared\
-			   -Wl,--version-script,/usr/local/MATLAB/MATLAB_Production_Server/R2013a/extern/lib/glnxa64/mexFunction.map \
+			   -Wl,--version-script,$(MATLAB_ROOT)extern/lib/glnxa64/mexFunction.map \
 			   -Wl,--no-undefined 
 			   
-CXX_LIBS = -Wl,-rpath-link,/usr/local/MATLAB/MATLAB_Production_Server/R2013a/bin/glnxa64 \
-		   -L/usr/local/MATLAB/MATLAB_Production_Server/R2013a/bin/glnxa64 -lmx -lmex -lmat -lm -fopenmp
+CXX_LIBS = -Wl,-rpath-link,$(MATLAB_ROOT)bin/glnxa64 \
+		   -L$(MATLAB_ROOT)bin/glnxa64 -lmx -lmex -lmat -lm -fopenmp
 		   
 	
 	
@@ -109,10 +110,10 @@ $(SLR)%_.mexa64: %.slr.o
 ILUPACK_ROOT = ./$(SRC)Solver/ilupack/
 ILUPACK = ./$(SRC)Solver/ilupack/matlabsrc/
 ILUPACK_PATH = ./$(SRC)Solver/ilupack/mex/
-ILUPACK_FLAGS = -c  -I$(ILUPACK_ROOT)include -I/usr/local/MATLAB/MATLAB_Production_Server/R2013a/extern/include -I/usr/local/MATLAB/MATLAB_Production_Server/R2013a/simulink/include -DMATLAB_MEX_FILE -ansi -D_GNU_SOURCE  -fexceptions -fPIC -fno-omit-frame-pointer -pthread  -D_LONG_INTEGER_ -D_MUMPS_MATCHING_ -D__UNDERSCORE__ -O -DNDEBUG  
+ILUPACK_FLAGS = -c  -I$(ILUPACK_ROOT)include -I$(MATLAB_ROOT)extern/include -I$(MATLAB_ROOT)simulink/include -DMATLAB_MEX_FILE -ansi -D_GNU_SOURCE  -fexceptions -fPIC -fno-omit-frame-pointer -pthread  -D_LONG_INTEGER_ -D_MUMPS_MATCHING_ -D__UNDERSCORE__ $(Opt) -DNDEBUG  
 
-ILUPACK_LINKS =  -O -pthread -shared -Wl,--version-script,/usr/local/MATLAB/MATLAB_Production_Server/R2013a/extern/lib/glnxa64/mexFunction.map -Wl,--no-undefined -o 
-ILUPACK_LIBS  =  -L$(ILUPACK_ROOT)lib/GNU64_long -lilupack -lmumps -lamd -lsparspak -lblaslike -lmwlapack -lmwblas -lmetis -lm -lc -lgfortran -Wl,-rpath-link,/usr/local/MATLAB/MATLAB_Production_Server/R2013a/bin/glnxa64 -L/usr/local/MATLAB/MATLAB_Production_Server/R2013a/bin/glnxa64 -lmx -lmex -lmat -lm -lstdc++
+ILUPACK_LINKS =  $(Opt) -pthread -shared -Wl,--version-script,$(MATLAB_ROOT)extern/lib/glnxa64/mexFunction.map -Wl,--no-undefined -o 
+ILUPACK_LIBS  =  -L$(ILUPACK_ROOT)lib/GNU64_long -lilupack -lmumps -lamd -lsparspak -lblaslike -lmwlapack -lmwblas -lmetis -lm -lc -lgfortran -Wl,-rpath-link,$(MATLAB_ROOT)bin/glnxa64 -L$(MATLAB_ROOT)bin/glnxa64 -lmx -lmex -lmat -lm -lstdc++
 
 
 ILUPACK_SRCS = $(wildcard $(ILUPACK)*.c)

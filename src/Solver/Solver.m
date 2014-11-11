@@ -13,16 +13,16 @@ end
 
 methods
 function this = Solver(type)
-    if strcmp(type, 'ilu')
-        this.ilu = 1;
-        this.gmres= 0;
-    elseif (strcmp(type, 'gmres'))
-        this.ilu = 0;
-        this.gmres = 1;
-    else 
-    	this.ilu = 0;
-        this.gmres = 0;
-    end
+if strcmp(type, 'ilu')
+this.ilu = 1;
+this.gmres= 0;
+elseif (strcmp(type, 'gmres'))
+this.ilu = 0;
+this.gmres = 1;
+else 
+this.ilu = 0;
+this.gmres = 0;
+end
 this.id_ = Solver_('new');
 end
 
@@ -41,7 +41,7 @@ if (this.ilu == 1)
     options = AMGinit(A);
     [Prec, options] = AMGfactor(A, options);
     [x, ~] = AMGsolver(A, Prec, options,  b);
-
+	Prec = AMGdelete(Prec);
 elseif (this.gmres == 1)
     % use gmres
     % parallelized with internal MATLAB
