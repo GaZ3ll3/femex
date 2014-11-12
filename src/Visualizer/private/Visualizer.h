@@ -32,11 +32,34 @@ namespace MEX {
  *
  * and output solution's gradient
  */
+
 class Visualizer {
 public:
 	Visualizer();
+	Visualizer(MatlabPtr& i_data, MatlabPtr& i_domain);
 	virtual ~Visualizer();
 
+
+	/*
+	 * assorted visualization methods
+	 */
+	/*
+	 * surf figure
+	 */
+	void TriSurf();
+	void TriMesh();
+	/*
+	 * Vector figure
+	 */
+	void Quiver();
+	/*
+	 * surf figure
+	 */
+	void QuiverX();
+	void QuiverY();
+
+
+private:
 
 
 };

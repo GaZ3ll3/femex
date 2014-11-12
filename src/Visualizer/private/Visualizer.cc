@@ -13,6 +13,10 @@ Visualizer::Visualizer() {
 
 }
 
+Visualizer::Visualizer(MatlabPtr& i_data, MatlabPtr& i_domain) {
+
+}
+
 Visualizer::~Visualizer() {
 }
 
