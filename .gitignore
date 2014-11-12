@@ -36,6 +36,10 @@
 *.app
 *.mexa64
 
+
+# agmg directory
+src/Solver/agmg
+
 # settings
 .settings/
 .cproject
