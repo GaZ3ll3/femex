@@ -874,7 +874,7 @@ void mexFunction
 		     /* factorize diagonal block */
 		     k=blocksize*blocksize;
 		     zhetrf("u",&blocksize,Dbuff,&blocksize,
-			    Ibuff,Dbuff+k,&k,&l,1);
+			    Ibuff,Dbuff+k,(long int*)&k,(long int*)&l,1);
 		     if (l<0) {
 		        mexPrintf("_HETRF: argument %d has an illegal value",-l);
 			return ;
@@ -886,7 +886,7 @@ void mexFunction
 		     /* invert diagonal block */
 		     k=blocksize*blocksize;
 		     zhetri("u",&blocksize,Dbuff,&blocksize,
-			    Ibuff,Dbuff+k,&l,1);
+			    Ibuff,Dbuff+k,(long int*)&l,1);
 		     if (l<0) {
 		        mexPrintf("_HETRI: argument %d has an illegal value",-l);
 			return ;
@@ -1244,7 +1244,7 @@ void mexFunction
 		     /* factorize diagonal block */
 		     k=blocksize*blocksize;
 		     zhetrf("u",&blocksize,Dbuff,&blocksize,
-			    Ibuff,Dbuff+k,&k,&l,1);
+			    Ibuff,Dbuff+k,(long int*)&k,(long int*)&l,1);
 		     if (l<0) {
 		        mexPrintf("_HETRF: argument %d has an illegal value",-l);
 			return ;
@@ -1256,7 +1256,7 @@ void mexFunction
 		     /* invert diagonal block */
 		     k=blocksize*blocksize;
 		     zhetri("u",&blocksize,Dbuff,&blocksize,
-			    Ibuff,Dbuff+k,&l,1);
+			    Ibuff,Dbuff+k,(long int*)&l,1);
 		     if (l<0) {
 		        mexPrintf("_HETRI: argument %d has an illegal value",-l);
 			return ;

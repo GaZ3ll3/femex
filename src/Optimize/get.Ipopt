@@ -1,0 +1,100 @@
+#!/bin/sh
+
+set -e
+
+wgetcmd="wget"
+wgetcount=`which wget 2>/dev/null | wc -l`
+if test ! $wgetcount = 1; then
+  echo "Utility wget not found in your PATH."
+  if test `uname` = Darwin; then
+    wgetcmd="curl -L -k -O"
+    echo "Using ftp command instead."
+  elif test `uname` = FreeBSD; then
+    wgetcmd=fetch
+    echo "Using fetch command instead."
+  else
+    exit -1
+  fi
+fi
+
+
+
+coinipopt=Ipopt-3.11.9
+
+echo " "
+echo "Running script for downloading the source code for Ipopt"
+echo " "
+
+rm -f ipopt.tgz
+
+echo "Downloading the source code from projects.coin-or.org..."
+if $wgetcmd http://www.coin-or.org/download/source/Ipopt/$coinipopt.tgz ;
+then
+  mv $coinipopt.tgz ipopt.tgz
+else
+  echo "Cannot download the source code..."
+fi
+
+echo "Uncompressing the tarball..."
+gunzip -f ipopt.tgz
+
+echo "Unpacking the source code..."
+tar xf ipopt.tar
+
+echo "Deleting the tar file..."
+rm ipopt.tar
+
+echo " "
+echo "Done downloading the source code for Ipopt."
+echo " "
+
+echo " "
+echo "Downloading Third Party packages"
+
+cd $coinipopt
+
+cd ./ThirdParty/Blas
+./get.Blas
+
+cd ../../ThirdParty/ASL
+./get.ASL
+
+cd ../../ThirdParty/Lapack
+./get.Lapack
+
+cd ../../ThirdParty/Metis
+./get.Metis
+
+cd ../../ThirdParty/Mumps
+./get.Mumps
+
+cd ../..
+
+echo " "
+echo "Done downloading all Third Party packages"
+
+echo " "
+echo "Ipopt INSTALL"
+ ./configure CC=gcc F77=gfortran-4.4 CXX=g++ --disable-shared --with-pic --with-blas=BUILD --with-lapack=BUILD --with-matlab-home=$MATLAB_ROOT
+ make -j4
+ make install
+ 
+ cd Ipopt/contrib/MatlabInterface/src
+ 
+ make
+ 
+ cp ipopt.mexa64 ../../../../../ipopt/
+ 
+ cd ../../../../../
+ 
+ rm -rf $coinipopt
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

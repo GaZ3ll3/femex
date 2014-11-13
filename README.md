@@ -9,7 +9,7 @@ System Requirements:
 * Matlab 2013a+
 
 if you would like to use AGMG-3.0 as solver, ``gfortran-4.4`` is also needed. 
-Thanks to ``ABI``, gfortran 4.7+ can link libraries on compiled files from gfortran 4.4.
+Thanks to ``ABI``(http://www.fortran90.org/src/faq.html#abi), gfortran 4.7+ can link libraries on compiled files from gfortran 4.4, since the library is backward compatible.
 
 ILUPACK is already included for a choice of solvers.
 

@@ -3,7 +3,7 @@ CC  = gcc
 FF  = gfortran
 Opt = -Ofast
 
-MATLAB_ROOT = /usr/local/MATLAB/MATLAB_Production_Server/R2013a/
+include Makefile.in
 
 CXX_FLAGS = -DMATLAB_MEX_FILE -std=c++11 -fopenmp -march=native \
 			-D_GNU_SOURCE -fPIC -fno-omit-frame-pointer -Wno-write-strings -pthread\
