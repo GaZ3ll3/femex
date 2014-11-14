@@ -3,7 +3,7 @@ function  fem = test(prec, min_area)
 %   Detailed explanation goes here
 addpath(genpath('~/Documents/github/femex'));
 
-fem = FEM(prec, min_area);
+fem = FEM([0 0 1 0 1 1 0 1]', prec, min_area);
 num_elems = size(fem.Promoted.elems, 2);
 num_fqnodes = size(fem.Facet.Qnodes, 2);
 num_edges = size(fem.Promoted.edges, 2);
@@ -78,9 +78,15 @@ solver.delete();
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
 
+solver = Solver('agmg');
+tic;
+fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
+toc;
+solver.delete();
 
+disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
-
-
+trimesh(fem.TriMesh', fem.Promoted.nodes(1,1:numofnodes), ...
+    fem.Promoted.nodes(2, 1:numofnodes), fem.Solution(1:numofnodes));
 end
 

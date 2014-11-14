@@ -27,7 +27,7 @@ classdef FEM < handle
     end
     
     methods
-        function this = FEM(prec, min_area)
+        function this = FEM(edge_points, prec, min_area)
             this.Ref_mesh = Mesh([0 0 1 0 0 1]', 0.5);
             [this.Ref_points, ~, ~] = this.Ref_mesh.promote(prec);
             
@@ -43,7 +43,11 @@ classdef FEM < handle
             [this.Edge.Ref, this.Edge.RefX] = ...
                 this.Assembler.reference1D(prec, this.Edge.Qnodes);
               
-            this.Mesh =  Mesh([0 0 0 1 1 1 1 0]', min_area);
+            if size(edge_points,2) ~= 1
+            	this.Mesh =  Mesh(edge_points', min_area);
+            else
+            	this.Mesh =  Mesh(edge_points, min_area);
+            end
             [this.Num_nodes, this.Num_elems, this.Num_edges] = ...
                 this.Mesh.export();
             
