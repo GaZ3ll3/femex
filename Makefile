@@ -12,6 +12,7 @@ CXX_FLAGS = -DMATLAB_MEX_FILE -std=c++11 -fopenmp -march=native \
 CXX_INCLUDE = -I./include/mexplus \
 			  -I./include/pprint \
 			  -I./include/Utility \
+			  -I./include/exprtk \
 			  -I$(MATLAB_ROOT)extern/include \
 			  -I$(MATLAB_ROOT)simulink/include
 

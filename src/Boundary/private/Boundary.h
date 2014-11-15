@@ -20,6 +20,7 @@
 
 #include <mexplus.h>
 #include <pprint.h>
+#include "exprtk.hpp"
 
 #include "utils.h"
 
@@ -37,8 +38,7 @@ public:
 
 	vector<int32_t> b_edges;
 	unordered_set<int32_t> b_edge_set;
-
-
+	vector<std::string> b_expr;
 	// apply boundary condition on LHS and RHS
 
 };
