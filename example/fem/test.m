@@ -21,8 +21,9 @@ boundary.set_boundary('y - 1');
 boundary.set_boundary('x');
 boundary.set_boundary('y');
 
+tic;
 bcs = boundary.get_boundary(fem.Promoted.edges, fem.Promoted.nodes, 4);
-
+toc;
 bc1.qnodes1D = fem.Assembler.qnodes1D(fem.Promoted.nodes, fem.Edge.Qnodes, bcs{1});
 bc2.qnodes1D = fem.Assembler.qnodes1D(fem.Promoted.nodes, fem.Edge.Qnodes ,bcs{2});
 bc3.qnodes1D = fem.Assembler.qnodes1D(fem.Promoted.nodes, fem.Edge.Qnodes, bcs{3});

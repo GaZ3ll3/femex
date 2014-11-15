@@ -138,6 +138,10 @@ MEX_DEFINE(get_boundary)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	vector<exprtk::expression<Real_t>> expressions(_num_expr);
 	vector<exprtk::parser<Real_t>> parsers(_num_expr);
 
+	omp_set_dynamic(0);
+	omp_set_num_threads(2);
+
+#pragma omp parallel for
 	for (size_t i = 0; i < _num_expr; i++) {
 		expressions[i].register_symbol_table(symbol_table);
 		parsers[i].compile(boundary->b_expr[i], expressions[i]);
@@ -169,7 +173,7 @@ MEX_DEFINE(get_boundary)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 			}
 		}
 	}
-
+#pragma omp parallel for
 	for (size_t i = 0; i < _num_expr; i++) {
 		plhs[i] = mxCreateNumericMatrix(_num_node, _global[i].size()/_num_node, mxINT32_CLASS,mxREAL);
 		// implicit convert pointer
