@@ -45,7 +45,7 @@ S = fem.assems(ones(num_elems, num_fqnodes));
 % Q = fem.assemlbc(ones(num_edges, num_eqnodes), fem.Promoted.edges);
 
 % boundary condition
-f = @(x,y)(6*x + 0.1*x.*x.*x);
+f = @(x,y)(6*x + x.*x.*x);
 
 % bc_1.robin = @(x,y)(x.*x.*x + 3);
 % bc_2.robin = @(x,y)(x.*x.*x);
@@ -75,13 +75,13 @@ LoadVector = LoadVector - bc_1.LoadVector - bc_2.LoadVector - bc_3.LoadVector - 
 
 Dirichlet = [];
 boundary = Boundary(Dirichlet);
-dofs = boundary.dofs(N, Dirichlet);
+dofs = boundary.dofs(N);
 
 
 fem.Solution = zeros(N, 1);
 %true
 v = fem.Promoted.nodes(1,:).^3;
-R = 0.1*M - S ;
+R = M - S ;
 % apply Dirichlet
 LoadVector = LoadVector + R*fem.Solution;
 
