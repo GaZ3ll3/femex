@@ -58,6 +58,7 @@ all:
 	@echo " "
 	@echo '        $(MATLAB_ROOT)'
 	
+	@mkdir ipopt
 	@cd $(coinipopt)/Ipopt/contrib/MatlabInterface/src && make && mv ipopt.mexa64 ../../../../../ipopt/
 	
 	rm -rf $(coinipopt)
