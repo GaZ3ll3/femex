@@ -13,11 +13,15 @@ Thanks to ``ABI``(http://www.fortran90.org/src/faq.html#abi), gfortran 4.7+ can 
 
 ILUPACK is already included for a choice of solvers.
 
+
+
 How to use:
 -----------
-Simply add femex directory to current workspace path.
+* Modify ``Makefile.in`` to set ``MATLAB_ROOT`` to the directory which includes ``bin``.
 
-Follow the example to set up boundary conditions.
+* Simply add femex directory to current workspace path.
+
+* Follow the example to set up boundary conditions.
 
 
  
