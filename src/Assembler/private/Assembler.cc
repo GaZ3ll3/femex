@@ -437,6 +437,11 @@ void Assembler::AssembleLoad(Real_t*& pLoad, MatlabPtr Nodes,
 
 
 	// Fcn cannot be a function handle, too slow
+
+	/* @Revised: Fcn can be a function handle for one pass.
+	 * Which means extra space to store all the values. However,
+	 * we did not do it because Matlab can handle this easily.
+	 */
 	auto Fcn_ptr = Matlab_Cast<Real_t>(Fcn);
 	// linear interpolation
 	for (size_t i =0; i < numberofelem; i++){
