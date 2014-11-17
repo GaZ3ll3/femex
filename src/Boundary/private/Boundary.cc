@@ -16,20 +16,20 @@ Boundary::Boundary() {
 
 Boundary::Boundary(MatlabPtr _edges) {
 
-	b_edges.resize(mxGetM(_edges)*mxGetN(_edges));
-	memcpy(&b_edges[0], mxGetPr(_edges), mxGetM(_edges)*mxGetN(_edges)*sizeof(int32_t));
-	for (auto it = b_edges.begin(); it != b_edges.end(); it++) {
-		b_edge_set.insert(*it);
-	}
+	auto _limit = mxGetElementSize(_edges);
+	auto _edge_ptr = Matlab_Cast<int32_t>(_edges);
 
+	for (auto it = 0; it < _limit; it++) {
+		b_edge_set.insert(*_edge_ptr++);
+	}
 	// b_expr now is empty
 }
 
 Boundary::~Boundary() {
 
-	b_edges.clear();
 	b_edge_set.clear();
 	b_expr.clear();
+
 #ifdef DEBUG
 	mexPrintf("Boundary detached\n");
 #endif
@@ -37,10 +37,11 @@ Boundary::~Boundary() {
 
 void Boundary::setDirichlet(MatlabPtr _edges) {
 
-	b_edges.resize(mxGetM(_edges)*mxGetN(_edges));
-	memcpy(&b_edges[0], mxGetPr(_edges), mxGetM(_edges)*mxGetN(_edges)*sizeof(int32_t));
-	for (auto it = b_edges.begin(); it != b_edges.end(); it++) {
-		b_edge_set.insert(*it);
+	auto _limit = mxGetM(_edges)*mxGetN(_edges);
+	auto _edge_ptr = Matlab_Cast<int32_t>(_edges);
+
+	for (auto it = 0; it < _limit; it++) {
+		b_edge_set.insert(*_edge_ptr++);
 	}
 }
 
@@ -75,7 +76,23 @@ MEX_DEFINE(set_dirichlet)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* pr
 	OutputArguments output(nlhs, plhs, 0);
 	auto boundary = Session<DirichletBC>::get(input.get(0));
 	boundary->setDirichlet(CAST(input.get(1)));
+}
 
+/*
+ * Depreciated
+ */
+MEX_DEFINE(get_dirichlet)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
+	InputArguments input(nrhs, prhs, 1);
+	OutputArguments output(nlhs, plhs, 1);
+	auto boundary = Session<DirichletBC>::get(input.get(0));
+
+	plhs[0] = mxCreateNumericMatrix(boundary->b_edge_set.size(), 1, mxINT32_CLASS, mxREAL);
+
+	auto _plhs_ptr = Matlab_Cast<int32_t>(plhs[0]);
+
+	for (auto it = boundary->b_edge_set.begin(); it != boundary->b_edge_set.end(); it++) {
+		*_plhs_ptr++ = *it;
+	}
 }
 
 MEX_DEFINE(delete) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
@@ -95,19 +112,31 @@ MEX_DEFINE(report) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 // can be implemented by set_difference from <algorithm>
 MEX_DEFINE(dofs) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
 	InputArguments input(nrhs, prhs, 2);
-	OutputArguments output(nlhs, plhs, 1);
+	OutputArguments output(nlhs, plhs, 2);
+	/* @param
+	 * ....prhs[0]: id
+	 * ....prhs[1]: range
+	 * @return:
+	 * ....plhs[0]: dofs
+	 * ....plhs[1]: non-dofs
+	 */
 	auto boundary = Session<DirichletBC>::get(input.get(0));
 	auto _range   = input.get<int32_t>(1);
 
 	plhs[0] = mxCreateNumericMatrix(_range - boundary->b_edge_set.size(), 1, mxINT32_CLASS, mxREAL);
 
-	auto plhs_ptr = Matlab_Cast<int32_t>(plhs[0]);
+	auto _plhs_ptr = Matlab_Cast<int32_t>(plhs[0]);
+
+	plhs[1] = mxCreateNumericMatrix(boundary->b_edge_set.size(), 1, mxINT32_CLASS, mxREAL);
+
+	auto __plhs_ptr = Matlab_Cast<int32_t>(plhs[1]);
+
 	for (int32_t i = 1; i <= _range; ++i) {
 		if (boundary->b_edge_set.find(i) != boundary->b_edge_set.end()) {
-			continue;
+			*__plhs_ptr++ = i;
 		}
 		else {
-			*plhs_ptr++ = i;
+			*_plhs_ptr++ = i;
 		}
 	}
 

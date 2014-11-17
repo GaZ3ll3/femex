@@ -26,18 +26,21 @@ methods
       Boundary_('report', this.id_);
   end
   
-  function dof = dofs(this, N)
-      dof  = Boundary_('dofs', this.id_, N);
+  function [dof, ndof] = dofs(this, N)
+      [dof, ndof]  = Boundary_('dofs', this.id_, N);
   end
   
+  function [ndof] = getDirichlet(this)
+      ndof = Boundary_('get_dirichlet', this.id_);
+  end
   function [] = set_boundary(this, expr)
   	Boundary_('set_boundary', this.id_, expr);
   end
   
-  function [bcs] = get_boundary(this, edges, nodes, NargOut)
-     bcs = cell(NargOut, 1);
+  function [varargout] = get_boundary(this, edges, nodes, NargOut)
+     varargout = cell(NargOut, 1);
  
-    [bcs{:}] = Boundary_('get_boundary', this.id_, edges, nodes);
+    [varargout{:}] = Boundary_('get_boundary', this.id_, edges, nodes);
   end
 end
 end

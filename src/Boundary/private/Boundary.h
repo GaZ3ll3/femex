@@ -45,7 +45,6 @@ public:
 	 */
 	virtual void setDirichlet(MatlabPtr);
 
-	vector<int32_t> b_edges;
 	unordered_set<int32_t> b_edge_set;
 	vector<std::string> b_expr;
 	// apply boundary condition on LHS and RHS
