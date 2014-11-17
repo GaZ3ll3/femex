@@ -34,7 +34,16 @@ enum Boundary_t {DIRICHLET = 0, NEUMANN, ROBIN};
 class Boundary {
 public:
 	Boundary(MatlabPtr);
+	/*
+	 * Default constructor, placeholder
+	 */
+	Boundary();
 	virtual ~Boundary();
+
+	/*
+	 * For the case with placeholder, delayed construction.
+	 */
+	virtual void setDirichlet(MatlabPtr);
 
 	vector<int32_t> b_edges;
 	unordered_set<int32_t> b_edge_set;
@@ -46,6 +55,10 @@ public:
 class DirichletBC:public Boundary {
 public:
 	explicit DirichletBC(MatlabPtr _edges) : Boundary(_edges) {}
+	/*
+	 * placeholder, for later use
+	 */
+	explicit DirichletBC() : Boundary() {}
 };
 
 

@@ -206,31 +206,68 @@ void Assembler::AssembleBC(Real_t* &pI, Real_t* &pJ, Real_t* &pV,
 	mwSize vertex_1, vertex_2;
 	Real_t length;
 
-	for (size_t i = 0; i < numberofedges; i++) {
+	/*
+	 * More codes but there is only one judgment at beginning.
+	 * Performance does not drop.
+	 */
+	if (mxGetNumberOfElements(Fcn) > 1){
+
+		for (size_t i = 0; i < numberofedges; i++) {
 
 
-		vertex_1 = pedge_ptr[i*(numberofnodesperedge) ] - 1;
-		vertex_2 = pedge_ptr[i*(numberofnodesperedge) + 1] - 1;
+			vertex_1 = pedge_ptr[i*(numberofnodesperedge) ] - 1;
+			vertex_2 = pedge_ptr[i*(numberofnodesperedge) + 1] - 1;
 
 
-		length = sqrt(
-				pow(pnodes_ptr[2*vertex_1] - pnodes_ptr[2*vertex_2], 2)
-				+
-				pow(pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1] , 2));
+			length = sqrt(
+					pow(pnodes_ptr[2*vertex_1] - pnodes_ptr[2*vertex_2], 2)
+					+
+					pow(pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1] , 2));
 
-		for (size_t j = 0 ; j < numberofnodesperedge; j++) {
-			for (size_t k = 0; k < numberofnodesperedge; k++) {
-				*pI++ = pedge_ptr[i*numberofnodesperedge + j];
-				*pJ++ = pedge_ptr[i*numberofnodesperedge + k];
-				*pV = 0.;
+			for (size_t j = 0 ; j < numberofnodesperedge; j++) {
+				for (size_t k = 0; k < numberofnodesperedge; k++) {
+					*pI++ = pedge_ptr[i*numberofnodesperedge + j];
+					*pJ++ = pedge_ptr[i*numberofnodesperedge + k];
+					*pV = 0.;
 
-				for (size_t l = 0; l < numberofqnodes; l++) {
-					*pV = *pV + Interp[i*numberofqnodes + l] *
-							reference[j + l*numberofnodesperedge] *
-							reference[k + l*numberofnodesperedge] *
-							weights[l];
+					for (size_t l = 0; l < numberofqnodes; l++) {
+						*pV = *pV + Interp[i*numberofqnodes + l] *
+								reference[j + l*numberofnodesperedge] *
+								reference[k + l*numberofnodesperedge] *
+								weights[l];
+					}
+					*pV *= length/2.0; pV++;
 				}
-				*pV *= length/2.0; pV++;
+			}
+		}
+	}
+	else {
+		for (size_t i = 0; i < numberofedges; i++) {
+
+
+			vertex_1 = pedge_ptr[i*(numberofnodesperedge) ] - 1;
+			vertex_2 = pedge_ptr[i*(numberofnodesperedge) + 1] - 1;
+
+
+			length = sqrt(
+					pow(pnodes_ptr[2*vertex_1] - pnodes_ptr[2*vertex_2], 2)
+					+
+					pow(pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1] , 2));
+
+			for (size_t j = 0 ; j < numberofnodesperedge; j++) {
+				for (size_t k = 0; k < numberofnodesperedge; k++) {
+					*pI++ = pedge_ptr[i*numberofnodesperedge + j];
+					*pJ++ = pedge_ptr[i*numberofnodesperedge + k];
+					*pV = 0.;
+
+					for (size_t l = 0; l < numberofqnodes; l++) {
+						*pV = *pV +
+								reference[j + l*numberofnodesperedge] *
+								reference[k + l*numberofnodesperedge] *
+								weights[l];
+					}
+					*pV *= *(Interp)*length/2.0; pV++;
+				}
 			}
 		}
 	}
@@ -257,23 +294,52 @@ void Assembler::AssembleBC(Real_t*& pNeumann, MatlabPtr Nodes,
 	mwSize vertex_1, vertex_2;
 	Real_t length, tmp;
 
-	for (size_t i = 0; i < numberofedges; i++) {
-		// integral over each interval
-		vertex_1 = pedge_ptr[i*(numberofnodesperedge) ] - 1;
-		vertex_2 = pedge_ptr[i*(numberofnodesperedge) + 1] - 1;
+	if (mxGetNumberOfElements(Fcn) > 1) {
+		/*
+		 * Fcn is a matrix.
+		 */
+		for (size_t i = 0; i < numberofedges; i++) {
+			// integral over each interval
+			vertex_1 = pedge_ptr[i*(numberofnodesperedge) ] - 1;
+			vertex_2 = pedge_ptr[i*(numberofnodesperedge) + 1] - 1;
 
-		length = sqrt(
-				pow(pnodes_ptr[2*vertex_1] - pnodes_ptr[2*vertex_2], 2)
-				+
-				pow(pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1] , 2));
+			length = sqrt(
+					pow(pnodes_ptr[2*vertex_1] - pnodes_ptr[2*vertex_2], 2)
+					+
+					pow(pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1] , 2));
 
-		for (size_t j = 0 ; j < numberofnodesperedge; j++) {
-			// each basis
-			tmp = 0.;
-			for (size_t l = 0 ; l < numberofqnodes; l++) {
-				tmp += Interp[i*numberofqnodes + l] * reference[j + l*numberofnodesperedge] * weights[l];
+			for (size_t j = 0 ; j < numberofnodesperedge; j++) {
+				// each basis
+				tmp = 0.;
+				for (size_t l = 0 ; l < numberofqnodes; l++) {
+					tmp += Interp[i*numberofqnodes + l] * reference[j + l*numberofnodesperedge] * weights[l];
+				}
+				pNeumann[pedge_ptr[i*(numberofnodesperedge) + j] - 1] += tmp * length/2.;
 			}
-			pNeumann[pedge_ptr[i*(numberofnodesperedge) + j] - 1] += tmp * length/2.;
+		}
+	}
+	else {
+		/*
+		 * Fcn is a number
+		 */
+		for (size_t i = 0; i < numberofedges; i++) {
+			// integral over each interval
+			vertex_1 = pedge_ptr[i*(numberofnodesperedge) ] - 1;
+			vertex_2 = pedge_ptr[i*(numberofnodesperedge) + 1] - 1;
+
+			length = sqrt(
+					pow(pnodes_ptr[2*vertex_1] - pnodes_ptr[2*vertex_2], 2)
+					+
+					pow(pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1] , 2));
+
+			for (size_t j = 0 ; j < numberofnodesperedge; j++) {
+				// each basis
+				tmp = 0.;
+				for (size_t l = 0 ; l < numberofqnodes; l++) {
+					tmp += reference[j + l*numberofnodesperedge] * weights[l];
+				}
+				pNeumann[pedge_ptr[i*(numberofnodesperedge) + j] - 1] += *(Interp)*tmp * length/2.;
+			}
 		}
 	}
 }
@@ -298,38 +364,77 @@ void Assembler::AssembleMass(Real_t* &pI, Real_t* &pJ, Real_t* &pV,
 	Real_t det, area;
 
 
-	for (size_t i =0; i < numberofelem; i++){
+	if (mxGetNumberOfElements(Fcn) > 1){
+		for (size_t i =0; i < numberofelem; i++){
 
-		vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
-		vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
-		vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+			vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+			vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
 
-		det = (pnodes_ptr[vertex_2*2] - pnodes_ptr[vertex_1*2])*(pnodes_ptr[vertex_3*2 + 1] - pnodes_ptr[vertex_1*2 + 1]) -
-				(pnodes_ptr[vertex_2*2 + 1] - pnodes_ptr[vertex_1*2 + 1])*(pnodes_ptr[vertex_3*2] - pnodes_ptr[vertex_1*2]);
-		area = 0.5*fabs(det);
+			det = (pnodes_ptr[vertex_2*2] - pnodes_ptr[vertex_1*2])*(pnodes_ptr[vertex_3*2 + 1] - pnodes_ptr[vertex_1*2 + 1]) -
+					(pnodes_ptr[vertex_2*2 + 1] - pnodes_ptr[vertex_1*2 + 1])*(pnodes_ptr[vertex_3*2] - pnodes_ptr[vertex_1*2]);
+			area = 0.5*fabs(det);
 
-		// Due to symmetric property, only need half of the work load.
-		for (size_t j = 0; j < numberofnodesperelem; j++){
-			for (size_t k = 0; k < j + 1; k++){
-				*pI = pelem_ptr[i*numberofnodesperelem + j];
-				*pJ = pelem_ptr[i*numberofnodesperelem + k];
-				*pV = 0.;
-				for (size_t l = 0; l < numberofqnodes; l++){
-					*pV = *pV + Interp[i*numberofqnodes + l]*
-							reference[j+ l*numberofnodesperelem]*
-							reference[k+ l*numberofnodesperelem]*
-							weights[l];
-				}
-				*pV  = (*pV)*area;
+			// Due to symmetric property, only need half of the work load.
+			for (size_t j = 0; j < numberofnodesperelem; j++){
+				for (size_t k = 0; k < j + 1; k++){
+					*pI = pelem_ptr[i*numberofnodesperelem + j];
+					*pJ = pelem_ptr[i*numberofnodesperelem + k];
+					*pV = 0.;
+					for (size_t l = 0; l < numberofqnodes; l++){
+						*pV = *pV + Interp[i*numberofqnodes + l]*
+								reference[j+ l*numberofnodesperelem]*
+								reference[k+ l*numberofnodesperelem]*
+								weights[l];
+					}
+					*pV  = (*pV)*area;
 
-				pI++; pJ++; pV++;
-				if (k != j) {
-					*pI = *(pJ - 1);
-					*pJ = *(pI - 1);
-					*pV = *(pV - 1);
 					pI++; pJ++; pV++;
-				}
+					if (k != j) {
+						*pI = *(pJ - 1);
+						*pJ = *(pI - 1);
+						*pV = *(pV - 1);
+						pI++; pJ++; pV++;
+					}
 
+				}
+			}
+		}
+	}
+	else {
+		for (size_t i =0; i < numberofelem; i++){
+
+			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+			vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+			vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+
+			det = (pnodes_ptr[vertex_2*2] - pnodes_ptr[vertex_1*2])*(pnodes_ptr[vertex_3*2 + 1] - pnodes_ptr[vertex_1*2 + 1]) -
+					(pnodes_ptr[vertex_2*2 + 1] - pnodes_ptr[vertex_1*2 + 1])*(pnodes_ptr[vertex_3*2] - pnodes_ptr[vertex_1*2]);
+			area = 0.5*fabs(det);
+
+			// Due to symmetric property, only need half of the work load.
+			for (size_t j = 0; j < numberofnodesperelem; j++){
+				for (size_t k = 0; k < j + 1; k++){
+					*pI = pelem_ptr[i*numberofnodesperelem + j];
+					*pJ = pelem_ptr[i*numberofnodesperelem + k];
+					*pV = 0.;
+					for (size_t l = 0; l < numberofqnodes; l++){
+						*pV = *pV +
+								reference[j+ l*numberofnodesperelem]*
+								reference[k+ l*numberofnodesperelem]*
+								weights[l];
+					}
+					*pV  = *(Interp)*(*pV)*area;
+
+					pI++; pJ++; pV++;
+					if (k != j) {
+						*pI = *(pJ - 1);
+						*pJ = *(pI - 1);
+						*pV = *(pV - 1);
+						pI++; pJ++; pV++;
+					}
+
+				}
 			}
 		}
 	}
@@ -466,7 +571,7 @@ void Assembler::AssembleLoad(Real_t*& pLoad, MatlabPtr Nodes,
 				pLoad[pelem_ptr[i*numberofnodesperelem + j] - 1] += tmp*area;
 			}
 		}
-		else {
+		else if(mxGetNumberOfElements(Fcn) == numberofqnodes * numberofelem) {
 			// Fcn has numberofqnodes * numberofelem elements
 			for (size_t j = 0; j < numberofnodesperelem; j++) {
 				tmp = 0.;
@@ -475,6 +580,20 @@ void Assembler::AssembleLoad(Real_t*& pLoad, MatlabPtr Nodes,
 				}
 				pLoad[pelem_ptr[i*numberofnodesperelem + j] - 1] += tmp*area;
 			}
+		}
+		else if (mxGetNumberOfElements(Fcn) == 1) {
+			// Fcn is constant
+			for (size_t j = 0; j < numberofnodesperelem; j++) {
+				tmp = 0.;
+				for (size_t l = 0; l < numberofqnodes; l++) {
+					tmp += reference[j+ l*numberofnodesperelem]*weights[l];
+				}
+				pLoad[pelem_ptr[i*numberofnodesperelem + j] - 1] += *(Fcn_ptr)*tmp*area;
+			}
+		}
+		else {
+			// Other cases does not match
+			mexErrMsgTxt("Error:Assembler:AssembleLoad::Failed with unexpected Fcn.\n");
 		}
 	}
 }
@@ -501,43 +620,89 @@ void Assembler::AssembleStiff(Real_t* &pI, Real_t* &pJ, Real_t*&pV,
 	Real_t det, area;
 	Real_t Jacobian[2][2];
 
-	for (size_t i =0; i < numberofelem; i++){
+	if (mxGetNumberOfElements(Fcn) > 1) {
+		// Fcn is a matrix
+		for (size_t i =0; i < numberofelem; i++){
 
-		vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
-		vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
-		vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+			vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+			vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
 
-		Jacobian[0][0] = pnodes_ptr[2*vertex_3 + 1] - pnodes_ptr[2*vertex_1 + 1];
-		Jacobian[1][1] = pnodes_ptr[2*vertex_2    ] - pnodes_ptr[2*vertex_1    ];
-		Jacobian[0][1] = pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1];
-		Jacobian[1][0] = pnodes_ptr[2*vertex_1    ] - pnodes_ptr[2*vertex_3    ];
+			Jacobian[0][0] = pnodes_ptr[2*vertex_3 + 1] - pnodes_ptr[2*vertex_1 + 1];
+			Jacobian[1][1] = pnodes_ptr[2*vertex_2    ] - pnodes_ptr[2*vertex_1    ];
+			Jacobian[0][1] = pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1];
+			Jacobian[1][0] = pnodes_ptr[2*vertex_1    ] - pnodes_ptr[2*vertex_3    ];
 
-		// Orientation corrected.
-		det = Jacobian[0][0] * Jacobian[1][1] - Jacobian[0][1] * Jacobian[1][0];
-		area = 0.5*fabs(det);
+			// Orientation corrected.
+			det = Jacobian[0][0] * Jacobian[1][1] - Jacobian[0][1] * Jacobian[1][0];
+			area = 0.5*fabs(det);
 
-		// Due to symmetric property, half of work load can be reduced
-		for (size_t j = 0; j < numberofnodesperelem; j++){
-			for (size_t k = 0; k < j + 1; k++){
-				*pI = pelem_ptr[i*numberofnodesperelem + j];
-				*pJ = pelem_ptr[i*numberofnodesperelem + k];
-				*pV = 0.;
-				for (size_t l = 0; l < numberofqnodes; l++){
-					*pV = *pV + Interp[i*numberofqnodes + l] *(
-							(Jacobian[0][0]*referenceX[j+ l*numberofnodesperelem] + Jacobian[0][1]*referenceY[j+ l*numberofnodesperelem])*
-							(Jacobian[0][0]*referenceX[k+ l*numberofnodesperelem] + Jacobian[0][1]*referenceY[k+ l*numberofnodesperelem])
-							+
-							(Jacobian[1][0]*referenceX[j+ l*numberofnodesperelem] + Jacobian[1][1]*referenceY[j+ l*numberofnodesperelem])*
-							(Jacobian[1][0]*referenceX[k+ l*numberofnodesperelem] + Jacobian[1][1]*referenceY[k+ l*numberofnodesperelem])
-							)*weights[l];
-				}
-				*pV = (*pV)/4.0/area;
-				pI++; pJ++; pV++;
-				if (j != k){
-					*pI = *(pJ - 1);
-					*pJ = *(pI - 1);
-					*pV = *(pV - 1);
+			// Due to symmetric property, half of work load can be reduced
+			for (size_t j = 0; j < numberofnodesperelem; j++){
+				for (size_t k = 0; k < j + 1; k++){
+					*pI = pelem_ptr[i*numberofnodesperelem + j];
+					*pJ = pelem_ptr[i*numberofnodesperelem + k];
+					*pV = 0.;
+					for (size_t l = 0; l < numberofqnodes; l++){
+						*pV = *pV + Interp[i*numberofqnodes + l] *(
+								(Jacobian[0][0]*referenceX[j+ l*numberofnodesperelem] + Jacobian[0][1]*referenceY[j+ l*numberofnodesperelem])*
+								(Jacobian[0][0]*referenceX[k+ l*numberofnodesperelem] + Jacobian[0][1]*referenceY[k+ l*numberofnodesperelem])
+								+
+								(Jacobian[1][0]*referenceX[j+ l*numberofnodesperelem] + Jacobian[1][1]*referenceY[j+ l*numberofnodesperelem])*
+								(Jacobian[1][0]*referenceX[k+ l*numberofnodesperelem] + Jacobian[1][1]*referenceY[k+ l*numberofnodesperelem])
+								)*weights[l];
+					}
+					*pV = (*pV)/4.0/area;
 					pI++; pJ++; pV++;
+					if (j != k){
+						*pI = *(pJ - 1);
+						*pJ = *(pI - 1);
+						*pV = *(pV - 1);
+						pI++; pJ++; pV++;
+					}
+				}
+			}
+		}
+	}
+	else {
+		for (size_t i =0; i < numberofelem; i++){
+			// Fcn is a constant
+			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+			vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+			vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+
+			Jacobian[0][0] = pnodes_ptr[2*vertex_3 + 1] - pnodes_ptr[2*vertex_1 + 1];
+			Jacobian[1][1] = pnodes_ptr[2*vertex_2    ] - pnodes_ptr[2*vertex_1    ];
+			Jacobian[0][1] = pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1];
+			Jacobian[1][0] = pnodes_ptr[2*vertex_1    ] - pnodes_ptr[2*vertex_3    ];
+
+			// Orientation corrected.
+			det = Jacobian[0][0] * Jacobian[1][1] - Jacobian[0][1] * Jacobian[1][0];
+			area = 0.5*fabs(det);
+
+			// Due to symmetric property, half of work load can be reduced
+			for (size_t j = 0; j < numberofnodesperelem; j++){
+				for (size_t k = 0; k < j + 1; k++){
+					*pI = pelem_ptr[i*numberofnodesperelem + j];
+					*pJ = pelem_ptr[i*numberofnodesperelem + k];
+					*pV = 0.;
+					for (size_t l = 0; l < numberofqnodes; l++){
+						*pV = *pV + (
+								(Jacobian[0][0]*referenceX[j+ l*numberofnodesperelem] + Jacobian[0][1]*referenceY[j+ l*numberofnodesperelem])*
+								(Jacobian[0][0]*referenceX[k+ l*numberofnodesperelem] + Jacobian[0][1]*referenceY[k+ l*numberofnodesperelem])
+								+
+								(Jacobian[1][0]*referenceX[j+ l*numberofnodesperelem] + Jacobian[1][1]*referenceY[j+ l*numberofnodesperelem])*
+								(Jacobian[1][0]*referenceX[k+ l*numberofnodesperelem] + Jacobian[1][1]*referenceY[k+ l*numberofnodesperelem])
+								)*weights[l];
+					}
+					*pV = *(Interp)*(*pV)/4.0/area;
+					pI++; pJ++; pV++;
+					if (j != k){
+						*pI = *(pJ - 1);
+						*pJ = *(pI - 1);
+						*pV = *(pV - 1);
+						pI++; pJ++; pV++;
+					}
 				}
 			}
 		}

@@ -39,14 +39,27 @@ public:
 	/*
 	 * public methods
 	 */
+	/*
+	 * Reference Matrix
+	 */
 	void Reference(MatlabPtr&, MatlabPtr&, MatlabPtr&,MatlabPtr,MatlabPtr);
+	/*
+	 * Mass Matrix
+	 */
 	void AssembleMass(Real_t*&, Real_t*&, Real_t*&, MatlabPtr, MatlabPtr,
 			MatlabPtr, MatlabPtr, MatlabPtr);
+	/*
+	 * Stiffness Matrix
+	 */
 	void AssembleStiff(Real_t*&, Real_t*&, Real_t*&,MatlabPtr, MatlabPtr,
 			MatlabPtr, MatlabPtr, MatlabPtr, MatlabPtr);
+	/*
+	 * Load Vector from Robin Boundary
+	 */
 	void AssembleLoad(Real_t*& pLoad, MatlabPtr Nodes,
 			MatlabPtr QNodes, MatlabPtr Elems,MatlabPtr Ref,
 			MatlabPtr Weights, MatlabPtr Fcn);
+
 	void AssembleLoad(Real_t*& pLoad,
 			MatlabPtr Nodes, MatlabPtr Fcn);
 

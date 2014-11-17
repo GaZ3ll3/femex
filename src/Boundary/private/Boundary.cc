@@ -9,6 +9,11 @@
 
 namespace MEX {
 
+Boundary::Boundary() {
+
+}
+
+
 Boundary::Boundary(MatlabPtr _edges) {
 
 	b_edges.resize(mxGetM(_edges)*mxGetN(_edges));
@@ -30,6 +35,15 @@ Boundary::~Boundary() {
 #endif
 }
 
+void Boundary::setDirichlet(MatlabPtr _edges) {
+
+	b_edges.resize(mxGetM(_edges)*mxGetN(_edges));
+	memcpy(&b_edges[0], mxGetPr(_edges), mxGetM(_edges)*mxGetN(_edges)*sizeof(int32_t));
+	for (auto it = b_edges.begin(); it != b_edges.end(); it++) {
+		b_edge_set.insert(*it);
+	}
+}
+
 } /* namespace MEX */
 
 
@@ -47,6 +61,21 @@ MEX_DEFINE(new)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
 	output.set(0, Session<DirichletBC>::create(new DirichletBC(
 			CAST(input.get(0))
 						)));
+}
+
+MEX_DEFINE(placeholder)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
+	InputArguments input(nrhs, prhs, 0);
+	OutputArguments output(nlhs, plhs, 1);
+	output.set(0, Session<DirichletBC>::create(new DirichletBC()));
+
+}
+
+MEX_DEFINE(set_dirichlet)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
+	InputArguments input(nrhs, prhs, 2);
+	OutputArguments output(nlhs, plhs, 0);
+	auto boundary = Session<DirichletBC>::get(input.get(0));
+	boundary->setDirichlet(CAST(input.get(1)));
+
 }
 
 MEX_DEFINE(delete) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {

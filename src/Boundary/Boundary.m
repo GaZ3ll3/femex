@@ -5,13 +5,20 @@ properties (Access = private)
 end
 
 methods
-  function this = Boundary(edge)
-    this.id_ = Boundary_('new', edge);
+  function this = Boundary(varargin)
+  	if nargin == 1
+    	this.id_ = Boundary_('new', varargin{1});
+    elseif nargin == 0
+    	this.id_ = Boundary_('placeholder');
+    end
   end
 
+  function setDirichlet(this, edges)
+      Boundary_('set_dirichlet', this.id_, edges);
+  end
+  
   function delete(this)
-  %DELETE Destructor.
-    Boundary_('delete', this.id_);
+      Boundary_('delete', this.id_);
   end
     
   
