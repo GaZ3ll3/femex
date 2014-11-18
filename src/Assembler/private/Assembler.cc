@@ -559,19 +559,7 @@ void Assembler::AssembleLoad(Real_t*& pLoad, MatlabPtr Nodes,
 				(pnodes_ptr[vertex_2*2 + 1] - pnodes_ptr[vertex_1*2 + 1])*(pnodes_ptr[vertex_3*2] - pnodes_ptr[vertex_1*2]);
 		area = 0.5*fabs(det);
 
-		// linear interpolation
-		if (mxGetNumberOfElements(Fcn) == mxGetN(Nodes)) {
-			for (size_t j = 0; j < numberofnodesperelem; j++) {
-				tmp = 0.;
-				for (size_t l = 0; l < numberofqnodes; l++) {
-					tmp +=  (Fcn_ptr[vertex_1] *(1 - qnodes_ptr[2*l] - qnodes_ptr[2*l + 1]) +
-							 Fcn_ptr[vertex_2]*qnodes_ptr[2*l] +
-							 Fcn_ptr[vertex_3]*qnodes_ptr[2*l + 1])*reference[j+ l*numberofnodesperelem]*weights[l];
-				}
-				pLoad[pelem_ptr[i*numberofnodesperelem + j] - 1] += tmp*area;
-			}
-		}
-		else if(mxGetNumberOfElements(Fcn) == numberofqnodes * numberofelem) {
+		if(mxGetNumberOfElements(Fcn) == numberofqnodes * numberofelem) {
 			// Fcn has numberofqnodes * numberofelem elements
 			for (size_t j = 0; j < numberofnodesperelem; j++) {
 				tmp = 0.;
