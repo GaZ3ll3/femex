@@ -5,6 +5,7 @@ function  fem = test(prec, min_area)
 addpath(genpath('~/Documents/github/femex'));
 
 fem = FEM([0 0 1 0 1 1 0 1]', prec, min_area);
+fem
 N = size(fem.Promoted.nodes, 2);
 numofnodes = fem.Num_nodes;
 
@@ -31,7 +32,7 @@ bc4.qnodes1D = fem.Assembler.qnodes1D(fem.Promoted.nodes, fem.Edge.Qnodes ,bc4.b
 
 % M = fem.assema(1);
 S = fem.assems(1);
-Q = fem.assemlbc(1, fem.Promoted.edges);
+Q = fem.assemlbc(1, bc3.bc) + fem.assemlbc(1, bc4.bc);
 
 f = @(x)(6*x(1,:));
 % bc1.robin = @(x)(x(1,:).^3 + 3);

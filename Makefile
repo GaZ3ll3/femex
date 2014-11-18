@@ -92,6 +92,7 @@ BOD_BINS = $(patsubst $(BOD)%.cc, $(BOD)%_.mexa64, $(BOD_SRCS))
 
 %.bod.o: $(BOD)%.cc
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
+	
 $(BOD)%_.mexa64: %.bod.o
 	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 	

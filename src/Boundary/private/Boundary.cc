@@ -7,6 +7,7 @@
 
 #include "Boundary.h"
 
+
 namespace MEX {
 
 Boundary::Boundary() {
@@ -149,7 +150,6 @@ MEX_DEFINE(set_boundary)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	InputArguments input(nrhs, prhs, 2);
 	auto boundary = Session<DirichletBC>::get(input.get(0));
 	std::string expr_string(mxArrayToString(prhs[1]));
-	auto curr_size = boundary->b_expr.size();
 	boundary->b_expr.push_back(expr_string);
 }
 
