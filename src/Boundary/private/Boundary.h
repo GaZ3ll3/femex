@@ -20,6 +20,7 @@
 
 #include <mexplus.h>
 #include <pprint.h>
+#include "exprtk.hpp"
 
 #include "utils.h"
 
@@ -33,12 +34,19 @@ enum Boundary_t {DIRICHLET = 0, NEUMANN, ROBIN};
 class Boundary {
 public:
 	Boundary(MatlabPtr);
+	/*
+	 * Default constructor, placeholder
+	 */
+	Boundary();
 	virtual ~Boundary();
 
-	vector<int32_t> b_edges;
+	/*
+	 * For the case with placeholder, delayed construction.
+	 */
+	virtual void setDirichlet(MatlabPtr);
+
 	unordered_set<int32_t> b_edge_set;
-
-
+	vector<std::string> b_expr;
 	// apply boundary condition on LHS and RHS
 
 };
@@ -46,6 +54,10 @@ public:
 class DirichletBC:public Boundary {
 public:
 	explicit DirichletBC(MatlabPtr _edges) : Boundary(_edges) {}
+	/*
+	 * placeholder, for later use
+	 */
+	explicit DirichletBC() : Boundary() {}
 };
 
 

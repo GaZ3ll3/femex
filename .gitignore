@@ -20,9 +20,27 @@
 *.lai
 *.la
 *.a
+!libamd.a
+!libblaslike.a
+!liblapack.a
+!libmumps.a
+!libblas.a
+!libilupack.a
+!libmetis.a
+!libsparspak.a
 *.lib
 
 # Executables
 *.exe
 *.out
 *.app
+*.mexa64
+
+
+# agmg directory
+#src/Solver/agmg
+
+# settings
+.settings/
+.cproject
+.project

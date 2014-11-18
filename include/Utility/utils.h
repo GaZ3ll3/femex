@@ -15,11 +15,17 @@
 typedef mxArray* MatlabPtr;
 typedef double   Real_t;
 
+
+
 using namespace std;
 
 #define MEX_EXPECT(condition) if (!(condition)) \
     mexErrMsgTxt(#condition " not true.")
 
+
+#define CAST(PTR) const_cast<MatlabPtr>(PTR)
+
+#define MEX_EPS 1e-9
 
 template <typename T> T* Matlab_Cast(MatlabPtr _ptr){
 	return static_cast<T*> (mxGetData(_ptr));
