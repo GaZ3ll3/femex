@@ -36,7 +36,7 @@ function [x, info] = examplehs051
   
   % Run IPOPT.
   [x info] = ipopt(x0,funcs,options);
-  options
+
   
 % ----------------------------------------------------------------------
 function f = objective (x)

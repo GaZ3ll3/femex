@@ -210,7 +210,7 @@ void Assembler::AssembleBC(Real_t* &pI, Real_t* &pJ, Real_t* &pV,
 	 * More codes but there is only one judgment at beginning.
 	 * Performance does not drop.
 	 */
-	if (mxGetNumberOfElements(Fcn) > 1){
+	if (mxGetNumberOfElements(Fcn) == numberofedges*numberofqnodes){
 
 		for (size_t i = 0; i < numberofedges; i++) {
 
@@ -294,7 +294,7 @@ void Assembler::AssembleBC(Real_t*& pNeumann, MatlabPtr Nodes,
 	mwSize vertex_1, vertex_2;
 	Real_t length, tmp;
 
-	if (mxGetNumberOfElements(Fcn) > 1) {
+	if (mxGetNumberOfElements(Fcn)  == numberofedges*numberofqnodes) {
 		/*
 		 * Fcn is a matrix.
 		 */
@@ -364,7 +364,7 @@ void Assembler::AssembleMass(Real_t* &pI, Real_t* &pJ, Real_t* &pV,
 	Real_t det, area;
 
 
-	if (mxGetNumberOfElements(Fcn) > 1){
+	if (mxGetNumberOfElements(Fcn) == numberofelem*numberofqnodes ){
 		for (size_t i =0; i < numberofelem; i++){
 
 			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
@@ -620,7 +620,7 @@ void Assembler::AssembleStiff(Real_t* &pI, Real_t* &pJ, Real_t*&pV,
 	Real_t det, area;
 	Real_t Jacobian[2][2];
 
-	if (mxGetNumberOfElements(Fcn) > 1) {
+	if (mxGetNumberOfElements(Fcn)  == numberofelem*numberofqnodes) {
 		// Fcn is a matrix
 		for (size_t i =0; i < numberofelem; i++){
 
