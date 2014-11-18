@@ -5,7 +5,7 @@ CC = gcc
 F4 = gfortran-4.4
 F8 = gfortran-4.8
 
-ALL_C_FLAGS = -c -I$(MATLAB_ROOT)extern/include -I$(MATLAB_ROOT)R2013a/simulink/include -DMATLAB_MEX_FILE -ansi -D_GNU_SOURCE\
+ALL_C_FLAGS = -c -I$(MATLAB_ROOT)extern/include -I$(MATLAB_ROOT)simulink/include -DMATLAB_MEX_FILE -ansi -D_GNU_SOURCE\
   -fexceptions -fPIC -fno-omit-frame-pointer -pthread  -Ofast -DNDEBUG
 # suppress all warnings
 ALL_F_FLAGS = -c  -I$(MATLAB_ROOT)extern/include -I$(MATLAB_ROOT)simulink/include  -fexceptions -fbackslash\

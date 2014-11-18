@@ -38,7 +38,7 @@
 
 
 # agmg directory
-#src/Solver/agmg
+src/Solver/agmg
 
 # settings
 .settings/
