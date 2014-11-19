@@ -11,6 +11,8 @@ classdef PDEcs < handle
         options         
         % Ipopt funcs setup
         funcs        
+        % regularization
+        beta
         % start point
         x0        
         % final solution
@@ -70,6 +72,7 @@ classdef PDEcs < handle
             
             this.static_var.LoadVector = this.static_var.fem.asseml(Load);
             this.x0         = auxdata{4};
+            this.beta       = auxdata{5};
             
                         
         end
@@ -88,8 +91,8 @@ classdef PDEcs < handle
            
 
             % there are no constraints, thus no jac needed.
-            this.options.ipopt.max_iter              = 4000;
-            this.options.ipopt.print_level           = 5;
+            this.options.ipopt.max_iter              = 400;
+            this.options.ipopt.print_level           = 2;
             
             this.options.ipopt.hessian_approximation = 'limited-memory';
             this.options.ipopt.limited_memory_update_type = 'bfgs'; % sr1
@@ -140,7 +143,7 @@ classdef PDEcs < handle
             diff = this.volatile_var.u - this.static_var.data;
             
             % without regularization term
-            f = 0.5*diff'*this.static_var.Q*diff;
+            f = 0.5*diff'*this.static_var.Q*diff + 0.5*this.beta*x*x;
             
         end
         
@@ -152,7 +155,8 @@ classdef PDEcs < handle
             this.volatile_var.v = (this.static_var.S - this.volatile_var.M)\(this.static_var.Q*diff);
             
 
-            g = this.volatile_var.u'*this.static_var.M*this.volatile_var.v;
+            g = this.volatile_var.u'*this.static_var.M*this.volatile_var.v...
+                + this.beta*x;
             
         end
         
