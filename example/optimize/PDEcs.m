@@ -92,7 +92,7 @@ classdef PDEcs < handle
 
             % there are no constraints, thus no jac needed.
             this.options.ipopt.max_iter              = 400;
-            this.options.ipopt.print_level           = 2;
+            this.options.ipopt.print_level           = 5;
             
             this.options.ipopt.hessian_approximation = 'limited-memory';
             this.options.ipopt.limited_memory_update_type = 'bfgs'; % sr1
@@ -142,7 +142,7 @@ classdef PDEcs < handle
             
             diff = this.volatile_var.u - this.static_var.data;
             
-            % without regularization term
+            % with regularization term
             f = 0.5*diff'*this.static_var.Q*diff + 0.5*this.beta*x*x;
             
         end
