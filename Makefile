@@ -107,6 +107,18 @@ SLR_BINS = $(patsubst $(SLR)%.cc, $(SLR)%_.mexa64, $(SLR_SRCS))
 $(SLR)%_.mexa64: %.slr.o
 	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 	
+	
+	
+	
+SVR = $(SRC)PDEcs/private/
+SVR_SRCS = $(wildcard $(SVR)*.cc)
+SVR_OBJS = $(patsubst $(SVR)%.cc, %.svr.o, $(SVR_SRCS))
+SVR_BINS = $(patsubst $(SVR)%.cc, $(SVR)%_.mexa64, $(SVR_SRCS))
+
+%.svr.o: $(SVR)%.cc
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
+$(SVR)%_.mexa64: %.svr.o
+	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 ##############################################################
 # ILUPACK make
 ILUPACK_ROOT = ./$(SRC)Solver/ilupack/
@@ -129,7 +141,7 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 
 ##############################################################	
 # The action starts here.
-all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS)
+all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(SVR_BINS) $(ILUPACK_BINS)
 
 clean:
 	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(TRIANGLELIB)triangle.o $(ILUPACK_PATH)*.mexa64 
