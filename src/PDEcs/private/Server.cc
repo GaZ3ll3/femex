@@ -80,7 +80,11 @@ Real_t Server::Inner_Prod(Real_t* u, Real_t* v, size_t n){
 
 }
 
-
+/*
+ *  If there is no unroll-loops, it is still not fast enough
+ *
+ *  For smaller inner product, there is no much difference.
+ */
 Real_t Server::Inner_Prod_omp(Real_t* u, Real_t* v, size_t n){
 
 
@@ -135,7 +139,7 @@ MEX_DEFINE(delete) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 	Session<Server>::destroy(input.get(0));
 }
 
-MEX_DEFINE(prod) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+MEX_DEFINE(sprod) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 
 	InputArguments input(nrhs, prhs, 3);
 	OutputArguments output(nlhs, plhs, 1);
@@ -151,27 +155,6 @@ MEX_DEFINE(prod) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 
 
 	auto ret = server->Inner_Prod(u_ptr, v_ptr, n);
-	plhs[0] = mxCreateDoubleScalar(ret);
-
-}
-
-MEX_DEFINE(sprod) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
-
-	InputArguments input(nrhs, prhs, 6);
-	OutputArguments output(nlhs, plhs, 1);
-
-	auto server = Session<Server>::get(input.get(0));
-
-
-	auto u_ptr = Matlab_Cast<Real_t>(CAST(prhs[1]));
-	auto v_ptr = Matlab_Cast<Real_t>(CAST(prhs[2]));
-	auto n     = mxGetM(prhs[1]) > mxGetM(prhs[2])? mxGetM(prhs[2]):mxGetM(prhs[1]);
-
-	auto _iptr = Matlab_Cast<Real_t>(CAST(prhs[3]));
-	auto _jptr = Matlab_Cast<Real_t>(CAST(prhs[4]));
-	auto _vptr = Matlab_Cast<Real_t>(CAST(prhs[5]));
-
-	auto ret = server->Inner_Prod(u_ptr, v_ptr, n, _iptr, _jptr, _vptr);
 	plhs[0] = mxCreateDoubleScalar(ret);
 
 }

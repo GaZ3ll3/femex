@@ -15,8 +15,8 @@ classdef Server < handle
             Server_('delete', this.id_);
         end
         
-        function [ret] = prod(this, u, v)
-            [ret] = Server_('prod', this.id_, u, v);
+        function [ret] = sprod(this, u, v)
+            [ret] = Server_('sprod', this.id_, u, v);
         end
         
         function [ret] = pprod(this, u ,v)
