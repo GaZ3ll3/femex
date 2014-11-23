@@ -18,6 +18,10 @@ classdef Server < handle
         function [ret] = prod(this, u, v)
             [ret] = Server_('prod', this.id_, u, v);
         end
+        
+        function [ret] = pprod(this, u ,v)
+            [ret] = Server_('pprod', this.id_, u, v);
+        end
     end
     
 end

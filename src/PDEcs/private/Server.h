@@ -45,10 +45,11 @@ public:
 
 	// default inner product
 	Real_t Inner_Prod(Real_t* u, Real_t* v, size_t n);
+	Real_t Inner_Prod_omp(Real_t* u, Real_t* v, size_t n);
 	// inner product with kernel
-//	Real_t Inner_Prod(Real_t* u, Real_t* v,  int32_t* pI, int32_t* pJ, int32_t* pV);
+	Real_t Inner_Prod(Real_t* u, Real_t* v,  int32_t* pI, int32_t* pJ, int32_t* pV);
 	// piecewise constant
-//	void   Inner_Prod(Real_t*& grad, Real_t* u, Real_t* v, int32_t*& pI, int32_t*& pJ, int32_t*& pV);
+	void   Inner_Prod(Real_t*& grad, Real_t* u, Real_t* v, int32_t*& pI, int32_t*& pJ, int32_t*& pV);
 	// finest space
 	// not implemented yet.
 
