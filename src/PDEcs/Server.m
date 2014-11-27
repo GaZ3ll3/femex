@@ -22,10 +22,6 @@ classdef Server < handle
         function [ret] = pprod(this, u ,v)
             [ret] = Server_('pprod', this.id_, u, v);
         end
-        
-        function [ret] = sprod(this, u, v, I, J, V)
-            [ret] = Server_('sprod',this.id_, u, v, I, J, V);
-        end
     end
     
 end

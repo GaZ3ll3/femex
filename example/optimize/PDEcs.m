@@ -136,6 +136,7 @@ classdef PDEcs < handle
         
         
         function f = objective(this, x)
+                        
             this.set_volatile_var(x);
             
             this.volatile_var.u = -(this.static_var.S - this.volatile_var.M)\this.static_var.LoadVector;
@@ -143,11 +144,12 @@ classdef PDEcs < handle
             diff = this.volatile_var.u - this.static_var.data;
             
             % with regularization term
-            f = 0.5*dot(diff, this.static_var.Q*diff) + 0.5*this.beta*x*x;
+            f = 0.5*diff'* this.static_var.Q*diff + 0.5*this.beta*x*x;
             
         end
         
         function g = gradient(this, x)
+            
             this.set_volatile_var(x);
             
             this.volatile_var.u = -(this.static_var.S - this.volatile_var.M)\this.static_var.LoadVector;
@@ -155,7 +157,7 @@ classdef PDEcs < handle
             this.volatile_var.v = (this.static_var.S - this.volatile_var.M)\(this.static_var.Q*diff);
             
 
-            g = dot(this.volatile_var.u, this.static_var.M*this.volatile_var.v)...
+            g = this.volatile_var.u'* this.static_var.M*this.volatile_var.v...
                 + this.beta*x;
             
         end

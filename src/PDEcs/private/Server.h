@@ -46,16 +46,14 @@ public:
 	// default inner product
 	Real_t Inner_Prod(Real_t* u, Real_t* v, size_t n);
 	Real_t Inner_Prod_omp(Real_t* u, Real_t* v, size_t n);
-	// inner product with kernel
-	Real_t Inner_Prod(Real_t* u, Real_t* v, size_t n,  Real_t* pI, Real_t* pJ, Real_t* pV);
-	Real_t Inner_Prod_omp(Real_t* u, Real_t* v, size_t n, Real_t* pI, Real_t* pJ, Real_t* pV);
-	// piecewise constant
-	void   Inner_Prod(Real_t* grad, Real_t* u, Real_t* v, size_t n,  int32_t* pI, int32_t* pJ, Real_t* pV);
-	// finest space
-	// not implemented yet.
 
 
+	// calculate gradient from inner product
 
+	// Real_t* to int32_t* have to cast.
+	void Inner_Prod(Real_t* u, Real_t* v, size_t n, Real_t* pI, Real_t* pJ, Real_t* pV);
+	// this requires a cast of int32(MATLAB_PTR) operation in Matlab's environment.
+	void Inner_Prod(Real_t* u, Real_t* v, size_t n, int32_t* pI, int32_t* pJ, Real_t* pV);
 };
 
 } /* namespace MEX */

@@ -145,16 +145,11 @@ MEX_DEFINE(sprod) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	OutputArguments output(nlhs, plhs, 1);
 
 	auto server = Session<Server>::get(input.get(0));
-
-
 	auto u_ptr = Matlab_Cast<Real_t>(CAST(prhs[1]));
-
 	auto v_ptr = Matlab_Cast<Real_t>(CAST(prhs[2]));
-
 	auto n     = mxGetM(prhs[1]) > mxGetM(prhs[2])? mxGetM(prhs[2]):mxGetM(prhs[1]);
-
-
 	auto ret = server->Inner_Prod(u_ptr, v_ptr, n);
+
 	plhs[0] = mxCreateDoubleScalar(ret);
 
 }
@@ -165,16 +160,11 @@ MEX_DEFINE(pprod) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	OutputArguments output(nlhs, plhs, 1);
 
 	auto server = Session<Server>::get(input.get(0));
-
-
 	auto u_ptr = Matlab_Cast<Real_t>(CAST(prhs[1]));
-
 	auto v_ptr = Matlab_Cast<Real_t>(CAST(prhs[2]));
-
 	auto n     = mxGetM(prhs[1]) > mxGetM(prhs[2])? mxGetM(prhs[2]):mxGetM(prhs[1]);
-
-
 	auto ret = server->Inner_Prod_omp(u_ptr, v_ptr, n);
+
 	plhs[0] = mxCreateDoubleScalar(ret);
 
 }
