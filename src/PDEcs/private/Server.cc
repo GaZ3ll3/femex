@@ -114,9 +114,6 @@ Real_t Server::Inner_Prod_omp(Real_t* u, Real_t* v, size_t n){
     return result;
 }
 
-
-
-
 } /* namespace MEX */
 
 
@@ -128,12 +125,15 @@ template class mexplus::Session<Server>;
 namespace {
 
 MEX_DEFINE(new)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
+
 	InputArguments input(nrhs, prhs, 0);
 	OutputArguments output(nlhs, plhs, 1);
+
 	output.set(0, Session<Server>::create(new Server()));
 }
 
 MEX_DEFINE(delete) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+
 	InputArguments input(nrhs, prhs, 1);
 	OutputArguments output(nlhs, plhs, 0);
 	Session<Server>::destroy(input.get(0));

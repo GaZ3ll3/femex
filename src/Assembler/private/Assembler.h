@@ -60,8 +60,11 @@ public:
 			MatlabPtr QNodes, MatlabPtr Elems,MatlabPtr Ref,
 			MatlabPtr Weights, MatlabPtr Fcn);
 
-	void AssembleLoad(Real_t*& pLoad,
-			MatlabPtr Nodes, MatlabPtr Fcn);
+	/*
+	 * Integral for point source < Fcn , delta(x)> = Fcn(x) in infinite dimensional space
+	 * if x is not a node, it will be some weighted expression(localized) function.
+	 */
+	void AssembleLoad(Real_t*& pLoad, MatlabPtr _point, MatlabPtr Fcn);
 
 	// 1d Integral
 	void Reference(MatlabPtr&, MatlabPtr&, MatlabPtr, MatlabPtr);

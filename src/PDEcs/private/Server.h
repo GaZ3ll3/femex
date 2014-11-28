@@ -54,6 +54,10 @@ public:
 	void Inner_Prod(Real_t* u, Real_t* v, size_t n, Real_t* pI, Real_t* pJ, Real_t* pV);
 	// this requires a cast of int32(MATLAB_PTR) operation in Matlab's environment.
 	void Inner_Prod(Real_t* u, Real_t* v, size_t n, int32_t* pI, int32_t* pJ, Real_t* pV);
+
+
+
+
 };
 
 } /* namespace MEX */
