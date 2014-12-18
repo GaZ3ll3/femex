@@ -23,6 +23,8 @@ How to use:
 
 * Follow the example to set up boundary conditions.
 
-
  
+Note:
+------
+* Since ``femex`` is built with Matlab's ``mex`` interface, it will need license for use which is not included.
 
