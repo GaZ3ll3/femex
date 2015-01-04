@@ -35,10 +35,12 @@ typedef	struct Topology {
 		std::unordered_map<std::string, vector<int32_t>> edges;
 		vector<int32_t>    elems;
 		vector<int32_t>    boundary;
+		vector<int32_t>    boundary_index;
 
-		void clear(){
+  		void clear(){
 			nodes.clear(); edges.clear();
 			elems.clear(); boundary.clear();
+			boundary_index.clear();
 		}
 
 		void resize(int32_t _nsize,int32_t _esize,int32_t _bsize){

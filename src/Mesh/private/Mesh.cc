@@ -148,9 +148,27 @@ void Mesh::Promote(int32_t _deg) noexcept{
 
 		}
 
+		// make a hash-set for boundary element
+		std::unordered_set<std::string> _boundary_set;
+		// temporary for storage
+		std::unordered_map<std::string, int32_t>  boundary_elems;
+		// setup _boundary_set
+		for (int32_t index = 0; index < _meshdata.numberofsegments; index++){
+			/*
+			 * reverse the order
+			 */
+			auto bound_l = std::to_string(_Seg_R(index));
+			auto bound_r = std::to_string(_Seg_L(index));
+			_boundary_set.insert(bound_l + "-" + bound_r);
+		}
+		// end for
+
 		int32_t counter = 2*_meshdata.numberofpoints + 2*(deg - 1)*_meshdata.numberofedges;
 
 		std::unordered_map<std::string, std::vector<int32_t>>::const_iterator EdgeIterator;
+		// iterator for boundary
+		std::unordered_set<std::string>::const_iterator BoundaryIterator;
+		std::unordered_map<std::string, int32_t>::const_iterator BoundaryElemIterator;
 
 
 		for (int32_t index = 0; index < _meshdata.numberoftriangles; index++){
@@ -212,6 +230,26 @@ void Mesh::Promote(int32_t _deg) noexcept{
 			}
 
 
+			/*
+			 * check if boundary is in boundary set
+			 */
+
+			// 0 - 1
+			BoundaryIterator = _boundary_set.find(tri_u + "-" + tri_v);
+			if (BoundaryIterator != _boundary_set.end()) {
+				boundary_elems.insert(make_pair(tri_u + "-" + tri_v, index));
+			}
+			// 1 - 2
+			BoundaryIterator = _boundary_set.find(tri_v + "-" + tri_w);
+			if (BoundaryIterator != _boundary_set.end()){
+				boundary_elems.insert(make_pair(tri_v + "-" + tri_w, index));
+			}
+			// 2 - 0
+			BoundaryIterator = _boundary_set.find(tri_w + "-" + tri_u);
+			if (BoundaryIterator != _boundary_set.end()){
+				boundary_elems.insert(make_pair(tri_w + "-" + tri_u, index));
+			}
+
 
 			int32_t internal_counter = 0;
 			for (int32_t i  = 1; i < deg - 1; i++){
@@ -235,8 +273,6 @@ void Mesh::Promote(int32_t _deg) noexcept{
 			}
 		} // End of loop over elems
 
-
-
 		for (int32_t index = 0; index < _meshdata.numberofsegments; index++){
 			/*
 			 * Orientation reversed
@@ -246,21 +282,33 @@ void Mesh::Promote(int32_t _deg) noexcept{
 
 			auto bound_l = std::to_string(topology.boundary[(deg + 1)*index    ]);
 			auto bound_r = std::to_string(topology.boundary[(deg + 1)*index + 1]);
+
 			/*
 			 * In order insert the interpolated nodes.
 			 */
 			EdgeIterator = topology.edges.find( bound_l + "-" + bound_r);
+			BoundaryElemIterator = boundary_elems.find(bound_l + "-" + bound_r);
+
 
 			if (EdgeIterator != topology.edges.end()){
 				std::copy(EdgeIterator->second.begin(), EdgeIterator->second.end(), topology.boundary.begin() + (deg + 1)*index + 2);
 			}
 
 			if (EdgeIterator == topology.edges.end()){
-				EdgeIterator = topology.edges.find(bound_r + "_" + bound_l);
+				EdgeIterator = topology.edges.find(bound_r + "-" + bound_l);
 				std::reverse_copy(EdgeIterator->second.begin(), EdgeIterator->second.end(), topology.boundary.begin() + (deg + 1)*index + 2);
 			}
-		}// End of for
 
+			if (BoundaryElemIterator != boundary_elems.end()) {
+				topology.boundary_index.push_back(BoundaryElemIterator->second);
+			}
+			else {
+				BoundaryElemIterator = boundary_elems.find(bound_r + "-" + bound_l);
+				if (BoundaryElemIterator != boundary_elems.end()) {
+					topology.boundary_index.push_back(BoundaryElemIterator->second);
+				}
+			}
+		}// End of for
 	}
 }
 
@@ -342,7 +390,7 @@ MEX_DEFINE(report)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 
 MEX_DEFINE(promote)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	InputArguments input(nrhs, prhs, 2);
-	OutputArguments output(nlhs, plhs, 3);
+	OutputArguments output(nlhs, plhs, 4);
 	auto mesh = Session<Mesh>::get(input.get(0));
 	auto deg  = input.get<int>(1);
 
@@ -359,6 +407,10 @@ MEX_DEFINE(promote)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 	memcpy(mxGetPr(plhs[2]), &mesh->topology.boundary[0], mesh->topology.boundary.size()*sizeof(int));
 	MatlabPtr temp_2[] = {plhs[2],mxCreateDoubleScalar(1.0)};
 	mexCallMATLAB(1, &plhs[2], 2, temp_2, "plus");
+	plhs[3] = mxCreateNumericMatrix(1, mesh->topology.boundary_index.size(), mxINT32_CLASS, mxREAL);
+	memcpy(mxGetPr(plhs[3]), &mesh->topology.boundary_index[0], mesh->topology.boundary_index.size()*sizeof(int));
+	MatlabPtr temp_3[] = {plhs[3], mxCreateDoubleScalar(1.0)};
+	mexCallMATLAB(1, &plhs[3], 2, temp_3, "plus");
 }
 
 
