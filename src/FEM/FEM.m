@@ -52,7 +52,7 @@ classdef FEM < handle
                 this.Mesh.export();
             
             
-            [this.Promoted.nodes, this.Promoted.elems, this.Promoted.edges, this.Promoted.ind] = ...
+            [this.Promoted.nodes, this.Promoted.elems, this.Promoted.edges, this.Promoted.indices] = ...
                 this.Mesh.promote(prec);
             
             this.TriMesh = this.Promoted.elems(1:3, :);

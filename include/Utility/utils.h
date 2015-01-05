@@ -22,7 +22,9 @@ using namespace std;
 #define MEX_EXPECT(condition) if (!(condition)) \
     mexErrMsgTxt(#condition " not true.")
 
-
+/*
+ * make const MatlabPtr into nonconst MatlabPtr
+ */
 #define CAST(PTR) const_cast<MatlabPtr>(PTR)
 
 #define MEX_EPS 1e-9
