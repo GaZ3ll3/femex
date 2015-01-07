@@ -32,6 +32,9 @@ Solver_('delete', this.id_);
 end
 
 
+function [DX, DY] = reference(this, points)
+	[DX, DY] = Solver_('reference', this.id_, points);
+end
 
 function [x] = solve(this, A, b)
 
