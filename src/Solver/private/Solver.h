@@ -34,8 +34,8 @@ public:
 	/*
 	 * public methods
 	 */
-
-
+	void Reference(MatlabPtr &DX, MatlabPtr &DY,
+			MatlabPtr Points);
 };
 
 } /* namespace MEX */
