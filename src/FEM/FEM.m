@@ -18,11 +18,12 @@ classdef FEM < handle
         Num_edges
         
         Solution
+        
+        Ref_points
     end
     
     properties (Access = private)
         Ref_mesh
-        Ref_points   
         Mesh
     end
     

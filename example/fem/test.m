@@ -77,6 +77,8 @@ solver = Solver('umfpack');
 tic;
 fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
 toc;
+[DX, DY] = solver.reference(fem.Ref_points);
+[GX, GY] = solver.grad(fem.Solution, fem.Promoted.nodes, fem.Promoted.elems, DX, DY);
 solver.delete();
 
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
@@ -90,6 +92,17 @@ solver.delete();
 
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
+
+
+for i = 1:size(fem.Promoted.elems, 2)
+u(fem.Promoted.elems(:, i)) = GX(:, i);
+v(fem.Promoted.elems(:, i)) = GY(:, i);
+end
+
+figure(1);
+quiver(fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), u, v);
+
+figure(2);
 trimesh(fem.TriMesh', fem.Promoted.nodes(1,1:numofnodes), ...
     fem.Promoted.nodes(2, 1:numofnodes), fem.Solution(1:numofnodes));
 end
