@@ -34,8 +34,14 @@ public:
 	/*
 	 * public methods
 	 */
+	// return reference
 	void Reference(MatlabPtr &DX, MatlabPtr &DY,
 			MatlabPtr Points);
+	// return gradient on each element
+	void Gradient(MatlabPtr& GradX, MatlabPtr& GradY,MatlabPtr Solution, MatlabPtr Nodes, MatlabPtr Elems,
+			MatlabPtr DX, MatlabPtr DY);
+	// return Neumann data, unfinished yet
+	void Neumann();
 };
 
 } /* namespace MEX */
