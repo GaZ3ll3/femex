@@ -1,34 +1,34 @@
 classdef Solver < handle
 
 properties (Access = private)
-id_ 
+	id_ 
 end
 
 properties (Access = public)
-ilu
-agmg
+	ilu
+	agmg
 end
 
 
 
 methods
 function this = Solver(type)
-if strcmp(type, 'ilu')
-this.ilu = 1;
-this.agmg= 0;
-elseif (strcmp(type, 'agmg'))
-this.ilu = 0;
-this.agmg = 1;
-else 
-this.ilu = 0;
-this.agmg = 0;
-end
-this.id_ = Solver_('new');
+	if strcmp(type, 'ilu')
+		this.ilu = 1;
+			this.agmg= 0;
+	elseif (strcmp(type, 'agmg'))
+		this.ilu = 0;
+		this.agmg = 1;
+	else 
+		this.ilu = 0;
+		this.agmg = 0;
+	end
+	this.id_ = Solver_('new');
 end
 
 
 function delete(this)
-Solver_('delete', this.id_);
+	Solver_('delete', this.id_);
 end
 
 
