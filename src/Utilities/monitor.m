@@ -1,4 +1,4 @@
-function monitor(fem)
+function [sum] = monitor(fem)
 
 fields = fieldnames(fem);
 len    = size(fields, 1);
