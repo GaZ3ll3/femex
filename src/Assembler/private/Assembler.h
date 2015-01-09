@@ -5,8 +5,8 @@
  *      Author: lurker
  */
 
-#ifndef ASSEMBLER_PRIVATE_ASSEMBLER_C_
-#define ASSEMBLER_PRIVATE_ASSEMBLER_C_
+#ifndef ASSEMBLER_PRIVATE_ASSEMBLER_H_
+#define ASSEMBLER_PRIVATE_ASSEMBLER_H_
 
 #include <cstdlib>
 #include <vector>
