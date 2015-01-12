@@ -99,10 +99,10 @@ u(fem.Promoted.elems(:, i)) = GX(:, i);
 v(fem.Promoted.elems(:, i)) = GY(:, i);
 end
 
-figure(1);
-quiver(fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), u, v);
 
-figure(2);
+quiver3(fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), fem.Solution', u, v, -ones(size(fem.Solution, 2),size(fem.Solution, 1)));
+
+hold on
 trimesh(fem.TriMesh', fem.Promoted.nodes(1,1:numofnodes), ...
     fem.Promoted.nodes(2, 1:numofnodes), fem.Solution(1:numofnodes));
 end
