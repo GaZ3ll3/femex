@@ -125,6 +125,9 @@ void Solver::Gradient(MatlabPtr& GradX, MatlabPtr& GradY, MatlabPtr Solution, Ma
 		for (size_t j = 0; j < numberofnodeperelem; j++) {
 			gx_ptr[j] = 0.;
 			gy_ptr[j] = 0.;
+			/*
+			 * since k is relatively small, thus the summation won't be incorrect too much.
+			 */
 			for (size_t k = 0; k < numberofnodeperelem; k++) {
 				gx_ptr[j] += temp_ptr[k] * DX_ptr[j * numberofnodeperelem + k];
 				gy_ptr[j] += temp_ptr[k] * DY_ptr[j * numberofnodeperelem + k];
@@ -150,6 +153,40 @@ void Solver::Gradient(MatlabPtr& GradX, MatlabPtr& GradY, MatlabPtr Solution, Ma
 		}
 	}
 }
+
+// TODO
+void Neumann(MatlabPtr& Neumann, MatlabPtr GradX, MatlabPtr GradY, MatlabPtr Nodes, MatlabPtr Elems,
+		MatlabPtr Boundaries, MatlabPtr BoundaryId){
+
+	auto numberofelem        = mxGetN(Elems);
+	auto numberofnodeperelem = mxGetM(Elems);
+
+	auto gradX_ptr = mxGetPr(GradX);
+	auto gradY_ptr = mxGetPr(GradY);
+
+	auto elem_ptr = (int32_t*)mxGetPr(Elems);
+	auto node_ptr = mxGetPr(Nodes);
+
+
+	auto neumann_ptr = mxGetPr(Neumann);
+
+	auto boundary_ptr = (int32_t*)mxGetPr(Boundaries);
+	auto id_ptr       = (int32_t*)mxGetPr(BoundaryId);
+
+	/*
+	 * Each boundary-segment contains 'degree + 1' end points,
+	 * which produces 'degree + 1' Neumann data for each boundary.
+	 *
+	 * Neumann is a matrix with (number of boundary) x (degree + 1).
+	 *
+	 * each segment has same exterior normal vector, so it won't cost
+	 * too much on calculating the dot product.
+	 *
+	 * complexity O(number of boundary) x O(degree + 1).
+	 */
+
+}
+
 } /* namespace MEX */
 
 using namespace MEX;

@@ -40,8 +40,9 @@ public:
 	// return gradient on each element
 	void Gradient(MatlabPtr& GradX, MatlabPtr& GradY,MatlabPtr Solution, MatlabPtr Nodes, MatlabPtr Elems,
 			MatlabPtr DX, MatlabPtr DY);
-	// return Neumann data, unfinished yet
-	void Neumann();
+	// return Neumann data which matches the boundaries
+	void Neumann(MatlabPtr& Neumann, MatlabPtr GradX, MatlabPtr GradY, MatlabPtr Nodes, MatlabPtr Elems,
+			MatlabPtr Boundaries, MatlabPtr BoundaryId);
 };
 
 } /* namespace MEX */
