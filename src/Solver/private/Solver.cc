@@ -154,8 +154,7 @@ void Solver::Gradient(MatlabPtr& GradX, MatlabPtr& GradY, MatlabPtr Solution, Ma
 	}
 }
 
-// TODO
-void Neumann(MatlabPtr& Neumann, MatlabPtr GradX, MatlabPtr GradY, MatlabPtr Nodes, MatlabPtr Elems,
+void Solver::Neumann(MatlabPtr& Neumann, MatlabPtr GradX, MatlabPtr GradY, MatlabPtr Nodes, MatlabPtr Elems,
 		MatlabPtr Boundaries, MatlabPtr BoundaryId){
 
 	auto numberofelem        = mxGetN(Elems);
@@ -167,11 +166,16 @@ void Neumann(MatlabPtr& Neumann, MatlabPtr GradX, MatlabPtr GradY, MatlabPtr Nod
 	auto elem_ptr = (int32_t*)mxGetPr(Elems);
 	auto node_ptr = mxGetPr(Nodes);
 
-
 	auto neumann_ptr = mxGetPr(Neumann);
 
 	auto boundary_ptr = (int32_t*)mxGetPr(Boundaries);
 	auto id_ptr       = (int32_t*)mxGetPr(BoundaryId);
+
+
+	auto numberofboundary = mxGetN(Boundaries);
+	auto numberofnodeperboundary = mxGetM(Boundaries);
+
+
 
 	/*
 	 * Each boundary-segment contains 'degree + 1' end points,
@@ -185,6 +189,76 @@ void Neumann(MatlabPtr& Neumann, MatlabPtr GradX, MatlabPtr GradY, MatlabPtr Nod
 	 * complexity O(number of boundary) x O(degree + 1).
 	 */
 
+	// normal vector, uninitialized.
+	Real_t normal[2], length;
+	mwSize first, second, b_id;
+	mwSize tri_u, tri_v, tri_w;
+	mwSize edge[numberofnodeperboundary];
+
+	for (size_t i = 0; i < numberofboundary; i++) {
+
+		/*
+		 * pick first two nodes.
+		 */
+		first  = boundary_ptr[i * numberofnodeperboundary] - 1;
+		second = boundary_ptr[i * numberofnodeperboundary + 1] - 1;
+
+		b_id  = id_ptr[i] - 1;
+
+		tri_u = elem_ptr[b_id * numberofnodeperelem] - 1;
+		tri_v = elem_ptr[b_id * numberofnodeperelem + 1] - 1;
+		tri_w = elem_ptr[b_id * numberofnodeperelem + 2] - 1;
+
+		/*
+		 * match the edge
+		 */
+		// u - v
+		if (tri_u == first && tri_v == second) {
+			edge[0] = 1; edge[1] = 2;
+			for (size_t k = 2; k < numberofnodeperboundary; k++) {
+				edge[k] = 2 + k;
+			}
+		}
+		// v - w
+		else if (tri_v == first && tri_w == second) {
+			edge[0] = 2; edge[1] = 3;
+			for (size_t k = 2; k < numberofnodeperboundary; k++) {
+				edge[k] = numberofnodeperboundary + k;
+			}
+		}
+		// w - u
+		else if (tri_w == first && tri_u == second){
+			edge[0] = 3; edge[1] = 1;
+			for (size_t k = 2; k < numberofnodeperboundary; k++) {
+				edge[k] = 2 * numberofnodeperboundary - 2 + k ;
+			}
+		}
+		else {
+			// Error!
+			mexErrMsgTxt("Solver::Neumann::The boundary does not match the element.\n");
+		}
+
+
+		/*
+		 * normal direction
+		 */
+		normal[0] = node_ptr[2 * second + 1] - node_ptr[2 * first + 1];
+		normal[1] = node_ptr[2 * first] - node_ptr[2 * second];
+
+		length = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1]);
+
+		/*
+		 * normalize
+		 */
+		normal[0] /= length;
+		normal[1] /= length;
+
+		for (size_t j = 0; j < numberofnodeperboundary; j++){
+			neumann_ptr[i * numberofnodeperboundary + j] =
+					gradX_ptr[b_id * numberofnodeperelem + edge[j] - 1] * normal[0] +
+					gradY_ptr[b_id * numberofnodeperelem + edge[j] - 1] * normal[1];
+		}
+	}
 }
 
 } /* namespace MEX */
@@ -224,6 +298,24 @@ MEX_DEFINE(grad) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
 	solver->Gradient(plhs[0], plhs[1], CAST(prhs[1]),
 			CAST(prhs[2]),CAST(prhs[3]),
 			CAST(prhs[4]),CAST(prhs[5]));
+}
+
+
+MEX_DEFINE(neumann) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
+	InputArguments input(nrhs,  prhs, 7);
+	OutputArguments output(nlhs, plhs, 1);
+
+	Solver* solver = Session<Solver>::get(input.get(0));
+
+	size_t numberofboundary        = mxGetN(prhs[5]);
+	size_t numberofnodeperboundary = mxGetM(prhs[5]);
+
+	plhs[0] = mxCreateNumericMatrix(numberofnodeperboundary, numberofboundary, mxDOUBLE_CLASS, mxREAL);
+
+	solver->Neumann(plhs[0], CAST(prhs[1]),
+			CAST(prhs[2]),CAST(prhs[3]),
+			CAST(prhs[4]),CAST(prhs[5]),
+			CAST(prhs[6]));
 }
 
 MEX_DEFINE(reference) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {

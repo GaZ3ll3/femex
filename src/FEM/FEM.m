@@ -30,7 +30,7 @@ classdef FEM < handle
     methods
         function this = FEM(edge_points, prec, min_area)
             this.Ref_mesh = Mesh([0 0 1 0 0 1]', 0.5);
-            [this.Ref_points, ~, ~] = this.Ref_mesh.promote(prec);
+            [this.Ref_points, ~, ~, ~] = this.Ref_mesh.promote(prec);
             
             this.Assembler = Assembler();
             

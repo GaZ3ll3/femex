@@ -92,7 +92,7 @@ solver.delete();
 
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
-
+% needs to allocate memory for u and v.
 
 for i = 1:size(fem.Promoted.elems, 2)
 u(fem.Promoted.elems(:, i)) = GX(:, i);

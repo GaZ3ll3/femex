@@ -40,6 +40,11 @@ function [gradX, gradY] = grad(this, soln, nodes, elems, DX, DY)
 	[gradX, gradY] = Solver_('grad', this.id_, soln, nodes, elems, DX, DY);
 end
 
+
+function [neumann] = Neumann(this, GradX, GradY, nodes, elems, Boundary, BID)
+	[neumann] = Solver_('neumann', this.id_, GradX, GradY, nodes, elems, Boundary, BID);
+end
+
 function [x] = solve(this, A, b)
 
 if (this.ilu == 1)
