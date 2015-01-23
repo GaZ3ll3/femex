@@ -1,4 +1,4 @@
-function  fem = test(prec, min_area)
+function  [fem, neumann] = test(prec, min_area)
 % TEST solves Neumann/Dirichlet/Robin boundary condition PDE with h-p
 % finite element method.
 
@@ -88,18 +88,24 @@ solver = Solver('agmg');
 tic;
 fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
 toc;
-solver.delete();
+
 
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
 % needs to allocate memory for u and v.
+
+u = zeros(1, N);
+v = zeros(1, N);
+
 
 for i = 1:size(fem.Promoted.elems, 2)
 u(fem.Promoted.elems(:, i)) = GX(:, i);
 v(fem.Promoted.elems(:, i)) = GY(:, i);
 end
 
+neumann = solver.Neumann(GX, GY, fem.Promoted.nodes, fem.Promoted.elems, fem.Promoted.edges, fem.Promoted.indices);
 
+solver.delete();
 quiver3(fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), fem.Solution', u, v, -ones(size(fem.Solution, 2),size(fem.Solution, 1)));
 
 hold on
