@@ -247,16 +247,10 @@ void Solver::Neumann(MatlabPtr& Neumann, MatlabPtr GradX, MatlabPtr GradY, Matla
 
 		length = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1]);
 
-		/*
-		 * normalize
-		 */
-		normal[0] /= length;
-		normal[1] /= length;
-
 		for (size_t j = 0; j < numberofnodeperboundary; j++){
-			neumann_ptr[i * numberofnodeperboundary + j] =
+			neumann_ptr[i * numberofnodeperboundary + j] = (
 					gradX_ptr[b_id * numberofnodeperelem + edge[j] - 1] * normal[0] +
-					gradY_ptr[b_id * numberofnodeperelem + edge[j] - 1] * normal[1];
+					gradY_ptr[b_id * numberofnodeperelem + edge[j] - 1] * normal[1])/length;
 		}
 	}
 }
