@@ -81,8 +81,6 @@ public:
 	void Qnodes1D(Real_t*& Coords, MatlabPtr Nodes, MatlabPtr QNodes, MatlabPtr Edges);
 
 
-
-
 };
 
 #endif /* ASSEMBLER_PRIVATE_ASSEMBLER_C_ */
