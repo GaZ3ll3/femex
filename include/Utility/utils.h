@@ -42,5 +42,6 @@ inline size_t Nsize(MatlabPtr _ptr){
 	return mxGetN(_ptr);
 }
 
+extern "C" bool mxUnshareArray(mxArray *array_ptr, bool noDeepCopy);
 
 #endif /* INCLUDE_UTILITY_UTILS_H_ */
