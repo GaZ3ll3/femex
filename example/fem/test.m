@@ -84,6 +84,19 @@ solver.delete();
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
 
+%%% use MA57
+control.order = 0; % AMD control.ordering
+control.thres = 0.01;
+control.stpv = 0;
+
+tic;
+[str,info,rinfo] = ma57_factor(R(dofs, dofs),control);
+[fem.Solution(dofs),info,rinfo] = ma57_solve(R(dofs, dofs),-LoadVector(dofs),str);
+toc;
+disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
+
+%%%
+
 solver = Solver('agmg');
 tic;
 fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
