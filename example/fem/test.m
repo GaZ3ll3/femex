@@ -73,9 +73,13 @@ LoadVector = LoadVector + R*fem.Solution;
 % solver.delete();
 % disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
+
+A = R(dofs, dofs);
+b = LoadVector(dofs);
+
 solver = Solver('umfpack');
 tic;
-fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
+fem.Solution(dofs) = - solver.solve(A, b);
 toc;
 [DX, DY] = solver.reference(fem.Ref_points);
 [GX, GY] = solver.grad(fem.Solution, fem.Promoted.nodes, fem.Promoted.elems, DX, DY);
@@ -90,16 +94,60 @@ control.thres = 0.01;
 control.stpv = 0;
 
 tic;
-[str,info,rinfo] = ma57_factor(R(dofs, dofs),control);
-[fem.Solution(dofs),info,rinfo] = ma57_solve(R(dofs, dofs),-LoadVector(dofs),str);
+[str,~,~] = ma57_factor(A,control);
+[fem.Solution(dofs),~,~] = ma57_solve(A,-b,str);
 toc;
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
 %%%
 
+
+%%% use Mi20
+
+% tic;
+% hsl_mi20_startup;
+% hsl_control = hsl_mi20_control;
+% inform = hsl_mi20_setup(A,hsl_control);
+% fem.Solution(dofs) = pcg(A, -b, 1e-12, 1000,'hsl_mi20_precondition');
+% hsl_mi20_finalize;
+% toc;
+% disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
+
+
+%%%
+
+
+%%% pardiso
+
+% info = pardisoinit(-2,0);
+% 
+% verbose = false;
+% 
+% tic;
+% info = pardisoreorder(tril(A),info,verbose);
+% info = pardisofactor(tril(A),info,verbose);
+% % Compute the solutions X using the symbolic factorization.
+% 
+% [fem.Solution(dofs), info] = pardisosolve(tril(A),-b,info,verbose);
+% toc;
+% fprintf('PARDISO performed %d iterative refinement steps.\n',info.iparm(7));
+% 
+% 
+% disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
+% 
+% pardisofree(info);
+% clear info
+
+
+%%%
+
+
+
+
+
 solver = Solver('agmg');
 tic;
-fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
+fem.Solution(dofs) = - solver.solve(A, b);
 toc;
 
 
