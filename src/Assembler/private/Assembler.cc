@@ -27,6 +27,7 @@ void Assembler::Reference(MatlabPtr &F, MatlabPtr &DX, MatlabPtr &DY,
 	auto _numberofpoints = mxGetN(Points);
 	auto _numberofqpoints = mxGetN(QPoints);
 
+
 	/*
 	 *  Temporary Arrays, will be destroyed later.
 	 */

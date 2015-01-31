@@ -1,4 +1,4 @@
-function  fem = test(prec, min_area)
+function  [fem, neumann] = test(prec, min_area)
 % TEST solves Neumann/Dirichlet/Robin boundary condition PDE with h-p
 % finite element method.
 
@@ -73,9 +73,13 @@ LoadVector = LoadVector + R*fem.Solution;
 % solver.delete();
 % disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
+
+A = R(dofs, dofs);
+b = LoadVector(dofs);
+
 solver = Solver('umfpack');
 tic;
-fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
+fem.Solution(dofs) = - solver.solve(A, b);
 toc;
 [DX, DY] = solver.reference(fem.Ref_points);
 [GX, GY] = solver.grad(fem.Solution, fem.Promoted.nodes, fem.Promoted.elems, DX, DY);
@@ -84,22 +88,85 @@ solver.delete();
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
 
+%%% use MA57
+control.order = 0; % AMD control.ordering
+control.thres = 0.01;
+control.stpv = 0;
+
+tic;
+[str,~,~] = ma57_factor(A,control);
+[fem.Solution(dofs),~,~] = ma57_solve(A,-b,str);
+toc;
+disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
+
+%%%
+
+
+%%% use Mi20
+
+% tic;
+% hsl_mi20_startup;
+% hsl_control = hsl_mi20_control;
+% inform = hsl_mi20_setup(A,hsl_control);
+% fem.Solution(dofs) = pcg(A, -b, 1e-12, 1000,'hsl_mi20_precondition');
+% hsl_mi20_finalize;
+% toc;
+% disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
+
+
+%%%
+
+
+%%% pardiso
+
+% info = pardisoinit(-2,0);
+% 
+% verbose = false;
+% 
+% tic;
+% info = pardisoreorder(tril(A),info,verbose);
+% info = pardisofactor(tril(A),info,verbose);
+% % Compute the solutions X using the symbolic factorization.
+% 
+% [fem.Solution(dofs), info] = pardisosolve(tril(A),-b,info,verbose);
+% toc;
+% fprintf('PARDISO performed %d iterative refinement steps.\n',info.iparm(7));
+% 
+% 
+% disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
+% 
+% pardisofree(info);
+% clear info
+
+
+%%%
+
+
+
+
+
 solver = Solver('agmg');
 tic;
-fem.Solution(dofs) = - solver.solve(R(dofs, dofs), LoadVector(dofs));
+fem.Solution(dofs) = - solver.solve(A, b);
 toc;
-solver.delete();
+
 
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
 % needs to allocate memory for u and v.
+
+u = zeros(1, N);
+v = zeros(1, N);
+
 
 for i = 1:size(fem.Promoted.elems, 2)
 u(fem.Promoted.elems(:, i)) = GX(:, i);
 v(fem.Promoted.elems(:, i)) = GY(:, i);
 end
 
+neumann = solver.Neumann(GX, GY, fem.Promoted.nodes, fem.Promoted.elems, fem.Promoted.edges, fem.Promoted.indices);
 
+solver.delete();
 quiver3(fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), fem.Solution', u, v, -ones(size(fem.Solution, 2),size(fem.Solution, 1)));
 
 hold on

@@ -98,6 +98,39 @@ classdef FEM < handle
                 this.Edge.Qnodes, BC, this.Edge.Ref, this.Edge.Weights, Fcn);
         end
         
+        
+    end
+    
+    methods(Static)
+        
+        function [Norm] = norm(u, mass)
+            [m, n] = size(u);
+            
+            if m == 1
+                Norm = u*mass*u';
+            elseif n == 1
+                Norm = u'*mass*u;
+            else
+                error('FEM:Norm', 'Dimension does not match.\n');
+            end
+            
+            
+        end
+        
+        function [Norm] = semi_norm(u, stiff)
+            [m, n] = size(u);
+            
+            if m == 1
+                Norm = u*stiff*u';
+            elseif n == 1
+                Norm = u'*stiff*u;
+            else
+                error('FEM:SEMI_NORM', 'Dimension does not match.\n');
+            end
+            
+        end
+        
+        
     end
     
 end
