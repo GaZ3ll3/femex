@@ -699,6 +699,138 @@ void Assembler::AssembleStiff(Real_t* &pI, Real_t* &pJ, Real_t*&pV,
 }
 
 
+/*
+ * Stiff Kernel as two functions
+ */
+
+void Assembler::AssembleStiff(Real_t* &pI, Real_t* &pJ, Real_t*&pV,
+		MatlabPtr Nodes, MatlabPtr Elems, MatlabPtr RefX,
+		MatlabPtr RefY, MatlabPtr Weights, MatlabPtr Fcn_X, MatlabPtr Fcn_Y) {
+
+
+	auto  pnodes_ptr           = mxGetPr(Nodes);
+	auto  pelem_ptr            = (int32_t*)mxGetPr(Elems);
+	auto  referenceX           = mxGetPr(RefX);
+	auto  referenceY           = mxGetPr(RefY);
+	auto  weights              = mxGetPr(Weights);
+	auto  Interp_X             = mxGetPr(Fcn_X);
+	auto  Interp_Y             = mxGetPr(Fcn_Y);
+
+	auto numberofelem           = mxGetN(Elems);
+	auto numberofnodesperelem   = mxGetM(Elems);
+	auto numberofqnodes         = mxGetN(RefX);
+
+
+	mwSize vertex_1, vertex_2, vertex_3;
+	Real_t det, area;
+	Real_t Jacobian[2][2];
+
+	if (mxGetNumberOfElements(Fcn_X)  == numberofelem * numberofqnodes &&
+			mxGetNumberOfElements(Fcn_Y) == numberofelem * numberofqnodes) {
+		// Fcn is a matrix
+		for (size_t i =0; i < numberofelem; i++){
+
+			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+			vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+			vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+
+			Jacobian[0][0] = pnodes_ptr[2*vertex_3 + 1] - pnodes_ptr[2*vertex_1 + 1];
+			Jacobian[1][1] = pnodes_ptr[2*vertex_2    ] - pnodes_ptr[2*vertex_1    ];
+			Jacobian[0][1] = pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1];
+			Jacobian[1][0] = pnodes_ptr[2*vertex_1    ] - pnodes_ptr[2*vertex_3    ];
+
+			// Orientation corrected.
+			det = Jacobian[0][0] * Jacobian[1][1] - Jacobian[0][1] * Jacobian[1][0];
+			area = 0.5*fabs(det);
+
+			// Due to symmetric property, half of work load can be reduced
+			for (size_t j = 0; j < numberofnodesperelem; j++){
+				for (size_t k = 0; k < j + 1; k++){
+					*pI = pelem_ptr[i*numberofnodesperelem + j];
+					*pJ = pelem_ptr[i*numberofnodesperelem + k];
+					*pV = 0.;
+					for (size_t l = 0; l < numberofqnodes; l++){
+						*pV = *pV + (
+								Interp_X[i*numberofqnodes + l] *
+								(
+								(Jacobian[0][0]*referenceX[j+ l*numberofnodesperelem] + Jacobian[0][1]*referenceY[j+ l*numberofnodesperelem])*
+								(Jacobian[0][0]*referenceX[k+ l*numberofnodesperelem] + Jacobian[0][1]*referenceY[k+ l*numberofnodesperelem])
+								)
+								+
+								Interp_Y[i*numberofqnodes + l] *
+								(
+								(Jacobian[1][0]*referenceX[j+ l*numberofnodesperelem] + Jacobian[1][1]*referenceY[j+ l*numberofnodesperelem])*
+								(Jacobian[1][0]*referenceX[k+ l*numberofnodesperelem] + Jacobian[1][1]*referenceY[k+ l*numberofnodesperelem])
+								)
+								)*weights[l];
+					}
+					*pV = (*pV)/4.0/area;
+					pI++; pJ++; pV++;
+					if (j != k){
+						*pI = *(pJ - 1);
+						*pJ = *(pI - 1);
+						*pV = *(pV - 1);
+						pI++; pJ++; pV++;
+					}
+				}
+			}
+		}
+	}
+	else {
+		for (size_t i =0; i < numberofelem; i++){
+			// Fcn is a constant
+			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+			vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+			vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+
+			Jacobian[0][0] = pnodes_ptr[2*vertex_3 + 1] - pnodes_ptr[2*vertex_1 + 1];
+			Jacobian[1][1] = pnodes_ptr[2*vertex_2    ] - pnodes_ptr[2*vertex_1    ];
+			Jacobian[0][1] = pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1];
+			Jacobian[1][0] = pnodes_ptr[2*vertex_1    ] - pnodes_ptr[2*vertex_3    ];
+
+			// Orientation corrected.
+			det = Jacobian[0][0] * Jacobian[1][1] - Jacobian[0][1] * Jacobian[1][0];
+			area = 0.5*fabs(det);
+
+			// Due to symmetric property, half of work load can be reduced
+			for (size_t j = 0; j < numberofnodesperelem; j++){
+				for (size_t k = 0; k < j + 1; k++){
+					*pI = pelem_ptr[i*numberofnodesperelem + j];
+					*pJ = pelem_ptr[i*numberofnodesperelem + k];
+					*pV = 0.;
+					for (size_t l = 0; l < numberofqnodes; l++){
+						*pV = *pV +
+								(
+								*(Interp_X)*
+								(
+								(Jacobian[0][0]*referenceX[j+ l*numberofnodesperelem] + Jacobian[0][1]*referenceY[j+ l*numberofnodesperelem])*
+								(Jacobian[0][0]*referenceX[k+ l*numberofnodesperelem] + Jacobian[0][1]*referenceY[k+ l*numberofnodesperelem])
+								)
+								+
+								*(Interp_Y)*
+								(
+								(Jacobian[1][0]*referenceX[j+ l*numberofnodesperelem] + Jacobian[1][1]*referenceY[j+ l*numberofnodesperelem])*
+								(Jacobian[1][0]*referenceX[k+ l*numberofnodesperelem] + Jacobian[1][1]*referenceY[k+ l*numberofnodesperelem])
+								)
+								)*weights[l];
+					}
+					*pV = (*pV)/4.0/area;
+					pI++; pJ++; pV++;
+					if (j != k){
+						*pI = *(pJ - 1);
+						*pJ = *(pI - 1);
+						*pV = *(pV - 1);
+						pI++; pJ++; pV++;
+					}
+				}
+			}
+		}
+	}
+}
+
+
+
+
 template class mexplus::Session<Assembler>;
 
 
@@ -772,9 +904,33 @@ MEX_DEFINE(assems)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
 			CAST(prhs[2]), CAST(prhs[3]),
 			CAST(prhs[4]), CAST(prhs[5]),
 			CAST(prhs[6]));
+}
+
+// advanced interface with matrix kernel
+MEX_DEFINE(assemsm)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
+
+	InputArguments input(nrhs, prhs, 8);
+	OutputArguments output(nlhs, plhs, 3);
+	Assembler* assembler = Session<Assembler>::get(input.get(0));
+
+	size_t numberofelem           = mxGetN(prhs[2]);
+	size_t numberofnodesperelem   = mxGetM(prhs[2]);
+	size_t numberofqnodes         = mxGetM(prhs[3]);
 
 
+	plhs[0] = mxCreateNumericMatrix(numberofnodesperelem * numberofnodesperelem * numberofelem, 1,  mxDOUBLE_CLASS, mxREAL);
+	Real_t* pI = mxGetPr(plhs[0]);
 
+	plhs[1] = mxCreateNumericMatrix(numberofnodesperelem * numberofnodesperelem * numberofelem, 1,  mxDOUBLE_CLASS, mxREAL);
+	Real_t* pJ = mxGetPr(plhs[1]);
+
+	plhs[2] = mxCreateNumericMatrix(numberofnodesperelem * numberofnodesperelem * numberofelem, 1, mxDOUBLE_CLASS, mxREAL);
+	Real_t* pV = mxGetPr(plhs[2]);
+
+	assembler->AssembleStiff(pI, pJ, pV, CAST(prhs[1]),
+			CAST(prhs[2]), CAST(prhs[3]),
+			CAST(prhs[4]), CAST(prhs[5]),
+			CAST(prhs[6]), CAST(prhs[7]));
 }
 
 MEX_DEFINE(assema)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){

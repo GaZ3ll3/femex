@@ -51,8 +51,13 @@ public:
 	/*
 	 * Stiffness Matrix
 	 */
+	// if kernel is a function
 	void AssembleStiff(Real_t*&, Real_t*&, Real_t*&,MatlabPtr, MatlabPtr,
 			MatlabPtr, MatlabPtr, MatlabPtr, MatlabPtr);
+
+	// with a symmetric/diagonal matrix kernel
+	void AssembleStiff(Real_t*&, Real_t*&, Real_t*&,MatlabPtr, MatlabPtr,
+			MatlabPtr, MatlabPtr, MatlabPtr, MatlabPtr, MatlabPtr);
 	/*
 	 * Load Vector from Robin Boundary
 	 */
