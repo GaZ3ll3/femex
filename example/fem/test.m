@@ -4,7 +4,7 @@ function  [fem, neumann] = test(prec, min_area)
 
 addpath(genpath('~/Documents/github/femex'));
 
-fem = FEM([0 0 1 0 1 1 0 1]', prec, min_area);
+fem = FEM([0 0 1 0 1 1 0 1]', [0.25 0.25 0.75 0.25 0.75 0.75 0.25 0.75]', prec, min_area);
 
 N = size(fem.Promoted.nodes, 2);
 numofnodes = fem.Num_nodes;
@@ -89,15 +89,15 @@ disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)
 
 
 %%% use MA57
-control.order = 0; % AMD control.ordering
-control.thres = 0.01;
-control.stpv = 0;
-
-tic;
-[str,~,~] = ma57_factor(A,control);
-[fem.Solution(dofs),~,~] = ma57_solve(A,-b,str);
-toc;
-disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
+% control.order = 0; % AMD control.ordering
+% control.thres = 0.01;
+% control.stpv = 0;
+% 
+% tic;
+% [str,~,~] = ma57_factor(A,control);
+% [fem.Solution(dofs),~,~] = ma57_solve(A,-b,str);
+% toc;
+% disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
 %%%
 

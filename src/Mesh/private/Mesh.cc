@@ -9,12 +9,22 @@
 
 namespace MEX {
 
-Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _Area) noexcept{
-	min_area = *Matlab_Cast<Real_t>(_Area);
-	auto _BoundaryPtr = Matlab_Cast<Real_t>(_Boundary);
-	int32_t _Boundary_L = Msize(_Boundary)/2;
+Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _PML, MatlabPtr _Area) noexcept{
+	/*
+	 * there are n - 1 delimiters in array
+	 *
+	 */
+	min_area            = *Matlab_Cast<Real_t>(_Area);
+	auto _BoundaryPtr   = Matlab_Cast<Real_t>(_Boundary);
+	auto _BoundarySize  = mxGetM(_Boundary)/2;
 
+	auto _PMLPtr        = Matlab_Cast<Real_t>(_PML);
+	auto _PMLSize       = mxGetM(_PML)/2;
 
+	/*
+	 * All segments
+	 */
+	int32_t _Boundary_L = (_BoundarySize  + _PMLSize);
 	/*
 	 * Two step meshing
 	 */
@@ -22,15 +32,41 @@ Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _Area) noexcept{
 	input.numberofpoints = _Boundary_L;
 	input.numberofpointattributes = 0;
 	input.pointlist = (Real_t *) malloc(_Boundary_L * 2 * sizeof(Real_t));
+	input.numberofsegments = _Boundary_L;
+	input.segmentlist = (int32_t *) malloc(_Boundary_L * 2 * sizeof(int32_t));
+	input.segmentmarkerlist = (int *) nullptr;
 
-	for (int32_t i = 0; i < _Boundary_L; i++)
+
+	for (int32_t i = 0; i < _BoundarySize; i++)
 	{
-		input.pointlist[2*i] = *(_BoundaryPtr++);
-		input.pointlist[2*i + 1] = *(_BoundaryPtr++);
+		/*
+		 * closed boundary input
+		 */
+		input.pointlist[2 * i] = _BoundaryPtr[2 * i];
+		input.pointlist[2 * i + 1] = _BoundaryPtr[2 * i + 1];
+		input.segmentlist[2 * i] = i ;
+		input.segmentlist[2 * i + 1] = i + 1;
 	}
 
+	// getting a loop for closed boundary
+	input.segmentlist[2 * _BoundarySize - 1] = 0;
+
+
+	if (_PMLSize > 0){
+
+		for (int32_t i = 0; i < _PMLSize; i++) {
+			input.pointlist[2 * i + 2 * _BoundarySize] = _PMLPtr[2 * i];
+			input.pointlist[2 * i + 2 * _BoundarySize +  1] = _PMLPtr[2 * i + 1];
+			input.segmentlist[2 * i + 2 * _BoundarySize] = _BoundarySize + i;
+			input.segmentlist[2 * i + 2 * _BoundarySize + 1] = _BoundarySize + i + 1;
+		}
+
+		input.segmentlist[2 * _Boundary_L - 1] = _BoundarySize;
+
+	}
+	// end of segments
+
 	input.pointmarkerlist = (int *)nullptr;
-	input.numberofsegments = 0;
 	input.numberofholes = 0;
 	input.numberofregions = 0;
 	input.regionlist = (Real_t *)nullptr;
@@ -67,6 +103,7 @@ Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _Area) noexcept{
 	free(input.pointlist);
 	free(input.pointmarkerlist);
 	free(input.regionlist);
+	free(input.segmentlist);
 	free(mid.pointlist);
 	free(mid.pointmarkerlist);
 	free(mid.trianglelist);
@@ -364,10 +401,10 @@ namespace {
 
 // Create a new instance of Mesh and return its session id.
 MEX_DEFINE(new) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
-	InputArguments input(nrhs, prhs, 2);
+	InputArguments input(nrhs, prhs, 3);
 	OutputArguments output(nlhs, plhs, 1);
 	output.set(0, Session<Mesh>::create(new Mesh(const_cast<mxArray*>(input.get(0)),
-			const_cast<mxArray*>(input.get(1)))));
+			const_cast<mxArray*>(input.get(1)), const_cast<mxArray*>(input.get(2)))));
 }
 
 // Delete the instance by id

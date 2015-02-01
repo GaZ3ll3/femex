@@ -5,9 +5,9 @@ properties (Access = private)
 end
 
 methods
-function this = Mesh(boundary, min_area)
+function this = Mesh(boundary, pml,  min_area)
   assert(isnumeric(boundary));
-  this.id_ = Mesh_('new', boundary, min_area);
+  this.id_ = Mesh_('new', boundary, pml,  min_area);
 end
 
 function delete(this)

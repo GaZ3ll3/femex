@@ -59,7 +59,7 @@ public:
 	 *
 	 *  Construct new Mesh(triangle) object from data.
 	 */
-	Mesh(MatlabPtr, MatlabPtr) noexcept;
+	Mesh(MatlabPtr, MatlabPtr , MatlabPtr) noexcept;
 	/*
 	 *  virtual ~Mesh()
 	 *
