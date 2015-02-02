@@ -98,6 +98,9 @@ Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _PML, MatlabPtr _Area) noexcept{
 	_meshdata.edgemarkerlist = (int *) nullptr;
 	_meshdata.segmentlist = (int *) nullptr;
 
+	/*
+	 * minimum angle chosen as 30 degrees now. should be adjusted.
+	 */
 	triangulate(const_cast<char*>(("prq30.0a" + std::to_string(min_area) + "ezBC").c_str()), &mid, &_meshdata, (struct triangulateio *) nullptr);
 
 	free(input.pointlist);
