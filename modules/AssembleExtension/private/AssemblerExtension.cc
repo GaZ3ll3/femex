@@ -64,7 +64,7 @@ void AssemblerExtension::AssembleGradXFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 
 
 
-			// Due to symmetric property, only need half of the work load.
+			// TODO: there is no symmetry
 			for (size_t j = 0; j < numberofnodesperelem; j++){
 				for (size_t k = 0; k < j + 1; k++){
 					*pI = pelem_ptr[i*numberofnodesperelem + j];
@@ -140,7 +140,7 @@ void AssemblerExtension::AssembleGradYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 
 
 
-			// Due to symmetric property, only need half of the work load.
+			// todo: there is no symmetry
 			for (size_t j = 0; j < numberofnodesperelem; j++){
 				for (size_t k = 0; k < j + 1; k++){
 					*pI = pelem_ptr[i*numberofnodesperelem + j];
