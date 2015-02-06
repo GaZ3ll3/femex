@@ -62,11 +62,8 @@ void AssemblerExtension::AssembleGradXFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 			area = 0.5*fabs(det);
 
 
-
-
-			// TODO: there is no symmetry
 			for (size_t j = 0; j < numberofnodesperelem; j++){
-				for (size_t k = 0; k < j + 1; k++){
+				for (size_t k = 0; k < numberofnodesperelem; k++){
 					*pI = pelem_ptr[i*numberofnodesperelem + j];
 					*pJ = pelem_ptr[i*numberofnodesperelem + k];
 					*pV = 0.;
@@ -79,13 +76,6 @@ void AssemblerExtension::AssembleGradXFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 					}
 					*pV  = (*pV)/2.0;
 					pI++; pJ++; pV++;
-					if (k != j) {
-						*pI = *(pJ - 1);
-						*pJ = *(pI - 1);
-						*pV = *(pV - 1);
-						pI++; pJ++; pV++;
-					}
-
 				}
 			}
 		}//end for
@@ -138,11 +128,8 @@ void AssemblerExtension::AssembleGradYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 			area = 0.5*fabs(det);
 
 
-
-
-			// todo: there is no symmetry
 			for (size_t j = 0; j < numberofnodesperelem; j++){
-				for (size_t k = 0; k < j + 1; k++){
+				for (size_t k = 0; k < numberofnodesperelem; k++){
 					*pI = pelem_ptr[i*numberofnodesperelem + j];
 					*pJ = pelem_ptr[i*numberofnodesperelem + k];
 					*pV = 0.;
@@ -155,13 +142,6 @@ void AssemblerExtension::AssembleGradYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 					}
 					*pV  = (*pV)/2.0;
 					pI++; pJ++; pV++;
-					if (k != j) {
-						*pI = *(pJ - 1);
-						*pJ = *(pI - 1);
-						*pV = *(pV - 1);
-						pI++; pJ++; pV++;
-					}
-
 				}
 			}
 		}//end for
@@ -172,6 +152,7 @@ void AssemblerExtension::AssembleGradYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 	}
 }
 
+// todo: try to do integration on int  A(\nabla phi) \psi to make the calls into one.
 
 }
 
@@ -239,7 +220,7 @@ MEX_DEFINE(assemex_gradfunc_y)  (int nlhs, mxArray* plhs[], int nrhs, const mxAr
 	plhs[2] = mxCreateNumericMatrix(numberofnodesperelem * numberofnodesperelem * numberofelem, 1, mxDOUBLE_CLASS, mxREAL);
 	Real_t* pV = mxGetPr(plhs[2]);
 
-	assembler_ex->AssembleGradXFunc(pI, pJ, pV, CAST(prhs[1]),
+	assembler_ex->AssembleGradYFunc(pI, pJ, pV, CAST(prhs[1]),
 			CAST(prhs[2]), CAST(prhs[3]),
 			CAST(prhs[4]), CAST(prhs[5]),
 			CAST(prhs[6]), CAST(prhs[7]));
