@@ -10,7 +10,6 @@ methods
   end
 
   function delete(this)
-  %DELETE Destructor.
     AssemblerExtension_('delete', this.id_);
   end
   
@@ -21,6 +20,10 @@ methods
   
   function [I, J ,V] = assemble_ex_grad_y_func(this, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern)
      [I, J, V] =  AssemblerExtension_('assemex_gradfunc_y',  this.id_, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern);
+  end
+  
+  function [I, J ,V, W] = assemble_ex_grad_xy_func(this, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern_x, extern_y)
+     [I, J, V, W] =  AssemblerExtension_('assemex_gradfunc_xy',  this.id_, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern_x, extern_y);
   end
   
   

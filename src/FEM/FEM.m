@@ -28,8 +28,15 @@ classdef FEM < handle
     end
     
     methods
-        function this = FEM(edge_points, pml, prec, min_area)
-            this.Ref_mesh = Mesh([0 0 1 0 0 1]', [],  0.5);
+        function this = FEM(edge_points, prec, min_area, PML)
+            
+            if nargin == 3
+                
+                PML = [];
+                
+            end
+            
+            this.Ref_mesh = Mesh([0 0 1 0 0 1]', 0.5);
             [this.Ref_points, ~, ~, ~] = this.Ref_mesh.promote(prec);
             
             this.Assembler = Assembler();
@@ -45,9 +52,9 @@ classdef FEM < handle
                 this.Assembler.reference1D(prec, this.Edge.Qnodes);
               
             if size(edge_points,2) ~= 1
-            	this.Mesh =  Mesh(edge_points', pml', min_area);
+            	this.Mesh =  Mesh(edge_points', min_area, PML');
             else
-            	this.Mesh =  Mesh(edge_points, pml, min_area);
+            	this.Mesh =  Mesh(edge_points, min_area, PML);
             end
             [this.Num_nodes, this.Num_elems, this.Num_edges] = ...
                 this.Mesh.export();

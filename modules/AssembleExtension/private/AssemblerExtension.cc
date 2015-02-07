@@ -82,7 +82,6 @@ void AssemblerExtension::AssembleGradXFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 	}//end if
 	else {
 		mexErrMsgTxt("Error:AssemberExtension:GradXFunc:Dimension does not match.\n");
-		mexErrMsgTxt("Not implemented yet...\n");
 	}
 }
 
@@ -147,12 +146,90 @@ void AssemblerExtension::AssembleGradYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 		}//end for
 	}//end if
 	else {
-		mexErrMsgTxt("Error:AssemberExtension:GradXFunc:Dimension does not match.\n");
-		mexErrMsgTxt("Not implemented yet...\n");
+		mexErrMsgTxt("Error:AssemberExtension:GradYFunc:Dimension does not match.\n");
 	}
 }
 
-// todo: try to do integration on int  A(\nabla phi) \psi to make the calls into one.
+
+void AssemblerExtension::AssembleGradXYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV,Real_t* &pW,
+		MatlabPtr Nodes, MatlabPtr Elems, MatlabPtr Ref, MatlabPtr RefX,MatlabPtr RefY,
+		MatlabPtr Weights, MatlabPtr Fcn_X, MatlabPtr Fcn_Y){
+
+	auto  pnodes_ptr           = mxGetPr(Nodes);
+	auto  pelem_ptr            = (int32_t*)mxGetPr(Elems);
+	auto  reference            = mxGetPr(Ref);
+	auto  referenceX           = mxGetPr(RefX);
+	auto  referenceY           = mxGetPr(RefY);
+	auto  weights              = mxGetPr(Weights);
+	auto  Interp_X             = mxGetPr(Fcn_X);
+	auto  Interp_Y             = mxGetPr(Fcn_Y);
+
+	auto numberofelem           = mxGetN(Elems);
+	auto numberofnodesperelem   = mxGetM(Elems);
+	auto numberofqnodes         = mxGetN(Ref);
+
+
+	mwSize vertex_1, vertex_2 , vertex_3;
+	Real_t det, area;
+	Real_t Jacobian[2][2];
+
+
+	// evaluate Fcn at all quadrature nodes before calculation
+	if (mxGetNumberOfElements(Fcn_X) == numberofelem*numberofqnodes &&
+			mxGetNumberOfElements(Fcn_Y) == numberofelem*numberofqnodes ){
+
+		for (size_t i =0; i < numberofelem; i++){
+
+			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+			vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+			vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+
+
+			Jacobian[0][0] = pnodes_ptr[2*vertex_3 + 1] - pnodes_ptr[2*vertex_1 + 1];
+			Jacobian[1][1] = pnodes_ptr[2*vertex_2    ] - pnodes_ptr[2*vertex_1    ];
+			Jacobian[0][1] = pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1];
+			Jacobian[1][0] = pnodes_ptr[2*vertex_1    ] - pnodes_ptr[2*vertex_3    ];
+
+			det = Jacobian[0][0] * Jacobian[1][1] - Jacobian[0][1] * Jacobian[1][0];
+
+			area = 0.5*fabs(det);
+
+
+			for (size_t j = 0; j < numberofnodesperelem; j++){
+				for (size_t k = 0; k < numberofnodesperelem; k++){
+					*pI = pelem_ptr[i*numberofnodesperelem + j];
+					*pJ = pelem_ptr[i*numberofnodesperelem + k];
+					*pV = 0.;
+					*pW = 0.;
+					for (size_t l = 0; l < numberofqnodes; l++){
+
+
+						*pV = *pV + Interp_X[i*numberofqnodes + l] *
+						           (Jacobian[0][0]*referenceX[j+ l*numberofnodesperelem] +
+						            Jacobian[0][1]*referenceY[j+ l*numberofnodesperelem])
+									* reference[k+ l*numberofnodesperelem]*
+									weights[l];
+
+						*pW = *pW + Interp_Y[i*numberofqnodes + l] *
+								(Jacobian[1][0]*referenceX[j+ l*numberofnodesperelem] +
+								 Jacobian[1][1]*referenceY[j+ l*numberofnodesperelem])
+								* reference[k+ l*numberofnodesperelem]*
+								weights[l];
+
+					}
+					*pV  = (*pV)/2.0;
+					*pW  = (*pW)/2.0;
+					pI++; pJ++; pV++;pW++;
+				}
+			}
+		}//end for
+	}//end if
+	else {
+		mexErrMsgTxt("Error:AssemberExtension:GradYFunc:Dimension does not match.\n");
+	}
+}
+
+
 
 }
 
@@ -225,5 +302,34 @@ MEX_DEFINE(assemex_gradfunc_y)  (int nlhs, mxArray* plhs[], int nrhs, const mxAr
 			CAST(prhs[4]), CAST(prhs[5]),
 			CAST(prhs[6]), CAST(prhs[7]));
 }
+
+MEX_DEFINE(assemex_gradfunc_xy)  (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
+	InputArguments input(nrhs, prhs, 9);
+	OutputArguments output(nlhs, plhs, 4);
+	AssemblerExtension* assembler_ex = Session<AssemblerExtension>::get(input.get(0));
+
+	size_t numberofelem           = mxGetN(prhs[2]);
+	size_t numberofnodesperelem   = mxGetM(prhs[2]);
+	size_t numberofqnodes         = mxGetM(prhs[3]);
+
+
+	plhs[0] = mxCreateNumericMatrix(numberofnodesperelem * numberofnodesperelem * numberofelem, 1,  mxDOUBLE_CLASS, mxREAL);
+	Real_t* pI = mxGetPr(plhs[0]);
+
+	plhs[1] = mxCreateNumericMatrix(numberofnodesperelem * numberofnodesperelem * numberofelem, 1,  mxDOUBLE_CLASS, mxREAL);
+	Real_t* pJ = mxGetPr(plhs[1]);
+
+	plhs[2] = mxCreateNumericMatrix(numberofnodesperelem * numberofnodesperelem * numberofelem, 1, mxDOUBLE_CLASS, mxREAL);
+	Real_t* pV = mxGetPr(plhs[2]);
+
+	plhs[3] = mxCreateNumericMatrix(numberofnodesperelem * numberofnodesperelem * numberofelem, 1, mxDOUBLE_CLASS, mxREAL);
+	Real_t* pW = mxGetPr(plhs[3]);
+
+	assembler_ex->AssembleGradXYFunc(pI, pJ, pV, pW, CAST(prhs[1]),
+			CAST(prhs[2]), CAST(prhs[3]),
+			CAST(prhs[4]), CAST(prhs[5]),
+			CAST(prhs[6]), CAST(prhs[7]),CAST(prhs[8]));
+}
+
 }
 MEX_DISPATCH

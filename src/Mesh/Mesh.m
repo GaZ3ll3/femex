@@ -5,9 +5,13 @@ properties (Access = private)
 end
 
 methods
-function this = Mesh(boundary, pml,  min_area)
+function this = Mesh(boundary, min_area, PML)
   assert(isnumeric(boundary));
-  this.id_ = Mesh_('new', boundary, pml,  min_area);
+  if nargin == 2
+  	this.id_ = Mesh_('new', boundary, [],  min_area);
+  else
+    this.id_ = Mesh_('new', boundary, PML,  min_area);
+  end
 end
 
 function delete(this)
