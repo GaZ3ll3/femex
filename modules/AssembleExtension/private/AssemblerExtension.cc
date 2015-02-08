@@ -81,7 +81,40 @@ void AssemblerExtension::AssembleGradXFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 		}//end for
 	}//end if
 	else {
-		mexErrMsgTxt("Error:AssemberExtension:GradXFunc:Dimension does not match.\n");
+		for (size_t i =0; i < numberofelem; i++){
+
+			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+			vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+			vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+
+
+			Jacobian[0][0] = pnodes_ptr[2*vertex_3 + 1] - pnodes_ptr[2*vertex_1 + 1];
+			Jacobian[1][1] = pnodes_ptr[2*vertex_2    ] - pnodes_ptr[2*vertex_1    ];
+			Jacobian[0][1] = pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1];
+			Jacobian[1][0] = pnodes_ptr[2*vertex_1    ] - pnodes_ptr[2*vertex_3    ];
+
+			det = Jacobian[0][0] * Jacobian[1][1] - Jacobian[0][1] * Jacobian[1][0];
+
+			area = 0.5*fabs(det);
+
+
+			for (size_t j = 0; j < numberofnodesperelem; j++){
+				for (size_t k = 0; k < numberofnodesperelem; k++){
+					*pI = pelem_ptr[i*numberofnodesperelem + j];
+					*pJ = pelem_ptr[i*numberofnodesperelem + k];
+					*pV = 0.;
+					for (size_t l = 0; l < numberofqnodes; l++){
+						*pV = *pV +
+						           (Jacobian[0][0]*referenceX[j+ l*numberofnodesperelem] +
+						            Jacobian[0][1]*referenceY[j+ l*numberofnodesperelem])
+									* reference[k+ l*numberofnodesperelem]*
+									weights[l];
+					}
+					*pV  = *(Interp)*(*pV)/2.0;
+					pI++; pJ++; pV++;
+				}
+			}
+		}//end for
 	}
 }
 
@@ -146,7 +179,40 @@ void AssemblerExtension::AssembleGradYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV
 		}//end for
 	}//end if
 	else {
-		mexErrMsgTxt("Error:AssemberExtension:GradYFunc:Dimension does not match.\n");
+		for (size_t i =0; i < numberofelem; i++){
+
+			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+			vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+			vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+
+
+			Jacobian[0][0] = pnodes_ptr[2*vertex_3 + 1] - pnodes_ptr[2*vertex_1 + 1];
+			Jacobian[1][1] = pnodes_ptr[2*vertex_2    ] - pnodes_ptr[2*vertex_1    ];
+			Jacobian[0][1] = pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1];
+			Jacobian[1][0] = pnodes_ptr[2*vertex_1    ] - pnodes_ptr[2*vertex_3    ];
+
+			det = Jacobian[0][0] * Jacobian[1][1] - Jacobian[0][1] * Jacobian[1][0];
+
+			area = 0.5*fabs(det);
+
+
+			for (size_t j = 0; j < numberofnodesperelem; j++){
+				for (size_t k = 0; k < numberofnodesperelem; k++){
+					*pI = pelem_ptr[i*numberofnodesperelem + j];
+					*pJ = pelem_ptr[i*numberofnodesperelem + k];
+					*pV = 0.;
+					for (size_t l = 0; l < numberofqnodes; l++){
+						*pV = *pV +
+								(Jacobian[1][0]*referenceX[j+ l*numberofnodesperelem] +
+								 Jacobian[1][1]*referenceY[j+ l*numberofnodesperelem])
+								* reference[k+ l*numberofnodesperelem]*
+								weights[l];
+					}
+					*pV  = *(Interp)*(*pV)/2.0;
+					pI++; pJ++; pV++;
+				}
+			}
+		}//end for
 	}
 }
 
@@ -225,7 +291,51 @@ void AssemblerExtension::AssembleGradXYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &p
 		}//end for
 	}//end if
 	else {
-		mexErrMsgTxt("Error:AssemberExtension:GradYFunc:Dimension does not match.\n");
+		for (size_t i =0; i < numberofelem; i++){
+
+			vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+			vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+			vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+
+
+			Jacobian[0][0] = pnodes_ptr[2*vertex_3 + 1] - pnodes_ptr[2*vertex_1 + 1];
+			Jacobian[1][1] = pnodes_ptr[2*vertex_2    ] - pnodes_ptr[2*vertex_1    ];
+			Jacobian[0][1] = pnodes_ptr[2*vertex_1 + 1] - pnodes_ptr[2*vertex_2 + 1];
+			Jacobian[1][0] = pnodes_ptr[2*vertex_1    ] - pnodes_ptr[2*vertex_3    ];
+
+			det = Jacobian[0][0] * Jacobian[1][1] - Jacobian[0][1] * Jacobian[1][0];
+
+			area = 0.5*fabs(det);
+
+
+			for (size_t j = 0; j < numberofnodesperelem; j++){
+				for (size_t k = 0; k < numberofnodesperelem; k++){
+					*pI = pelem_ptr[i*numberofnodesperelem + j];
+					*pJ = pelem_ptr[i*numberofnodesperelem + k];
+					*pV = 0.;
+					*pW = 0.;
+					for (size_t l = 0; l < numberofqnodes; l++){
+
+
+						*pV = *pV +
+						           (Jacobian[0][0]*referenceX[j+ l*numberofnodesperelem] +
+						            Jacobian[0][1]*referenceY[j+ l*numberofnodesperelem])
+									* reference[k+ l*numberofnodesperelem]*
+									weights[l];
+
+						*pW = *pW +
+								(Jacobian[1][0]*referenceX[j+ l*numberofnodesperelem] +
+								 Jacobian[1][1]*referenceY[j+ l*numberofnodesperelem])
+								* reference[k+ l*numberofnodesperelem]*
+								weights[l];
+
+					}
+					*pV  = *(Interp_X)*(*pV)/2.0;
+					*pW  = *(Interp_Y)*(*pW)/2.0;
+					pI++; pJ++; pV++;pW++;
+				}
+			}
+		}//end for
 	}
 }
 

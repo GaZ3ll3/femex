@@ -124,6 +124,7 @@ $(SVR)%_.mexa64: %.svr.o
 ##########
 
 MOD = modules/
+
 ASE= $(MOD)AssembleExtension/private/
 ASE_SRCS = $(wildcard $(ASE)*.cc)
 ASE_OBJS = $(patsubst $(ASE)%.cc, %.ase.o, $(ASE_SRCS))
@@ -135,7 +136,17 @@ ASE_BINS = $(patsubst $(ASE)%.cc, $(ASE)%_.mexa64, $(ASE_SRCS))
 $(ASE)%_.mexa64: %.ase.o 
 	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 
+###########
+MSE= $(MOD)MeshExtension/private/
+MSE_SRCS = $(wildcard $(MSE)*.cc)
+MSE_OBJS = $(patsubst $(MSE)%.cc, %.mse.o, $(MSE_SRCS))
+MSE_BINS = $(patsubst $(MSE)%.cc, $(MSE)%_.mexa64, $(MSE_SRCS))
 
+%.mse.o: $(MSE)%.cc
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
+
+$(MSE)%_.mexa64: %.mse.o 
+	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 
 ##############################################################
 # ILUPACK make
@@ -159,9 +170,13 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 
 ##############################################################	
 # The action starts here.
-all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(SVR_BINS) $(ASE_BINS) $(ILUPACK_BINS)
+all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(SVR_BINS) \
+     $(ASE_BINS) $(MSE_BINS) $(ILUPACK_BINS)
 
-ase: $(ASE_BINS)
+module: $(ASE_BINS) $(MSE_BINS)
+
+distclean:
+	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(ASE)*_.mexa64 $(MSE)*_.mexa64 $(TRIANGLELIB)triangle.o $(ILUPACK_PATH)*.mexa64 
 
 clean:
-	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(ASE)*_.mexa64 $(TRIANGLELIB)triangle.o $(ILUPACK_PATH)*.mexa64 
+	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(ASE)*_.mexa64 $(MSE)*_.mexa64 $(TRIANGLELIB)triangle.o

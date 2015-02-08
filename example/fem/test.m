@@ -4,7 +4,7 @@ function  [fem, neumann] = test(prec, min_area)
 
 addpath(genpath('~/Documents/github/femex'));
 
-fem = FEM([0 0 1 0 1 1 0 1]', [-0.25 -0.25 1.25 -0.25 1.25 1.25 -0.25 1.25]', prec, min_area);
+fem = FEM([0 0 1 0 1 1 0 1]', prec, min_area, [-0.25 -0.25 1.25 -0.25 1.25 1.25 -0.25 1.25]');
 
 N = size(fem.Promoted.nodes, 2);
 numofnodes = fem.Num_nodes;

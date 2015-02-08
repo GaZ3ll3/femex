@@ -10,10 +10,7 @@
 namespace MEX {
 
 Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _PML, MatlabPtr _Area) noexcept{
-	/*
-	 * there are n - 1 delimiters in array
-	 *
-	 */
+
 	min_area            = *Matlab_Cast<Real_t>(_Area);
 	auto _BoundaryPtr   = Matlab_Cast<Real_t>(_Boundary);
 	auto _BoundarySize  = mxGetM(_Boundary)/2;
