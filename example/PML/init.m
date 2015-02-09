@@ -1,8 +1,8 @@
 function hobj = init(prec, min_area)
 
 
-L = 0.3;
-sigma0 = 60;
+L = 0.1;
+sigma0 = 80;
 
 hobj.fem = FEM([-0.5, -.5, .5, -.5, .5, .5, -.5, .5]', ...
     prec, min_area, [-0.5-L, -0.5-L, .5+L, -.5-L, .5+L, .5+L, -.5-L, .5+L]');

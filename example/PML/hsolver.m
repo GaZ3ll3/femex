@@ -50,7 +50,7 @@ z0 = zeros(length, 1);
 
     function theta = g(t)
         
-        f0 = 15;
+        f0 = 10;
         theta = zeros(length, 1);
         theta(n) = ...
             -exp(-pi^2 * (f0 * t - 1)^2) * ...
