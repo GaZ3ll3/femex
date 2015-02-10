@@ -26,6 +26,10 @@ methods
      [I, J, V, W] =  AssemblerExtension_('assemex_gradfunc_xy',  this.id_, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern_x, extern_y);
   end
   
+  function [I, J ,V] = assemble_ex_load_matrix(this, pnodes, pelems, ref, weights, extern)
+     [I, J, V] =  AssemblerExtension_('assemex_lm',  this.id_, pnodes, pelems, ref, weights, extern);
+  end
+  
   
 end
 

@@ -1,4 +1,4 @@
-function show(h, Y)
+function pml_show(h, Y)
 
 timestep = size(Y, 1);
 

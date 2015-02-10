@@ -337,6 +337,64 @@ void AssemblerExtension::AssembleGradXYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &p
 			}
 		}//end for
 	}
+}//end all
+
+// build matrix form of load vector.
+void AssemblerExtension::AssembleLoadMatrix(Real_t*& pI, Real_t*& pJ, Real_t*& pV, MatlabPtr Nodes,
+		MatlabPtr Elems,MatlabPtr Ref,
+		MatlabPtr Weights, MatlabPtr Fcn){
+
+	auto  pnodes_ptr           = mxGetPr(Nodes);
+//	auto  qnodes_ptr           = mxGetPr(QNodes);
+	auto  pelem_ptr            = (int32_t*)mxGetPr(Elems);
+	auto  reference            = mxGetPr(Ref);
+	auto  weights              = mxGetPr(Weights);
+	auto  Interp               = mxGetPr(Fcn);
+
+	auto numberofelem           = mxGetN(Elems);
+	auto numberofnodesperelem   = mxGetM(Elems);
+	auto numberofqnodes         = mxGetN(Ref);
+
+
+	mwSize vertex_1, vertex_2 , vertex_3;
+	Real_t det, area, tmp;
+
+
+	auto Fcn_ptr = Matlab_Cast<Real_t>(Fcn);
+	// linear interpolation
+	for (size_t i =0; i < numberofelem; i++){
+
+		vertex_1 = pelem_ptr[numberofnodesperelem*i] - 1;
+		vertex_2 = pelem_ptr[numberofnodesperelem*i + 1] - 1;
+		vertex_3 = pelem_ptr[numberofnodesperelem*i + 2] - 1;
+
+		det = (pnodes_ptr[vertex_2*2] - pnodes_ptr[vertex_1*2])*(pnodes_ptr[vertex_3*2 + 1] - pnodes_ptr[vertex_1*2 + 1]) -
+				(pnodes_ptr[vertex_2*2 + 1] - pnodes_ptr[vertex_1*2 + 1])*(pnodes_ptr[vertex_3*2] - pnodes_ptr[vertex_1*2]);
+		area = 0.5*fabs(det);
+
+		if(mxGetNumberOfElements(Fcn) == numberofqnodes * numberofelem) {
+
+			for (size_t j = 0; j < numberofnodesperelem; j++) {
+				tmp = 0.;
+				for (size_t l = 0; l < numberofqnodes; l++) {
+					tmp +=  Fcn_ptr[i*numberofqnodes + l]*reference[j+ l*numberofnodesperelem]*weights[l];
+				}
+
+				// which node
+				*pI = pelem_ptr[i*numberofnodesperelem + j];
+				// which element
+				*pJ = (i + 1);
+				// value
+				*pV = tmp * area;
+
+				pI++;pJ++;pV++;
+
+			}
+		}
+		else {
+			mexErrMsgTxt("AssemblerExtension::AssembleLoadMatrix::Dimension does not match.\n");
+		}
+	}
 }
 
 
@@ -440,6 +498,35 @@ MEX_DEFINE(assemex_gradfunc_xy)  (int nlhs, mxArray* plhs[], int nrhs, const mxA
 			CAST(prhs[4]), CAST(prhs[5]),
 			CAST(prhs[6]), CAST(prhs[7]),CAST(prhs[8]));
 }
+
+MEX_DEFINE(assemex_lm) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 6);
+	OutputArguments output(nlhs, plhs, 3);
+	AssemblerExtension* assembler_ex = Session<AssemblerExtension>::get(input.get(0));
+
+	auto numberofnodesperelem = mxGetM(prhs[2]);
+	auto numberofelem    =  mxGetN(prhs[2]);
+
+
+//	MatlabPtr Nodes,
+//			MatlabPtr QNodes, MatlabPtr Elems,MatlabPtr Ref,
+//			MatlabPtr Weights, MatlabPtr Fcn
+
+	plhs[0] = mxCreateNumericMatrix(numberofnodesperelem * numberofelem , 1,  mxDOUBLE_CLASS, mxREAL);
+	Real_t* pI = mxGetPr(plhs[0]);
+
+	plhs[1] = mxCreateNumericMatrix(numberofnodesperelem * numberofelem , 1,  mxDOUBLE_CLASS, mxREAL);
+	Real_t* pJ = mxGetPr(plhs[1]);
+
+	plhs[2] = mxCreateNumericMatrix(numberofnodesperelem * numberofelem, 1, mxDOUBLE_CLASS, mxREAL);
+	Real_t* pV = mxGetPr(plhs[2]);
+
+	assembler_ex->AssembleLoadMatrix(pI, pJ, pV, CAST(prhs[1]),
+			CAST(prhs[2]), CAST(prhs[3]),
+			CAST(prhs[4]), CAST(prhs[5]));
+
+}
+
 
 }
 MEX_DISPATCH

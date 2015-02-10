@@ -1,0 +1,26 @@
+function [RHS] = focus_diffusive(hobj, Energy)
+
+dofs = hobj.dofs;
+ndofs = hobj.ndofs;
+
+interp_energy = hobj.sigma * focus_mapping(Energy, hobj.fem.Promoted.elems, hobj.fem.Facet.Ref');
+
+
+[I, J ,V] = hobj.ase.assemble_ex_load_matrix(hobj.fem.Promoted.nodes, hobj.fem.Promoted.elems, hobj.fem.Facet.Ref, hobj.fem.Facet.Weights, interp_energy);
+
+Ref = sparse(I, J ,V);
+
+
+Kernel = hobj.S + hobj.mu_a * hobj.M -0.5 * hobj.Q;
+
+solution = Kernel\(Ref * hobj.rho);
+
+RHS = solution(ndofs);
+
+G = (Kernel(ndofs, ndofs) - Kernel(ndofs, dofs) * (Kernel(dofs, dofs)\Kernel(dofs, ndofs)));
+
+
+LHS = G\(Ref(ndofs, :) - Kernel(ndofs, dofs))
+
+end
+

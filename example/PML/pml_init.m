@@ -1,6 +1,6 @@
-function hobj = init(prec, min_area)
+function hobj = pml_init(prec, min_area)
 
-
+addpath(genpath('~/Documents/github/femex'));
 L = 0.1;
 sigma0 = 80;
 

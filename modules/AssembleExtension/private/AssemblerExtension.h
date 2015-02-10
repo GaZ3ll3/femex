@@ -58,6 +58,15 @@ public:
 			MatlabPtr Nodes, MatlabPtr Elems, MatlabPtr Ref, MatlabPtr RefX,MatlabPtr RefY,
 			MatlabPtr Weights, MatlabPtr Fcn_X, MatlabPtr Fcn_Y);
 
+
+
+	/*
+	 * load matrix
+	 */
+	void AssembleLoadMatrix(Real_t*& pI, Real_t*& pJ, Real_t*& pV, MatlabPtr Nodes,
+			 MatlabPtr Elems,MatlabPtr Ref,
+			MatlabPtr Weights, MatlabPtr Fcn);
+
 };
 
 }

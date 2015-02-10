@@ -1,4 +1,4 @@
-function [T, Y] = hsolver(hobj,U0, Ut0, n)
+function [T, Y] = pml_solver(hobj,U0, Ut0, n)
 
 
 length = size(hobj.fem.Promoted.nodes, 2);
