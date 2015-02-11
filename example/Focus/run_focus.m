@@ -1,11 +1,11 @@
-function [lhs, rhs] = run_focus()
+function run_focus()
 
-h = focus_init(1, 1/3200, 0.2, 50);
+[h, t] = focus_init(1, 1/9000, 0.2, 50);
 
 constrains = size(h.ndofs, 1);
 freedom = size(h.fem.Promoted.elems, 2);
 
-numberofeqn = ceil(0.2 * freedom/constrains);
+numberofeqn = ceil(0.3 * freedom/constrains);
 
 fprintf('%d measurements needed.\n', numberofeqn);
 
@@ -23,6 +23,23 @@ for i = 1:numberofeqn
     [lhs((i - 1) * constrains + 1 : i * constrains, :), rhs( (i - 1) * constrains + 1: i * constrains )] = focus_diffusive(h, e);
     
 end
+
+
+cvx_begin
+    variable x(size(lhs, 2))
+    minimize( norm( x, 2 ) )
+    subject to
+    lhs * x == rhs
+    x >= 0
+    x <= 1
+cvx_end
+
+
+u = zeros(size(x ,1), 1);
+u(t) = 1.0;
+
+fprintf('Error with target is %6.8f.\n',norm(x - u) );
+
 
 
 % res = lhs \ rhs;

@@ -1,4 +1,4 @@
-function hobj = focus_init(prec, min_area, sigma, freq)
+function [hobj, t] = focus_init(prec, min_area, sigma, freq)
 % initialize all setups, without any PML.
 
 
@@ -23,7 +23,7 @@ temp_ind = randi(size(hobj.fem.Promoted.elems, 2), 15, 1);
 hobj.rho = zeros(size(hobj.fem.Promoted.elems, 2), 1);
 hobj.rho(temp_ind) = 1;
 
-disp(temp_ind)
+t = temp_ind;
 
 
 hobj.M = hobj.fem.assema(1);
