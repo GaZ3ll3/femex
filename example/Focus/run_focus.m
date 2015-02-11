@@ -6,7 +6,7 @@ constrains = size(h.ndofs, 1);
 freedom = size(h.fem.Promoted.elems, 2);
 
 
-numberofeqn = 3 * ceil(freedom/constrains);
+numberofeqn = ceil(2.3 * freedom/constrains);
 
 fprintf('%d measurements needed.\n', numberofeqn);
 

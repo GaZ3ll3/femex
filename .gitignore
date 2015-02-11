@@ -41,6 +41,7 @@
 src/Solver/agmg
 src/Solver/ma57-3.9.0
 src/Solver/hsl_mi20-1.6.0
+src/Solver/cvx
 # settings
 .settings/
 .cproject
