@@ -9,7 +9,9 @@ for i = 1:l
     n = i;
     end
 end
+tic;
 disp('begin');
 [T, Y] = pml_solver(h, u0, ut0, n);
 disp('end');
+toc;
 pml_show(h, Y)

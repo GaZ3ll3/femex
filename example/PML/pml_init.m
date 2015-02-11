@@ -1,7 +1,7 @@
 function hobj = pml_init(prec, min_area)
 
 addpath(genpath('~/Documents/github/femex'));
-L = 0.1;
+L = 0.2;
 sigma0 = 80;
 
 hobj.fem = FEM([-0.5, -.5, .5, -.5, .5, .5, -.5, .5]', ...

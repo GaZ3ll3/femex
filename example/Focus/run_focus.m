@@ -1,11 +1,11 @@
 function run_focus()
 
-[h, t] = focus_init(1, 1/9000, 0.2, 50);
+[h, t] = focus_init(1, 1/5000, 0.2, 50);
 
 constrains = size(h.ndofs, 1);
 freedom = size(h.fem.Promoted.elems, 2);
 
-numberofeqn = ceil(0.3 * freedom/constrains);
+numberofeqn = ceil(0.25 * freedom/constrains);
 
 fprintf('%d measurements needed.\n', numberofeqn);
 
@@ -24,7 +24,7 @@ for i = 1:numberofeqn
     
 end
 
-
+cvx_quiet(true);
 cvx_begin
     variable x(size(lhs, 2))
     minimize( norm( x, 2 ) )
