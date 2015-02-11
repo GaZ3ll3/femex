@@ -17,6 +17,8 @@ ILUPACK is already included for a choice of solvers.
 
 How to use:
 -----------
+* Back up Matlab's out-of-date ``libstdc++`` dynamic library files, try to use system's library.
+
 * Modify ``Makefile.in`` to set ``MATLAB_ROOT`` to the directory which includes ``bin``.
 
 * Simply add femex directory to current workspace path.

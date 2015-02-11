@@ -17,7 +17,13 @@ hobj.mu_a = 0.3;
 
 
 % piecewise constant
-hobj.rho = ones(size(hobj.fem.Promoted.elems, 2), 1);
+
+
+temp_ind = randi(size(hobj.fem.Promoted.elems, 2), 15, 1);
+hobj.rho = zeros(size(hobj.fem.Promoted.elems, 2), 1);
+hobj.rho(temp_ind) = 1;
+
+disp(temp_ind)
 
 
 hobj.M = hobj.fem.assema(1);

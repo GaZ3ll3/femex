@@ -5,8 +5,7 @@ h = focus_init(1, 1/3200, 0.2, 50);
 constrains = size(h.ndofs, 1);
 freedom = size(h.fem.Promoted.elems, 2);
 
-
-numberofeqn = ceil(2.3 * freedom/constrains);
+numberofeqn = ceil(0.2 * freedom/constrains);
 
 fprintf('%d measurements needed.\n', numberofeqn);
 
