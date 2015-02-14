@@ -9,11 +9,22 @@ w0 = zeros(length, 1);
 z0 = zeros(length, 1);
 
 % solve dy/dt = f(y), using RK4
-[T, Y] = ode45(@rigid, [0, 1], [u0;v0;w0;z0]); 
+
+opt=[];
+opt.RelTol=1e-3;opt.AbsTol=1e-6;
+
+
+% [T, Y, ~]=dopri5Mex(@rigid,[0, 0.5, 1],[u0; v0; w0; z0],opt);
+% [T, Y, ~]=dop853Mex(@rigid,[0, 0.5, 1],[u0; v0; w0; z0],opt);
+
+options = odeset('RelTol', 1e-3, 'AbsTol', 1e-6, 'NormControl', 'on');
+
+% [T, Y] = ode45(@rigid, [0, 0.5, 1], [u0;v0;w0;z0], options); 
+[T, Y] = ode113(@rigid, [0, 0.5, 1], [u0;v0;w0;z0], options); 
 
 
     function dy = rigid(t, y)
-        
+      
         dy = zeros(4 * length, 1);
         
         u = y(1:length);
@@ -46,6 +57,11 @@ z0 = zeros(length, 1);
         v = tmp(:, 1);
         w = tmp(:, 2);
         z = tmp(:, 3);
+
+% with overheads
+%         v = hobj.M\v;
+%         w = hobj.M\w;
+%         z = hobj.M\z;
     end
 
     function theta = g(t)
@@ -58,6 +74,10 @@ z0 = zeros(length, 1);
         
     end
 
+
+    function ret = massfcn(t, y)
+        ret = blkdiag(hobj.M, hobj.M,hobj.M, hobj.M);
+    end
 
 
 end
