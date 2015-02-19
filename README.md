@@ -17,6 +17,8 @@ ILUPACK is already included for a choice of solvers.
 
 How to use:
 -----------
+* For those who hadn't change the default gcc/gfortran .so files within Matlab, you should PRELOAD the system's gcc/gfortran libs first before starting Matlab.
+
 * Back up Matlab's out-of-date ``libstdc++`` dynamic library files, try to use system's library.
 
 * Modify ``Makefile.in`` to set ``MATLAB_ROOT`` to the directory which includes ``bin``.

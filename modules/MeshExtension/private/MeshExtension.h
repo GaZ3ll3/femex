@@ -38,7 +38,6 @@ public:
 	 * extract indices for the thin layer
 	 */
 	std::vector<size_t> layer;
-
 	void LayerElementsIndex(MatlabPtr Nodes, MatlabPtr Elems, MatlabPtr Interior);
 };
 
