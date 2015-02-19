@@ -1,5 +1,7 @@
-femex v.1.2.1
+femex v.1.2.1 
 =============
+
+WARNING: femex 1.2.1 will be not maintained. upgraded version femex2 will replace the current version.
 
 Research use for coding with PDE/FEM in 2D. Tested on Matlab 2013a with gcc-4.8 and gfortran-4.4.
 
