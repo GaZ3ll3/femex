@@ -161,9 +161,9 @@ void Mesh::Promote(int32_t _deg) noexcept{
 
 		topology.neighbors.resize(3 * _meshdata.numberoftriangles);
 		for (int32_t i = 0; i < _meshdata.numberoftriangles; i++) {
-			topology.neighbors[3 * i] = _meshdata.neighborlist[3 * i] + 1;
-			topology.neighbors[3 * i + 1] = _meshdata.neighborlist[3 * i + 1] + 1;
-			topology.neighbors[3 * i + 2] = _meshdata.neighborlist[3 * i + 2] + 1;
+			topology.neighbors[3 * i] = _meshdata.neighborlist[3 * i] ;
+			topology.neighbors[3 * i + 1] = _meshdata.neighborlist[3 * i + 1];
+			topology.neighbors[3 * i + 2] = _meshdata.neighborlist[3 * i + 2];
 		}
 
 		/*
@@ -464,6 +464,8 @@ MEX_DEFINE(promote)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 	mexCallMATLAB(1, &plhs[3], 2, temp_3, "plus");
 	plhs[4] = mxCreateNumericMatrix(3, mesh->topology.neighbors.size()/3, mxINT32_CLASS, mxREAL);
 	memcpy(mxGetPr(plhs[4]), &mesh->topology.neighbors[0], mesh->topology.neighbors.size()*sizeof(int));
+	MatlabPtr temp_4[] = {plhs[4], mxCreateDoubleScalar(1.0)};
+	mexCallMATLAB(1, &plhs[4], 2, temp_4, "plus");
 }
 
 
