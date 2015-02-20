@@ -137,16 +137,6 @@ $(ASE)%_.mexa64: %.ase.o
 	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 
 ###########
-MSE= $(MOD)MeshExtension/private/
-MSE_SRCS = $(wildcard $(MSE)*.cc)
-MSE_OBJS = $(patsubst $(MSE)%.cc, %.mse.o, $(MSE_SRCS))
-MSE_BINS = $(patsubst $(MSE)%.cc, $(MSE)%_.mexa64, $(MSE_SRCS))
-
-%.mse.o: $(MSE)%.cc
-	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
-
-$(MSE)%_.mexa64: %.mse.o 
-	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 
 ##############################################################
 # ILUPACK make

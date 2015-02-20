@@ -86,6 +86,36 @@ public:
 	void Qnodes1D(Real_t*& Coords, MatlabPtr Nodes, MatlabPtr QNodes, MatlabPtr Edges);
 
 
+	// modules
+	/*
+	 * integral on int \phi_i_x \phi_j
+	 */
+	void AssembleGradXFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV,
+			MatlabPtr Nodes, MatlabPtr Elems, MatlabPtr Ref, MatlabPtr RefX,MatlabPtr RefY,
+			MatlabPtr Weights, MatlabPtr Fcn);
+	/*
+	 * integral on int \phi_i_y \phi_j
+	 */
+	void AssembleGradYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV,
+			MatlabPtr Nodes, MatlabPtr Elems, MatlabPtr Ref, MatlabPtr RefX, MatlabPtr RefY,
+			MatlabPtr Weights, MatlabPtr Fcn);
+	/*
+	 * combine them all
+	 */
+	void AssembleGradXYFunc(Real_t* &pI, Real_t* &pJ, Real_t* &pV,Real_t* &pW,
+			MatlabPtr Nodes, MatlabPtr Elems, MatlabPtr Ref, MatlabPtr RefX,MatlabPtr RefY,
+			MatlabPtr Weights, MatlabPtr Fcn_X, MatlabPtr Fcn_Y);
+
+
+
+	/*
+	 * load matrix
+	 */
+	void AssembleLoadMatrix(Real_t*& pI, Real_t*& pJ, Real_t*& pV, MatlabPtr Nodes,
+			 MatlabPtr Elems,MatlabPtr Ref,
+			MatlabPtr Weights, MatlabPtr Fcn);
+
+
 };
 
 #endif /* ASSEMBLER_PRIVATE_ASSEMBLER_C_ */
