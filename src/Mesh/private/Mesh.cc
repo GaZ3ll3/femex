@@ -81,7 +81,7 @@ Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _PML, MatlabPtr _Area) noexcept{
 	/*
 	 * Coarse meshing
 	 */
-	triangulate("pcz", &input, &mid, (struct triangulateio *) nullptr);
+	triangulate("pczQ", &input, &mid, (struct triangulateio *) nullptr);
 	/*
 	 * Fine meshing
 	 */
@@ -94,11 +94,12 @@ Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _PML, MatlabPtr _Area) noexcept{
 	_meshdata.edgelist = (int *) nullptr;
 	_meshdata.edgemarkerlist = (int *) nullptr;
 	_meshdata.segmentlist = (int *) nullptr;
+	_meshdata.neighborlist = (int *) nullptr;
 
 	/*
 	 * minimum angle chosen as 30 degrees now. should be adjusted.
 	 */
-	triangulate(const_cast<char*>(("prq30.0a" + std::to_string(min_area) + "ezBC").c_str()), &mid, &_meshdata, (struct triangulateio *) nullptr);
+	triangulate(const_cast<char*>(("prqQ34.0a" + std::to_string(min_area) + "eznBC").c_str()), &mid, &_meshdata, (struct triangulateio *) nullptr);
 
 	free(input.pointlist);
 	free(input.pointmarkerlist);
