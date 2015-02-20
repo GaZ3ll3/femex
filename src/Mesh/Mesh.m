@@ -28,9 +28,9 @@ function report(this, verbose)
   Mesh_('report', this.id_); 
 end
   
-function [nodes, elems, segs, inds] = promote(this, degree)
+function [nodes, elems, segs, inds, neighbors] = promote(this, degree)
   assert(isscalar(this));
-  [nodes, elems, segs, inds] = Mesh_('promote', this.id_, degree);
+  [nodes, elems, segs, inds, neighbors] = Mesh_('promote', this.id_, degree);
 end
 
 function [np, nt, ne] = export(this)

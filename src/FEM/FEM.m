@@ -37,7 +37,7 @@ classdef FEM < handle
             end
             
             this.Ref_mesh = Mesh([0 0 1 0 0 1]', 0.5);
-            [this.Ref_points, ~, ~, ~] = this.Ref_mesh.promote(prec);
+            [this.Ref_points, ~, ~, ~, ~] = this.Ref_mesh.promote(prec);
             
             this.Assembler = Assembler();
             
@@ -60,7 +60,7 @@ classdef FEM < handle
                 this.Mesh.export();
             
             
-            [this.Promoted.nodes, this.Promoted.elems, this.Promoted.edges, this.Promoted.indices] = ...
+            [this.Promoted.nodes, this.Promoted.elems, this.Promoted.edges, this.Promoted.indices, this.Promoted.neighbors] = ...
                 this.Mesh.promote(prec);
             
             this.TriMesh = this.Promoted.elems(1:3, :);

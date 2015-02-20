@@ -97,7 +97,7 @@ Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _PML, MatlabPtr _Area) noexcept{
 	_meshdata.neighborlist = (int *) nullptr;
 
 	/*
-	 * minimum angle chosen as 30 degrees now. should be adjusted.
+	 * minimum angle chosen as 34.0 degrees now. should be adjusted.
 	 */
 	triangulate(const_cast<char*>(("prqQ34.0a" + std::to_string(min_area) + "eznBC").c_str()), &mid, &_meshdata, (struct triangulateio *) nullptr);
 
@@ -153,6 +153,18 @@ void Mesh::Promote(int32_t _deg) noexcept{
 				(id - 3*deg)*_meshdata.numberoftriangles),
 				((deg + 1) * (deg + 2)/2) * _meshdata.numberoftriangles,
 				(deg + 1) * _meshdata.numberofsegments);
+
+
+		/*
+		 * Fill neighbors
+		 */
+
+		topology.neighbors.resize(3 * _meshdata.numberoftriangles);
+		for (int32_t i = 0; i < _meshdata.numberoftriangles; i++) {
+			topology.neighbors[3 * i] = _meshdata.neighborlist[3 * i] + 1;
+			topology.neighbors[3 * i + 1] = _meshdata.neighborlist[3 * i + 1] + 1;
+			topology.neighbors[3 * i + 2] = _meshdata.neighborlist[3 * i + 2] + 1;
+		}
 
 		/*
 		 * Fill nodes
@@ -428,7 +440,7 @@ MEX_DEFINE(report)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 
 MEX_DEFINE(promote)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	InputArguments input(nrhs, prhs, 2);
-	OutputArguments output(nlhs, plhs, 4);
+	OutputArguments output(nlhs, plhs, 5);
 	auto mesh = Session<Mesh>::get(input.get(0));
 	auto deg  = input.get<int>(1);
 
@@ -449,6 +461,8 @@ MEX_DEFINE(promote)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 	memcpy(mxGetPr(plhs[3]), &mesh->topology.boundary_index[0], mesh->topology.boundary_index.size()*sizeof(int));
 	MatlabPtr temp_3[] = {plhs[3], mxCreateDoubleScalar(1.0)};
 	mexCallMATLAB(1, &plhs[3], 2, temp_3, "plus");
+	plhs[4] = mxCreateNumericMatrix(3, mesh->topology.neighbors.size()/3, mxINT32_CLASS, mxREAL);
+	memcpy(mxGetPr(plhs[4]), &mesh->topology.neighbors[0], mesh->topology.neighbors.size()*sizeof(int));
 }
 
 

@@ -36,11 +36,13 @@ typedef	struct Topology {
 		vector<int32_t>    elems;
 		vector<int32_t>    boundary;
 		vector<int32_t>    boundary_index;
+		vector<int32_t>    neighbors;
 
   		void clear(){
 			nodes.clear(); edges.clear();
 			elems.clear(); boundary.clear();
 			boundary_index.clear();
+			neighbors.clear();
 		}
 
 		void resize(int32_t _nsize,int32_t _esize,int32_t _bsize){
