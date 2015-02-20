@@ -72,7 +72,7 @@ Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _PML, MatlabPtr _Area) noexcept{
 	mid.pointmarkerlist = (int *) nullptr;
 	mid.trianglelist = (int *) nullptr;
 	mid.triangleattributelist = (Real_t *) nullptr;
-	mid.neighborlist = (int *) nullptr;
+//	mid.neighborlist = (int *) nullptr;
 	mid.segmentlist = (int *) nullptr;
 	mid.segmentmarkerlist = (int *) nullptr;
 	mid.edgelist = (int *) nullptr;
@@ -110,7 +110,7 @@ Mesh::Mesh(MatlabPtr _Boundary, MatlabPtr _PML, MatlabPtr _Area) noexcept{
 	free(mid.trianglelist);
 	free(mid.triangleattributelist);
 	free(mid.trianglearealist);
-	free(mid.neighborlist);
+//	free(mid.neighborlist);
 	free(mid.segmentlist);
 	free(mid.segmentmarkerlist);
 	free(mid.edgelist);
@@ -401,6 +401,7 @@ void Mesh::clear() noexcept{
 	if (_meshdata.segmentlist != nullptr) {free(_meshdata.segmentlist); _meshdata.segmentlist = nullptr;}
 	if (_meshdata.edgemarkerlist != nullptr) {free(_meshdata.edgemarkerlist); _meshdata.edgemarkerlist = nullptr;}
 	if (_meshdata.edgelist != nullptr) {free(_meshdata.edgelist); _meshdata.edgelist = nullptr;}
+	if (_meshdata.neighborlist != nullptr) {free(_meshdata.neighborlist); _meshdata.neighborlist = nullptr;}
 } // clear
 
 
