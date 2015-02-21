@@ -137,11 +137,8 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 
 ##############################################################	
 # The action starts here.
-all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(SVR_BINS) \
-     $(ASE_BINS) $(MSE_BINS) $(ILUPACK_BINS) Ipopt
+all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(SVR_BINS) $(ILUPACK_BINS) Ipopt
 	rm -rf $(TRIANGLELIB)triangle.o
-
-module: $(ASE_BINS) $(MSE_BINS)
 
 distclean:
 	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(ASE)*_.mexa64 $(MSE)*_.mexa64 $(TRIANGLELIB)triangle.o $(ILUPACK_PATH)*.mexa64 $(Optimize)ipopt/ipopt.mexa64
