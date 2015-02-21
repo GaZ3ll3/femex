@@ -45,7 +45,7 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 	Real_t theta;
 
 	for (int32_t i = 0; i < nAngle; i++) {
-		theta = initAngle + 2 * M_PI/ nAngle;
+		theta = initAngle + 2 * M_PIl/ nAngle;
 
 		// reallocate the empty set.
 
