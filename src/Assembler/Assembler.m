@@ -50,6 +50,22 @@ methods
   	[C] = Assembler_('qnodes1D', this.id_, pnodes, qnodes, pedges);
   end
   
+  function [I, J ,V] = assemble_grad_x_func(this, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern)
+     [I, J, V] =  Assembler_('assemex_gradfunc_x',  this.id_, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern);
+  end
+  
+  function [I, J ,V] = assemble_grad_y_func(this, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern)
+     [I, J, V] =  Assembler_('assemex_gradfunc_y',  this.id_, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern);
+  end
+  
+  function [I, J ,V, W] = assemble_grad_xy_func(this, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern_x, extern_y)
+     [I, J, V, W] =  Assembler_('assemex_gradfunc_xy',  this.id_, pnodes, pelems, ref, ref_gradx, ref_grady, weights, extern_x, extern_y);
+  end
+  
+  function [I, J ,V] = assemble_load_matrix(this, pnodes, pelems, ref, weights, extern)
+     [I, J, V] =  Assembler_('assemex_lm',  this.id_, pnodes, pelems, ref, weights, extern);
+  end
+  
   % Other methods...
 end
 end

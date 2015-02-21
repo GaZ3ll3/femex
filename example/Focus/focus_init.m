@@ -6,8 +6,6 @@ addpath(genpath('~/Documents/github/femex'));
 hobj.fem = FEM([-0.5, -.5, .5, -.5, .5, .5, -.5, .5]', ...
     prec, min_area);
 
-hobj.ase = AssemblerExtension();
-
 
 hobj.freq = freq;
 hobj.sigma = sigma;

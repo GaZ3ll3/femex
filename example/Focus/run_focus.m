@@ -24,7 +24,7 @@ for i = 1:numberofeqn
     
 end
 
-cvx_quiet(true);
+cvx_quiet(false);
 cvx_begin
     variable x(size(lhs, 2))
     minimize( norm( x, 2 ) )
