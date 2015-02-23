@@ -29,8 +29,7 @@ DiscreteOrinates::~DiscreteOrinates() {
 void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 		MatlabPtr neighbors, MatlabPtr edges, MatlabPtr weights, MatlabPtr Fcn){
 
-//
-//void DiscreteOrinates::RayInt(MatlabPtr nodes, MatlabPtr elems){
+
 	auto numberofnodes        = mxGetN(nodes);
 	auto numberofelems        = mxGetN(elems);
 	auto numberofnodesperelem = mxGetM(elems);
@@ -46,13 +45,14 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 	auto pedges               = (int32_t*)mxGetPr(edges);
 
 	mwSize vertex, e_vl, e_vr;;
-	Real_t theta , x1, x2, y1, y2, a, b;
+	Real_t theta , x1, x2, y1, y2,  a, b;
 	std::unordered_set<int32_t> visited;
 
 
 	Real_t ret, t, eta;
 	int32_t index;
 
+#ifdef ADJACENT
 	/*
 	 * build adjacent mapping.
 	 */
@@ -83,46 +83,34 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 	/*
 	 * adjacent mapping of nodes built.
 	 */
-
+#endif
 
 	for (int32_t i = 0; i < nAngle; i++) {
-
 		std::cout << "the " << i << "th run" << std::endl;
-		theta = initAngle + 2 * M_PIl / nAngle;
+		theta = initAngle + 2 * i * M_PIl / nAngle;
 		visited.clear();
-
 		for (int32_t j = 0; j < numberofelems; j++) {
-
 			for (int32_t k = 0; k < numberofnodesperelem; k++){
 				/*
 				 * index of vertex in nodes.
 				 */
 				vertex = pelems[numberofnodesperelem * j + k] - 1;
-
 				if (visited.find(vertex) == visited.end()){
 					visited.insert(vertex);
-
 					/*
 					 * calculate the ray intersects with the boundary.
 					 */
-
 					a = pnodes[2 * vertex    ];
 					b = pnodes[2 * vertex + 1];
-
 					for (int32_t l = 0; l < numberofedges; l++) {
-
-
 						e_vl = pedges[l * numberofnodesperedge    ] - 1;
 						e_vr = pedges[l * numberofnodesperedge + 1] - 1;
-
 						x1 = pnodes[2 * e_vl    ];
 						x2 = pnodes[2 * e_vr    ];
 						y1 = pnodes[2 * e_vl + 1];
 						y2 = pnodes[2 * e_vr + 1];
-
 						if (fabs( (y1 - y2)*(a - x2) - (x1 - x2) * (b - y2)) < MEX_EPS) {
 							// colinear.
-
 						}
 						else {
 							// non-colinear.
@@ -131,14 +119,11 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 								continue;
 							}
 							else {
-
 								t =((y1 - y2)*(a - x2) - (x1 - x2) * (b - y2))/
 										((x1 - x2) * sin(theta) - (y1- y2) * cos(theta));
 
 								eta = (sin(theta)*(a - x2) - cos(theta) * (b - y2))/
 										(sin(theta) * (x1 - x2) - cos(theta) * (y1 - y2));
-
-
 								if (t >= 0 && eta >= 0 && eta <= 1) {
 #ifdef DEBUG
 									std::cout << "vertex " << vertex << " at [" << a << ", " << b  << "]"<< " at distance of " << t << " from boundary"
@@ -146,11 +131,12 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 											<< "]" << std::endl;
 #endif
 
-								// t is the length of path integral.
 
-								}
-							}
-						}
+
+
+								}// end if
+							} // end else
+						}// end else
 					} //end for
 				} // end if
 			} // end for

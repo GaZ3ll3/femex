@@ -24,6 +24,10 @@
 using namespace std;
 using namespace mexplus;
 
+#define INTERSECT_DET(X1, Y1, X2, Y2, THETA) (cos((THETA)) * ((Y1) - (Y2))) - (sin((THETA)) * ((X1) - (X2)))
+
+#define INTERSECT_CROSS(X1, Y1, X2, Y2, A, B) (((X1) - (X2)) * ((B) - (Y2))) -(((A) - (X2)) * ((Y1)- (Y2)))
+
 namespace Core {
 
 class DiscreteOrinates {
@@ -38,7 +42,6 @@ public:
 
 	void RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 			MatlabPtr neighbors, MatlabPtr edges, MatlabPtr weights, MatlabPtr Fcn);
-	void RayInt(MatlabPtr nodes, MatlabPtr elems);
 
 
 
