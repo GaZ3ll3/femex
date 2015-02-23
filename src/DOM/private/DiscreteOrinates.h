@@ -37,7 +37,8 @@ public:
 
 
 	void RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
-			MatlabPtr neighbors, MatlabPtr weights, MatlabPtr Fcn);
+			MatlabPtr neighbors, MatlabPtr edges, MatlabPtr weights, MatlabPtr Fcn);
+	void RayInt(MatlabPtr nodes, MatlabPtr elems);
 
 
 

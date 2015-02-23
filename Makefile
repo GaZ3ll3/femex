@@ -107,6 +107,16 @@ SLR_BINS = $(patsubst $(SLR)%.cc, $(SLR)%_.mexa64, $(SLR_SRCS))
 $(SLR)%_.mexa64: %.slr.o
 	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 	
+	
+DOM = $(SRC)DOM/private/
+DOM_SRCS = $(wildcard $(DOM)*.cc)
+DOM_OBJS = $(patsubst $(DOM)%.cc, %.dom.o, $(DOM_SRCS))
+DOM_BINS = $(patsubst $(DOM)%.cc, $(DOM)%_.mexa64, $(DOM_SRCS))
+
+%.dom.o: $(DOM)%.cc
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
+$(DOM)%_.mexa64: %.dom.o
+	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 
 ##############################################################
 
@@ -137,7 +147,7 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 
 ##############################################################	
 # The action starts here.
-all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(SVR_BINS) $(ILUPACK_BINS) Ipopt
+all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) $(DOM_BINS)
 	rm -rf $(TRIANGLELIB)triangle.o
 
 distclean:
