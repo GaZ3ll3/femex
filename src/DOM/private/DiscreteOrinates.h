@@ -27,6 +27,13 @@ using namespace mexplus;
 
 #define SCALE 1.0L
 
+
+typedef struct Raylet {
+	int32_t elem;
+	Real_t first[2];
+	Real_t second[2];
+} Raylet;
+
 namespace Core {
 
 class DiscreteOrinates {
@@ -38,6 +45,16 @@ public:
 	DiscreteOrinates(MatlabPtr _nAngle, MatlabPtr _initAngle) noexcept;
 	virtual ~DiscreteOrinates();
 
+
+	/*
+	 *  variables, caution, this might be slow.
+	 */
+
+	std::vector<std::vector<std::vector<Raylet>>> Ray;
+
+	/*
+	 *  methods
+	 */
 
 	void RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 			MatlabPtr neighbors, MatlabPtr edges, MatlabPtr weights, MatlabPtr Fcn);
@@ -51,6 +68,10 @@ public:
 
 
 	void RayTrim(std::vector<Real_t>& tmp, Real_t &a, Real_t &b);
+
+	void RayShow();
+
+
 };
 
 } /* namespace Core */
