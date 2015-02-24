@@ -15,7 +15,7 @@
 typedef mxArray* MatlabPtr;
 typedef double   Real_t;
 
-#undef DEBUG
+//#define DEBUG
 
 
 using namespace std;

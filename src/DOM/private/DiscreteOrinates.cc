@@ -26,6 +26,7 @@ DiscreteOrinates::~DiscreteOrinates() {
 #endif
 }
 
+
 void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 		MatlabPtr neighbors, MatlabPtr edges, MatlabPtr weights, MatlabPtr Fcn){
 
