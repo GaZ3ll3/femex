@@ -48,42 +48,14 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 	Real_t theta , x1, x2, y1, y2,  a, b;
 	std::unordered_set<int32_t> visited;
 
-
 	Real_t ret, t, eta;
+	Real_t q_x1, q_y1, q_x2, q_y2, q_x3, q_y3;
+	Real_t q_eta, q_t;
 	int32_t index;
 
-#ifdef ADJACENT
-	/*
-	 * build adjacent mapping.
-	 */
-	std::vector<std::unordered_set<int32_t>> adjacent(numberofnodes);
-	mwSize vertex_1, vertex_2, vertex_3;
-
-	for (int32_t i = 0; i < numberofelems; i++) {
-		vertex_1 = pelems[numberofnodesperelem * i    ] - 1;
-		vertex_2 = pelems[numberofnodesperelem * i + 1] - 1;
-		vertex_3 = pelems[numberofnodesperelem * i + 2] - 1;
-
-		adjacent[vertex_1].insert(vertex_2);
-		adjacent[vertex_1].insert(vertex_3);
-		adjacent[vertex_2].insert(vertex_1);
-		adjacent[vertex_2].insert(vertex_3);
-		adjacent[vertex_3].insert(vertex_1);
-		adjacent[vertex_3].insert(vertex_2);
-	}
-
-#ifdef DEBUG
-	for (int32_t i = 0; i < numberofnodes; i++) {
-		for (auto it = adjacent[i].begin(); it != adjacent[i].end(); it++) {
-			std::cout << *it << " ";
-		}
-		std::cout << std::endl;
-	}
-#endif
-	/*
-	 * adjacent mapping of nodes built.
-	 */
-#endif
+	bool flag, intersect;
+	std::queue<int32_t> q_elem;
+	std::unordered_set<int32_t> s_elem;
 
 	for (int32_t i = 0; i < nAngle; i++) {
 		std::cout << "the " << i << "th run" << std::endl;
@@ -102,6 +74,11 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 					 */
 					a = pnodes[2 * vertex    ];
 					b = pnodes[2 * vertex + 1];
+
+					// clean up the queue for elements.(??)
+					// it is not needed to clean up, since the queue
+					// will be empty before next round.
+
 					for (int32_t l = 0; l < numberofedges; l++) {
 						e_vl = pedges[l * numberofnodesperedge    ] - 1;
 						e_vr = pedges[l * numberofnodesperedge + 1] - 1;
@@ -109,12 +86,16 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 						x2 = pnodes[2 * e_vr    ];
 						y1 = pnodes[2 * e_vl + 1];
 						y2 = pnodes[2 * e_vr + 1];
-						if (fabs( (y1 - y2)*(a - x2) - (x1 - x2) * (b - y2)) < MEX_EPS) {
+						//**********************************************
+						//** rewrite this part.
+						//**********************************************
+						if (fabs( (y1 - y2)*(a - x2) - (x1 - x2) * (b - y2)) < SCALE * MEX_EPS) {
 							// colinear.
+							// colinear must sit in between, otherwise, the polygon is not convex.
 						}
 						else {
 							// non-colinear.
-							if (fabs((x1 - x2) * sin(theta) - (y1- y2) * cos(theta)) < MEX_EPS) {
+							if (fabs((x1 - x2) * sin(theta) - (y1- y2) * cos(theta)) < SCALE * MEX_EPS) {
 								// ray along edge.
 								continue;
 							}
@@ -124,20 +105,208 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 
 								eta = (sin(theta)*(a - x2) - cos(theta) * (b - y2))/
 										(sin(theta) * (x1 - x2) - cos(theta) * (y1 - y2));
-								if (t >= 0 && eta >= 0 && eta <= 1) {
-#ifdef DEBUG
-									std::cout << "vertex " << vertex << " at [" << a << ", " << b  << "]"<< " at distance of " << t << " from boundary"
-											<< "["  << x1 * eta + (1 - eta) * x2 << ", " << y1 * eta + (1 - eta)*y2
-											<< "]" << std::endl;
-#endif
-
-
-
-
+								if (t >= 0 && eta >= -MEX_EPS && eta <= 1 + MEX_EPS) {
+									flag = true;
+									break;
 								}// end if
+								else {
+									flag = false;
+								}
 							} // end else
 						}// end else
+						//************************************************
 					} //end for
+
+					if (flag){
+#ifndef DEBUG
+						std::cout
+							<< "vertex " << vertex << " at [" << a << ", " << b  << "]"
+							<< " at distance of " << t << " from boundary"
+							<< "["  << x1 * eta + (1 - eta) * x2 << ", " << y1 * eta + (1 - eta)*y2
+							<< "]" << std::endl;
+#endif
+						/*
+						 * search along the ray, find the elements which passed through.
+						 *
+						 * use queue to do it.
+						 *
+						 * stopping criteria:
+						 *
+						 * queue is empty.
+						 *
+						 * Adding into queue if barycentric point is pushing forward.
+						 *
+						 */
+						// clean up set.
+						s_elem.clear();
+
+						// push current element
+						q_elem.push(j);
+						s_elem.insert(j);
+
+						while (!q_elem.empty()){
+							auto top = q_elem.front();
+							q_elem.pop();
+							std::cout << top << std::endl;
+
+							// loop over neighbors.
+							// fail safe strategy, if it is possible to intersect, must push.
+							for (int32_t q_elem_i = 0; q_elem_i < 3; q_elem_i ++){
+
+								index = pneighbors[3 * top + q_elem_i] - 1;
+
+								// test if it is going to push them in.
+								// first : valid index of element
+								if (index > -1 && s_elem.find(index) == s_elem.end()) {
+
+									/*
+									 * calculate the open angle limit. And find the suitable one.
+									 *
+									 * Target function is max(min(abs(langle - angle), abs(rangle - angle)))
+									 *
+									 * if both gives 0, then push both into queue.
+									 */
+
+									q_x1 = pnodes[2 * (pelems[numberofnodesperelem * index] - 1)];
+									q_y1 = pnodes[2 * (pelems[numberofnodesperelem * index] - 1) + 1];
+
+									q_x2 = pnodes[2 * (pelems[numberofnodesperelem * index + 1] - 1)];
+									q_y2 = pnodes[2 * (pelems[numberofnodesperelem * index + 1] - 1) + 1];
+
+									q_x3 = pnodes[2 * (pelems[numberofnodesperelem * index + 2] - 1)];
+									q_y3 = pnodes[2 * (pelems[numberofnodesperelem * index + 2] - 1) + 1];
+
+
+									/*
+									 * [a , b] 's angle for the element,
+									 */
+
+									intersect = false;
+									// 1 - 2 intersects.
+									if (fabs(INTERSECT_DET(q_x1, q_y1, q_x2, q_y2, theta)) < SCALE * MEX_EPS){
+										// ray parallel for edge.
+										if (fabs(INTERSECT_CROSS(q_x1, q_y1, q_x2, q_y2, a, b)) < SCALE * MEX_EPS){
+											// it is lucky to be colinear.
+											if (fabs(q_x1 - q_x2) + MEX_EPS < fabs(q_x1 - a) + fabs(q_x2 - a) ||
+													fabs(q_y1 - q_y2) + MEX_EPS < fabs(q_y1 - b) + fabs(q_y2 - b) ){
+
+												// outside
+											}
+											else {
+												intersect = true;
+												goto final;
+											}
+										}
+										else {
+											// intersect = false;
+										}
+									}
+									else{
+										// not parallel, then there is a intersect.
+										q_t =INTERSECT_CROSS(q_x1, q_y1, q_x2, q_y2, a, b)/
+												INTERSECT_DET(q_x1, q_y1, q_x2, q_y2, theta);
+
+										q_eta = INTERSECT_DET(a, b, q_x2, q_y2, theta)/
+												INTERSECT_DET(q_x1, q_y1, q_x2, q_y2, theta);
+										/*
+										 * q_t = 0 means colinear
+										 *
+										 */
+										if (q_t >= 0 && q_eta >= -MEX_EPS && q_eta <= 1 + MEX_EPS) {
+											intersect = true;
+
+											goto final;
+										}
+									}
+									// 2 - 3
+									if (fabs(INTERSECT_DET(q_x2, q_y2, q_x3, q_y3, theta)) < SCALE * MEX_EPS){
+										// ray parallel for edge.
+										if (fabs(INTERSECT_CROSS(q_x2, q_y2, q_x3, q_y3, a, b)) < SCALE * MEX_EPS){
+											// it is lucky to be colinear.
+											if (fabs(q_x2 - q_x3) + MEX_EPS < fabs(q_x2 - a) + fabs(q_x3 - a) ||
+													fabs(q_y2 - q_y3) + MEX_EPS < fabs(q_y2 - b) + fabs(q_y3 - b) ){
+
+												// outside
+											}
+											else {
+												intersect = true;
+												goto final;
+											}
+										}
+										else {
+											// intersect = false;
+										}
+									}
+									else{
+										// not parallel, then there is a intersect.
+										q_t =INTERSECT_CROSS(q_x2, q_y2, q_x3, q_y3, a, b)/
+												INTERSECT_DET(q_x2, q_y2, q_x3, q_y3, theta);
+
+										q_eta = INTERSECT_DET(a, b, q_x3, q_y3, theta)/
+												INTERSECT_DET(q_x2, q_y2, q_x3, q_y3, theta);
+
+										/*
+										 * q_t = 0 means colinear
+										 *
+										 */
+										if (q_t >= 0 && q_eta >= -MEX_EPS && q_eta <= 1 + MEX_EPS) {
+											intersect = true;
+
+											goto final;
+										}
+									}
+									// 3 - 1
+									if (fabs(INTERSECT_DET(q_x3, q_y3, q_x1, q_y1, theta)) < SCALE * MEX_EPS){
+										// ray parallel for edge.
+										if (fabs(INTERSECT_CROSS(q_x3, q_y3, q_x1, q_y1, a, b)) < SCALE * MEX_EPS){
+											// it is lucky to be colinear.
+											if (fabs(q_x3 - q_x1) + MEX_EPS < fabs(q_x3 - a) + fabs(q_x1 - a) ||
+													fabs(q_y3 - q_y1) + MEX_EPS < fabs(q_y3 - b) + fabs(q_y1 - b) ){
+
+												// outside
+											}
+											else {
+												intersect = true;
+												goto final;
+											}
+										}
+										else {
+											// intersect = false;
+										}
+									}
+									else{
+										// not parallel, then there is a intersect.
+										q_t =INTERSECT_CROSS(q_x2, q_y2, q_x3, q_y3, a, b)/
+												INTERSECT_DET(q_x2, q_y2, q_x3, q_y3, theta);
+
+										q_eta = INTERSECT_DET(a, b, q_x3, q_y3, theta)/
+												INTERSECT_DET(q_x2, q_y2, q_x3, q_y3, theta);
+										/*
+										 * q_t = 0 means colinear
+										 *
+										 */
+										if (q_t >= 0 && q_eta >= -MEX_EPS && q_eta <= 1 + MEX_EPS) {
+											intersect = true;
+
+											goto final;
+										}
+									}
+final:
+									if (intersect){
+										q_elem.push(index);
+										s_elem.insert(index);
+
+
+										/*
+										 * calculate integral over this element
+										 */
+
+
+									}
+								}// end if
+							}// end for
+						}// end while
+					}// end if(flag)
 				} // end if
 			} // end for
 		} // end for
