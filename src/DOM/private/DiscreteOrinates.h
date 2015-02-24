@@ -42,6 +42,15 @@ public:
 	void RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 			MatlabPtr neighbors, MatlabPtr edges, MatlabPtr weights, MatlabPtr Fcn);
 
+
+
+	void RayTrace(std::vector<Real_t>& tmp, bool& intersect, Real_t& q_t, Real_t& q_eta,
+			Real_t& q_x1, Real_t& q_y1, Real_t& q_x2,
+			Real_t& q_y2, Real_t& q_x3, Real_t& q_y3,
+			Real_t& a, Real_t& b, Real_t& theta);
+
+
+	void RayTrim(std::vector<Real_t>& tmp, Real_t &a, Real_t &b);
 };
 
 } /* namespace Core */
