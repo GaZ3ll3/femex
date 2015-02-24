@@ -9,7 +9,7 @@
 #define INCLUDE_UTILITY_UTILS_H_
 
 #include "mex.h"
-
+#include "math.h"
 #include <omp.h>
 
 typedef mxArray* MatlabPtr;
@@ -41,6 +41,14 @@ inline size_t Msize(MatlabPtr _ptr){
 inline size_t Nsize(MatlabPtr _ptr){
 	return mxGetN(_ptr);
 }
+
+inline Real_t INTERSECT_DET(Real_t X1, Real_t Y1, Real_t X2, Real_t Y2, Real_t THETA){
+		return ((cos((THETA)) * ((Y1) - (Y2))) - (sin((THETA)) * ((X1) - (X2))));
+	}
+inline Real_t INTERSECT_CROSS(Real_t X1,Real_t Y1,Real_t X2,Real_t Y2,Real_t A,Real_t B) {
+		return ((((X1) - (X2)) * ((B) - (Y2))) -(((A) - (X2)) * ((Y1)- (Y2))));
+	}
+
 
 extern "C" bool mxUnshareArray(mxArray *array_ptr, bool noDeepCopy);
 
