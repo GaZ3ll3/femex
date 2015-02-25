@@ -21,6 +21,21 @@ How to use:
 -----------
 * For those who hadn't change the default gcc/gfortran .so files within Matlab, you should PRELOAD the system's gcc/gfortran libs first before starting Matlab.
 
+In your shell, type in something like:
+
+```
+export LD_PRELOAD=/usr/lib/gcc/x86_64-linux-gnu/4.8/libstdc++.so:/usr/lib/gcc/x86_64-linux-gnu/4.8/libgcc_s.so:/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.so 
+```
+
+then start Matlab using
+
+```
+matlab -nodesktop -nosplash
+```
+
+
+
+
 * Back up Matlab's out-of-date ``libstdc++`` dynamic library files, try to use system's library.
 
 * Modify ``Makefile.in`` to set ``MATLAB_ROOT`` to the directory which includes ``bin``.
