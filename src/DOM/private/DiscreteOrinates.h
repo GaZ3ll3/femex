@@ -54,7 +54,15 @@ public:
 
 	std::vector<std::vector<Real_t>> Output;
 //	std::vector<std::vector<Real_t>> Source;
+
+	/*
+	 * isotropic source. less memory
+	 */
 	std::vector<Real_t> Source;
+	std::vector<std::vector<Real_t>> Static;
+
+	std::vector<Real_t> Sigma_t;
+	std::vector<Real_t> Sigma_s;
 
 	/*
 	 *  methods
@@ -77,7 +85,7 @@ public:
 	 * solve the transport equation.
 	 */
 
-	void SourceIteration_init();
+	void SourceIteration_init(MatlabPtr Fcn, MatlabPtr sigma_t, MatlabPtr sigma_s);
 	void SourceIteration_iter();
 	void SourceIteration_accl();
 

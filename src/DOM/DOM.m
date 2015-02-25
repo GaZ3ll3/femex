@@ -18,6 +18,13 @@ methods
   	DiscreteOrinates_('rayint', this.id_, nodes, elems, neighbors);
   end
   
+  function rayshow(this)
+      DiscreteOrinates_('rayshow', this.id_);
+  end
+  
+  function si_init(this, source, sigma_t, sigma_s)
+      DiscreteOrinates_('si_init', this.id_, source, sigma_t, sigma_s);
+  end
   
   % Other methods...
 end

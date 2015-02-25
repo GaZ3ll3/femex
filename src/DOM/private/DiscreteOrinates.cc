@@ -127,10 +127,6 @@ void DiscreteOrinates::RayInt(MatlabPtr nodes, MatlabPtr elems,
 
 					RayTrim(tmp, a, b);
 
-					/*
-					 * TODO: write into output.
-					 */
-
 					if (tmp.size()) {
 							tmp_ray.elem = index;
 						if (tmp.size() == 2) {
@@ -426,6 +422,9 @@ void DiscreteOrinates::RayTrim(std::vector<Real_t>& tmp, Real_t &a, Real_t &b){
 	}
 }
 
+/*
+ * depreciated later.
+ */
 void DiscreteOrinates::RayShow(){
 
 	int32_t tmp_i, tmp_j;
@@ -451,31 +450,57 @@ void DiscreteOrinates::RayShow(){
 //	std::cout << tmp_total << std::endl;
 }
 
+
+
 /*
  * Source Iteration.
  *
  */
 
-void DiscreteOrinates::SourceIteration_init(){
+void DiscreteOrinates::SourceIteration_init(MatlabPtr Fcn, MatlabPtr Sigma_t_Fcn, MatlabPtr Sigma_s_Fcn){
 //	Source.resize(nAngle);
 
 	/*
 	 * consider source as f(x).
 	 */
 	auto numberofnodes = Ray[0].size();
+	auto interp        = mxGetPr(Fcn);
+	auto interp_t      = mxGetPr(Sigma_t_Fcn);
+	auto interp_s      = mxGetPr(Sigma_s_Fcn);
+
+	mxAssert(mxGetN(Fcn) == numberofnodes,
+			"DiscreteOrinates::SourceIteration_init::Dimension does not match.\n");
+
+	Source.resize(numberofnodes);
+	Sigma_t.resize(numberofnodes);
+	Sigma_s.resize(numberofnodes);
+
+	memcpy(&Source[0], interp, sizeof(Real_t) * numberofnodes);
+	memcpy(&Sigma_t[0], interp_t, sizeof(Real_t) * numberofnodes);
+	memcpy(&Sigma_s[0], interp_s, sizeof(Real_t) * numberofnodes);
+
+//	for (auto it:Source){
+//		std::cout << it << std::endl;
+//	}
 
 	Output.resize(nAngle);
-	Source.resize(numberofnodes);
+	Static.resize(nAngle);
 
 	for (int32_t s_i; s_i < nAngle; s_i ++) {
 		Output[s_i].resize(numberofnodes);
+		Static[s_i].resize(numberofnodes);
 	}
+
+	/*
+	 * Now interpolate the sigma_t onto the intersection points.
+	 */
+
 }
 
 
 
 void DiscreteOrinates::SourceIteration_iter(){
-
+	// kernel as 1/2/pi constant
 }
 
 
@@ -514,6 +539,24 @@ MEX_DEFINE(rayint) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 
 	DOM->RayInt(CAST(prhs[1]), CAST(prhs[2]),
 			CAST(prhs[3]));
+}
+
+MEX_DEFINE(rayshow) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 1);
+	OutputArguments output(nlhs, plhs, 0);
+
+	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
+
+	DOM->RayShow();
+}
+
+MEX_DEFINE(si_init) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 4);
+	OutputArguments output(nlhs, plhs, 0);
+
+	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
+
+	DOM->SourceIteration_init(CAST(prhs[1]), CAST(prhs[2]), CAST(prhs[3]));
 }
 
 }
