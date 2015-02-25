@@ -40,23 +40,21 @@ DiscreteOrinates::~DiscreteOrinates() {
 #endif
 }
 
-void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
-		MatlabPtr neighbors, MatlabPtr edges, MatlabPtr weights, MatlabPtr Fcn){
+void DiscreteOrinates::RayInt(MatlabPtr nodes, MatlabPtr elems,
+		MatlabPtr neighbors){
 
 
 	auto numberofnodes        = mxGetN(nodes);
 	auto numberofelems        = mxGetN(elems);
 	auto numberofnodesperelem = mxGetM(elems);
-	auto numberofedges        = mxGetN(edges);
-	auto numberofnodesperedge = mxGetM(edges);
+//	auto numberofedges        = mxGetN(edges);
+//	auto numberofnodesperedge = mxGetM(edges);
 
 
 	auto pnodes               = mxGetPr(nodes);
 	auto pelems               = (int32_t*)mxGetPr(elems);
 	auto pneighbors           = (int32_t*)mxGetPr(neighbors);
-	auto pweights             = mxGetPr(weights);
-	auto interp               = mxGetPr(Fcn);
-	auto pedges               = (int32_t*)mxGetPr(edges);
+//	auto pedges               = (int32_t*)mxGetPr(edges);
 
 	mwSize vertex, e_vl, e_vr;;
 	Real_t theta , x1, x2, y1, y2,  a, b;
@@ -158,10 +156,6 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 							Ray[i][vertex].push_back(tmp_ray);
 						}
 					}
-
-
-
-
 #ifdef DEBUG
 					if (tmp.size()){
 						if (tmp.size() == 2){
@@ -263,6 +257,7 @@ void DiscreteOrinates::RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
 						}
 					}
 				}
+				Ray[i][vertex].shrink_to_fit();
 			}
 		}
 	}
@@ -456,6 +451,41 @@ void DiscreteOrinates::RayShow(){
 //	std::cout << tmp_total << std::endl;
 }
 
+/*
+ * Source Iteration.
+ *
+ */
+
+void DiscreteOrinates::SourceIteration_init(){
+//	Source.resize(nAngle);
+
+	/*
+	 * consider source as f(x).
+	 */
+	auto numberofnodes = Ray[0].size();
+
+	Output.resize(nAngle);
+	Source.resize(numberofnodes);
+
+	for (int32_t s_i; s_i < nAngle; s_i ++) {
+		Output[s_i].resize(numberofnodes);
+	}
+}
+
+
+
+void DiscreteOrinates::SourceIteration_iter(){
+
+}
+
+
+void DiscreteOrinates::SourceIteration_accl(){
+
+}
+
+
+
+
 } /* namespace Core */
 
 
@@ -477,16 +507,13 @@ MEX_DEFINE(delete) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 }
 
 MEX_DEFINE(rayint) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
-	InputArguments input(nrhs, prhs, 7);
-	OutputArguments output(nlhs, plhs, 1);
+	InputArguments input(nrhs, prhs, 4);
+	OutputArguments output(nlhs, plhs, 0);
 
 	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
 
-	plhs[0] = mxCreateNumericMatrix(1, 1,  mxDOUBLE_CLASS, mxREAL);
-	Real_t* pI = mxGetPr(plhs[0]);
-	DOM->RayInt(pI, CAST(prhs[1]), CAST(prhs[2]),
-			CAST(prhs[3]), CAST(prhs[4]),
-			CAST(prhs[5]), CAST(prhs[6]));
+	DOM->RayInt(CAST(prhs[1]), CAST(prhs[2]),
+			CAST(prhs[3]));
 }
 
 }

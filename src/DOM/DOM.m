@@ -14,8 +14,8 @@ methods
     DiscreteOrinates_('delete', this.id_);
   end
   
-  function [ret] = rayint(this, nodes, elems, neighbors, edges, weights, Fcn)
-  	ret = DiscreteOrinates_('rayint', this.id_, nodes, elems, neighbors, edges, weights, Fcn);
+  function  rayint(this, nodes, elems, neighbors)
+  	DiscreteOrinates_('rayint', this.id_, nodes, elems, neighbors);
   end
   
   
