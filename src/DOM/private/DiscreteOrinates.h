@@ -27,6 +27,13 @@ using namespace mexplus;
 
 #define SCALE 1.0L
 
+
+typedef struct Raylet {
+	int32_t elem;
+	Real_t first[2];
+	Real_t second[2];
+} Raylet;
+
 namespace Core {
 
 class DiscreteOrinates {
@@ -39,18 +46,41 @@ public:
 	virtual ~DiscreteOrinates();
 
 
-	void RayInt(Real_t*& output, MatlabPtr nodes, MatlabPtr elems,
-			MatlabPtr neighbors, MatlabPtr edges, MatlabPtr weights, MatlabPtr Fcn);
+	/*
+	 *  variables, caution, this might be slow.
+	 */
 
+	std::vector<std::vector<std::vector<Raylet>>> Ray;
 
+	std::vector<std::vector<Real_t>> Output;
+//	std::vector<std::vector<Real_t>> Source;
+	std::vector<Real_t> Source;
+
+	/*
+	 *  methods
+	 */
+
+	void RayInt(MatlabPtr nodes, MatlabPtr elems,
+			MatlabPtr neighbors);
 
 	void RayTrace(std::vector<Real_t>& tmp, bool& intersect, Real_t& q_t, Real_t& q_eta,
 			Real_t& q_x1, Real_t& q_y1, Real_t& q_x2,
 			Real_t& q_y2, Real_t& q_x3, Real_t& q_y3,
 			Real_t& a, Real_t& b, Real_t& theta);
 
-
 	void RayTrim(std::vector<Real_t>& tmp, Real_t &a, Real_t &b);
+
+	void RayShow();
+
+
+	/*
+	 * solve the transport equation.
+	 */
+
+	void SourceIteration_init();
+	void SourceIteration_iter();
+	void SourceIteration_accl();
+
 };
 
 } /* namespace Core */
