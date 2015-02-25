@@ -33,16 +33,13 @@ then start Matlab using
 matlab -nodesktop -nosplash
 ```
 
-
-
-
-* Back up Matlab's out-of-date ``libstdc++`` dynamic library files, try to use system's library.
+* If you have already backed up Matlab's out-of-date ``libstdc++`` dynamic library files, change the names of the .so files, then Matlab will call system's library by default.
 
 * Modify ``Makefile.in`` to set ``MATLAB_ROOT`` to the directory which includes ``bin``.
 
 * Simply add femex directory to current workspace path.
 
-* Follow the example to set up boundary conditions.
+* Ready to rock! 
 
  
 Note:
