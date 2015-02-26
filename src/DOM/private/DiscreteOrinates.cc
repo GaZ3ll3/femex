@@ -47,14 +47,10 @@ void DiscreteOrinates::RayInt(MatlabPtr nodes, MatlabPtr elems,
 	auto numberofnodes        = mxGetN(nodes);
 	auto numberofelems        = mxGetN(elems);
 	auto numberofnodesperelem = mxGetM(elems);
-//	auto numberofedges        = mxGetN(edges);
-//	auto numberofnodesperedge = mxGetM(edges);
-
 
 	auto pnodes               = mxGetPr(nodes);
 	auto pelems               = (int32_t*)mxGetPr(elems);
 	auto pneighbors           = (int32_t*)mxGetPr(neighbors);
-//	auto pedges               = (int32_t*)mxGetPr(edges);
 
 	mwSize vertex, e_vl, e_vr;;
 	Real_t theta , x1, x2, y1, y2,  a, b;
@@ -79,13 +75,10 @@ void DiscreteOrinates::RayInt(MatlabPtr nodes, MatlabPtr elems,
 	for (int32_t i = 0; i < nAngle; i++) {
 		Ray[i].resize(numberofnodes);
 	}
-
-
 	/*
 	 * main part
 	 */
 	for (int32_t i = 0; i < nAngle; i++) {
-		std::cout << "the " << i << "th run" << std::endl;
 		theta = initAngle + 2 * i * M_PIl / nAngle;
 		visited.clear();
 		for (int32_t j = 0; j < numberofelems; j++) {
@@ -257,7 +250,6 @@ void DiscreteOrinates::RayInt(MatlabPtr nodes, MatlabPtr elems,
 			}
 		}
 	}
-//	RayShow();
 }
 
 void DiscreteOrinates::RayTrace(std::vector<Real_t>& tmp, bool& intersect, Real_t& q_t, Real_t& q_eta,
@@ -274,7 +266,6 @@ void DiscreteOrinates::RayTrace(std::vector<Real_t>& tmp, bool& intersect, Real_
 			// it is lucky to be colinear.
 			if (fabs(q_x1 - q_x2) + MEX_EPS < fabs(q_x1 - a) + fabs(q_x2 - a) ||
 					fabs(q_y1 - q_y2) + MEX_EPS < fabs(q_y1 - b) + fabs(q_y2 - b) ){
-
 				// outside
 			}
 			else {
@@ -391,10 +382,6 @@ void DiscreteOrinates::RayTrim(std::vector<Real_t>& tmp, Real_t &a, Real_t &b){
 	}
 
 	if (tmp.size() == 6) {
-
-	/*
-	 * remove duplicate coordinates
-	 */
 	// 2 - 3 duplicates
 		if (fabs(tmp[2] - tmp[4]) + fabs(tmp[3] - tmp[5]) < MEX_EPS){
 			tmp.erase(tmp.begin() + 2, tmp.begin() + 4);
@@ -404,11 +391,8 @@ void DiscreteOrinates::RayTrim(std::vector<Real_t>& tmp, Real_t &a, Real_t &b){
 			tmp.erase(tmp.begin(), tmp.begin() + 2);
 		}
 	}
-
 	if (tmp.size() == 4) {
-	/*
-	 * remove duplicates
-	 */
+		//remove duplicates
 		if (fabs(tmp[0] - tmp[2]) + fabs(tmp[1] - tmp[3]) < MEX_EPS) {
 			tmp.clear();
 		}
@@ -428,26 +412,26 @@ void DiscreteOrinates::RayTrim(std::vector<Real_t>& tmp, Real_t &a, Real_t &b){
 void DiscreteOrinates::RayShow(){
 
 	int32_t tmp_i, tmp_j;
-//	size_t tmp_total = 0;
+	size_t tmp_total = 0;
 	if (nAngle != 0) {
 		for (int32_t i = 0 ; i < nAngle; i++){
 			tmp_i = Ray[i].size();
 			for (int32_t j = 0; j < tmp_i; j++){
 				tmp_j = Ray[i][j].size();
-//				tmp_total += tmp_j * 36;
+				tmp_total += tmp_j * 40;
 
-				for (int32_t k = 0; k < tmp_j; k++) {
-					std::cout << i << "th Angle, "
-							<< j << "th node, "
-							<< k << "th raylet: passes through "
-							<< Ray[i][j][k].elem << ", starting from "
-							<< Ray[i][j][k].first << " --> "
-							<< Ray[i][j][k].second << std::endl;
-				}
+//				for (int32_t k = 0; k < tmp_j; k++) {
+//					std::cout << i << "th Angle, "
+//							<< j << "th node, "
+//							<< k << "th raylet: passes through "
+//							<< Ray[i][j][k].elem << ", starting from "
+//							<< Ray[i][j][k].first << " --> "
+//							<< Ray[i][j][k].second << std::endl;
+//				}
 			}
 		}
 	}
-//	std::cout << tmp_total << std::endl;
+	std::cout << tmp_total / 1024.0/ 1024.0/ 1024.0 << " GBytes used in Ray storage." << std::endl;
 }
 
 
@@ -460,8 +444,6 @@ void DiscreteOrinates::RayShow(){
 void DiscreteOrinates::SourceIteration_init(MatlabPtr Fcn,
 		MatlabPtr Sigma_t_Fcn, MatlabPtr Sigma_s_Fcn,
 		MatlabPtr nodes, MatlabPtr elems){
-//	Source.resize(nAngle);
-
 	/*
 	 * consider source as f(x).
 	 */
@@ -490,7 +472,6 @@ void DiscreteOrinates::SourceIteration_init(MatlabPtr Fcn,
 
 	Output.resize(nAngle);
 
-
 	for (int32_t s_i; s_i < nAngle; s_i ++) {
 		Output[s_i].resize(numberofnodes);
 	}
@@ -499,14 +480,16 @@ void DiscreteOrinates::SourceIteration_init(MatlabPtr Fcn,
 
 
 void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
-	// kernel as 1/2/pi constant
 
 	auto pnodes        = mxGetPr(nodes);
 	auto pelems        = (int32_t *)mxGetPr(elems);
 	auto numberofnodesperelem = mxGetM(elems);
 
-	auto numberofnodes = Source.size();
+	auto numberofnodes = mxGetN(nodes);
 
+	/*
+	 * TODO: ADD KERNEL
+	 */
 	for (int32_t s_j = 0; s_j < numberofnodes; s_j++){
 		Average[s_j] = 0.;
 		for (int32_t s_i = 0; s_i < nAngle; s_i++) {
@@ -522,14 +505,10 @@ void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 	Real_t lv, rv, ls, rs;
 
 	for (int32_t s_i = 0; s_i < nAngle; s_i++) {
-
 		for (int32_t s_j = 0; s_j < numberofnodes; s_j++){
-
 			accum_s = 0.;
 			accum_v = 0.;
-
 			if (Ray[s_i][s_j].size()){
-
 				for (auto it : Ray[s_i][s_j]){
 					vertex_1 = pelems[it.elem * numberofnodesperelem ] - 1;
 					vertex_2 = pelems[it.elem * numberofnodesperelem + 1] - 1;
@@ -577,6 +556,9 @@ void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 					 */
 					length = sqrt(pow(it.first[0] - it.second[0], 2) + pow(it.first[1] - it.second[1], 2));
 
+					/*
+					 * TODO: accurate integral. now using first order.
+					 */
 					accum_v += exp(-accum_s) * lv * length/2.0;
 
 					accum_s += (rs + ls) * length/ 2.0;
@@ -596,13 +578,6 @@ void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 void DiscreteOrinates::SourceIteration_accl(){
 
 }
-
-
-void DiscreteOrinates::SourceIteration_output(){
-	// move to mexplus
-}
-
-
 
 } /* namespace Core */
 

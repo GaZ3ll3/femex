@@ -92,9 +92,6 @@ public:
 	void SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems);
 	void SourceIteration_accl();
 
-
-	void SourceIteration_output();
-
 };
 
 } /* namespace Core */
