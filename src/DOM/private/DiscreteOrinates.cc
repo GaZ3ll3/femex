@@ -495,7 +495,8 @@ void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 		for (int32_t s_i = 0; s_i < nAngle; s_i++) {
 			Average[s_j] += Output[s_i][s_j];
 		}
-		RHS[s_j] = Sigma_s[s_j] * Average[s_j]/nAngle;
+		Average[s_j] /= nAngle;
+		RHS[s_j] = Sigma_s[s_j] * Average[s_j];
 		RHS[s_j] += Source[s_j];
 	}
 
