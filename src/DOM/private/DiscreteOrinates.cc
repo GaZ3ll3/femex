@@ -457,16 +457,22 @@ void DiscreteOrinates::RayShow(){
  *
  */
 
-void DiscreteOrinates::SourceIteration_init(MatlabPtr Fcn, MatlabPtr Sigma_t_Fcn, MatlabPtr Sigma_s_Fcn){
+void DiscreteOrinates::SourceIteration_init(MatlabPtr Fcn,
+		MatlabPtr Sigma_t_Fcn, MatlabPtr Sigma_s_Fcn,
+		MatlabPtr nodes, MatlabPtr elems){
 //	Source.resize(nAngle);
 
 	/*
 	 * consider source as f(x).
 	 */
-	auto numberofnodes = Ray[0].size();
+	auto numberofnodes = mxGetN(nodes);
 	auto interp        = mxGetPr(Fcn);
 	auto interp_t      = mxGetPr(Sigma_t_Fcn);
 	auto interp_s      = mxGetPr(Sigma_s_Fcn);
+
+	auto pnodes        = mxGetPr(nodes);
+	auto pelems        = (int32_t*)mxGetPr(elems);
+	auto numberofnodesperelem = mxGetM(elems);
 
 	mxAssert(mxGetN(Fcn) == numberofnodes,
 			"DiscreteOrinates::SourceIteration_init::Dimension does not match.\n");
@@ -479,28 +485,111 @@ void DiscreteOrinates::SourceIteration_init(MatlabPtr Fcn, MatlabPtr Sigma_t_Fcn
 	memcpy(&Sigma_t[0], interp_t, sizeof(Real_t) * numberofnodes);
 	memcpy(&Sigma_s[0], interp_s, sizeof(Real_t) * numberofnodes);
 
-//	for (auto it:Source){
-//		std::cout << it << std::endl;
-//	}
+	RHS.resize(numberofnodes);
+	Average.resize(numberofnodes);
 
 	Output.resize(nAngle);
-	Static.resize(nAngle);
+
 
 	for (int32_t s_i; s_i < nAngle; s_i ++) {
 		Output[s_i].resize(numberofnodes);
-		Static[s_i].resize(numberofnodes);
 	}
-
-	/*
-	 * Now interpolate the sigma_t onto the intersection points.
-	 */
-
 }
 
 
 
-void DiscreteOrinates::SourceIteration_iter(){
+void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 	// kernel as 1/2/pi constant
+
+	auto pnodes        = mxGetPr(nodes);
+	auto pelems        = (int32_t *)mxGetPr(elems);
+	auto numberofnodesperelem = mxGetM(elems);
+
+	auto numberofnodes = Source.size();
+
+	for (int32_t s_j = 0; s_j < numberofnodes; s_j++){
+		Average[s_j] = 0.;
+		for (int32_t s_i = 0; s_i < nAngle; s_i++) {
+			Average[s_j] += Output[s_i][s_j];
+		}
+		RHS[s_j] = Sigma_s[s_j] * Average[s_j]/nAngle;
+		RHS[s_j] += Source[s_j];
+	}
+
+	mwSize vertex_1, vertex_2, vertex_3;
+	Real_t x1, y1, x2, y2, x3, y3, det, lambda, eta, length, accum_s, accum_v;
+
+	Real_t lv, rv, ls, rs;
+
+	for (int32_t s_i = 0; s_i < nAngle; s_i++) {
+
+		for (int32_t s_j = 0; s_j < numberofnodes; s_j++){
+
+			accum_s = 0.;
+			accum_v = 0.;
+
+			if (Ray[s_i][s_j].size()){
+
+				for (auto it : Ray[s_i][s_j]){
+					vertex_1 = pelems[it.elem * numberofnodesperelem ] - 1;
+					vertex_2 = pelems[it.elem * numberofnodesperelem + 1] - 1;
+					vertex_3 = pelems[it.elem * numberofnodesperelem + 2] - 1;
+
+					x1 = pnodes[2 * vertex_1];
+					y1 = pnodes[2 * vertex_1 + 1];
+					x2 = pnodes[2 * vertex_2];
+					y2 = pnodes[2 * vertex_2 + 1];
+					x3 = pnodes[2 * vertex_3];
+					y3 = pnodes[2 * vertex_3 + 1];
+
+					/*
+					 * first node
+					 */
+					det = (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
+
+					eta = ((y3 - y1) * (it.first[0] - x3) + (x1 - x3) * (it.first[1] - y3));
+					eta /= det;
+
+					lambda = (y2 - y3) * (it.first[0] - x3) + (x3 -  x2) * (it.first[1] - y3);
+					lambda /= det;
+
+					lv = lambda * RHS[vertex_1] + eta * RHS[vertex_2] +
+							(1 - lambda - eta) * RHS[vertex_3];
+					ls = lambda * Sigma_t[vertex_1] + eta * Sigma_t[vertex_2] +
+							(1 - lambda - eta) * Sigma_t[vertex_3];
+
+					/*
+					 * second node
+					 */
+					eta = ((y3 - y1) * (it.second[0] - x3) + (x1 - x3) * (it.second[1] - y3));
+					eta /= det;
+
+					lambda = (y2 - y3) * (it.second[0] - x3) + (x3 -  x2) * (it.second[1] - y3);
+					lambda /= det;
+
+					rv = lambda * RHS[vertex_1] + eta * RHS[vertex_2] +
+							(1 - lambda - eta) * RHS[vertex_3];
+					rs = lambda * Sigma_t[vertex_1] + eta * Sigma_t[vertex_2] +
+							(1 - lambda - eta) * Sigma_t[vertex_3];
+
+					/*
+					 * length
+					 */
+					length = sqrt(pow(it.first[0] - it.second[0], 2) + pow(it.first[1] - it.second[1], 2));
+
+					accum_v += exp(-accum_s) * lv * length/2.0;
+
+					accum_s += (rs + ls) * length/ 2.0;
+
+					accum_v += exp(-accum_s) * rv * length/2.0;
+				}
+			}
+			else{
+				accum_v = 0.;
+			}
+			Output[s_i][s_j] = accum_v;
+		}
+	}
 }
 
 
@@ -508,6 +597,10 @@ void DiscreteOrinates::SourceIteration_accl(){
 
 }
 
+
+void DiscreteOrinates::SourceIteration_output(){
+	// move to mexplus
+}
 
 
 
@@ -551,12 +644,32 @@ MEX_DEFINE(rayshow) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 }
 
 MEX_DEFINE(si_init) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
-	InputArguments input(nrhs, prhs, 4);
+	InputArguments input(nrhs, prhs, 6);
 	OutputArguments output(nlhs, plhs, 0);
 
 	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
 
-	DOM->SourceIteration_init(CAST(prhs[1]), CAST(prhs[2]), CAST(prhs[3]));
+	DOM->SourceIteration_init(CAST(prhs[1]), CAST(prhs[2]),
+			CAST(prhs[3]),CAST(prhs[4]), CAST(prhs[5]));
+}
+
+MEX_DEFINE(si_iter) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 3);
+	OutputArguments output(nlhs, plhs, 0);
+
+	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
+
+	DOM->SourceIteration_iter(CAST(prhs[1]), CAST(prhs[2]));
+}
+
+MEX_DEFINE(si_output) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 1);
+	OutputArguments output(nlhs, plhs, 1);
+
+	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
+
+	plhs[0] = mxCreateNumericMatrix(1, DOM->Average.size(), mxDOUBLE_CLASS, mxREAL);
+	memcpy(mxGetPr(plhs[0]), &(DOM->Average[0]), DOM->Average.size()*sizeof(Real_t));
 }
 
 }

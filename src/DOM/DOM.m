@@ -22,8 +22,16 @@ methods
       DiscreteOrinates_('rayshow', this.id_);
   end
   
-  function si_init(this, source, sigma_t, sigma_s)
-      DiscreteOrinates_('si_init', this.id_, source, sigma_t, sigma_s);
+  function si_init(this, source, sigma_t, sigma_s, nodes, elems)
+      DiscreteOrinates_('si_init', this.id_, source, sigma_t, sigma_s, nodes, elems);
+  end
+  
+  function si_iter(this, nodes, elems)
+      DiscreteOrinates_('si_iter', this.id_, nodes, elems);
+  end
+  
+  function [ret] = si_output(this)
+      [ret] = DiscreteOrinates_('si_output', this.id_);
   end
   
   % Other methods...
