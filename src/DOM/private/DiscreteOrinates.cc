@@ -617,7 +617,7 @@ void DiscreteOrinates::SourceIteration_set(MatlabPtr ave){
 	auto ave_ptr = mxGetPr(ave);
 	auto numberofnodes = mxGetM(ave);
 
-	mxAssert(numberofnodes == Average.size(), "DiscreteOrinates::SourceIteration_accl::Dimension does not match.\n");
+	mxAssert(numberofnodes == Average.size(), "DiscreteOrinates::SourceIteration_set::Dimension does not match.\n");
 
 	for (int32_t delta_i  = 0; delta_i < numberofnodes; delta_i ++) {
 		Average[delta_i] = ave_ptr[delta_i];
