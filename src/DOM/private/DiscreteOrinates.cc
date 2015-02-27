@@ -32,11 +32,19 @@ DiscreteOrinates::~DiscreteOrinates() {
 				Ray[i][j].clear();
 			}
 			Ray[i].clear();
+			Output[i].clear();
 		}
 		Ray.clear();
 	}
+
+	RHS.clear();
+	Source.clear();
+	Average.clear();
+	Sigma_t.clear();
+	Sigma_s.clear();
+
 #ifdef DEBUG
-	mexPrintf("Discrete Orinates Method detached.\n");
+	mexPrintf("Discrete Orinates Method(DOM) detached.\n");
 #endif
 }
 
@@ -431,7 +439,10 @@ void DiscreteOrinates::RayShow(){
 			}
 		}
 	}
-	std::cout << tmp_total / 1024.0/ 1024.0/ 1024.0 << " GBytes used in Ray storage." << std::endl;
+	std::cout
+	<< tmp_total / 1024.0/ 1024.0/ 1024.0
+	<< " GBytes used in Ray storage."
+	<< std::endl;
 }
 
 
@@ -490,15 +501,14 @@ void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 	/*
 	 * TODO: ADD KERNEL
 	 */
+
+
 	for (int32_t s_j = 0; s_j < numberofnodes; s_j++){
-		Average[s_j] = 0.;
-		for (int32_t s_i = 0; s_i < nAngle; s_i++) {
-			Average[s_j] += Output[s_i][s_j];
-		}
-		Average[s_j] /= nAngle;
+
 		RHS[s_j] = Sigma_s[s_j] * Average[s_j];
 		RHS[s_j] += Source[s_j];
 	}
+
 
 	mwSize vertex_1, vertex_2, vertex_3;
 	Real_t x1, y1, x2, y2, x3, y3, det, lambda, eta, length, accum_s, accum_v;
@@ -560,11 +570,15 @@ void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 					/*
 					 * TODO: accurate integral. now using first order.
 					 */
-					accum_v += exp(-accum_s) * lv * length/2.0;
+					accum_v += exp(-accum_s) * lv * length/6.0;
 
-					accum_s += (rs + ls) * length/ 2.0;
+					accum_s += (rs + ls) * length/ 4.0;
 
-					accum_v += exp(-accum_s) * rv * length/2.0;
+					accum_v += exp(-accum_s) * (lv + rv) * length / 3.0;
+
+					accum_s += (rs + ls) * length/ 4.0;
+
+					accum_v += exp(-accum_s) * rv * length/6.0;
 				}
 			}
 			else{
@@ -573,11 +587,41 @@ void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 			Output[s_i][s_j] = accum_v;
 		}
 	}
+
+	/*
+	 * update Average
+	 */
+	for (int32_t s_j = 0; s_j < numberofnodes; s_j++){
+		Average[s_j] = 0.;
+		for (int32_t s_i = 0; s_i < nAngle; s_i++) {
+			Average[s_j] += Output[s_i][s_j];
+		}
+		Average[s_j] /= nAngle;
+	}
 }
 
 
-void DiscreteOrinates::SourceIteration_accl(){
+void DiscreteOrinates::SourceIteration_accl(MatlabPtr delta){
 
+	auto delta_ptr = mxGetPr(delta);
+	auto numberofnodes = mxGetM(delta);
+
+	mxAssert(numberofnodes == Average.size(), "DiscreteOrinates::SourceIteration_accl::Dimension does not match.\n");
+
+	for (int32_t delta_i  = 0; delta_i < numberofnodes; delta_i ++) {
+		Average[delta_i] += delta_ptr[delta_i];
+	}
+}
+
+void DiscreteOrinates::SourceIteration_set(MatlabPtr ave){
+	auto ave_ptr = mxGetPr(ave);
+	auto numberofnodes = mxGetM(ave);
+
+	mxAssert(numberofnodes == Average.size(), "DiscreteOrinates::SourceIteration_accl::Dimension does not match.\n");
+
+	for (int32_t delta_i  = 0; delta_i < numberofnodes; delta_i ++) {
+		Average[delta_i] = ave_ptr[delta_i];
+	}
 }
 
 } /* namespace Core */
@@ -635,6 +679,7 @@ MEX_DEFINE(si_iter) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
 
+
 	DOM->SourceIteration_iter(CAST(prhs[1]), CAST(prhs[2]));
 }
 
@@ -647,6 +692,26 @@ MEX_DEFINE(si_output) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[
 	plhs[0] = mxCreateNumericMatrix(1, DOM->Average.size(), mxDOUBLE_CLASS, mxREAL);
 	memcpy(mxGetPr(plhs[0]), &(DOM->Average[0]), DOM->Average.size()*sizeof(Real_t));
 }
+
+
+MEX_DEFINE(si_dsa) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 2);
+	OutputArguments output(nlhs, plhs, 0);
+
+	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
+
+	DOM->SourceIteration_accl(CAST(prhs[1]));
+}
+
+MEX_DEFINE(si_set) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 2);
+	OutputArguments output(nlhs, plhs, 0);
+
+	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
+
+	DOM->SourceIteration_set(CAST(prhs[1]));
+}
+
 
 }
 

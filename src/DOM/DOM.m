@@ -34,6 +34,13 @@ methods
       [ret] = DiscreteOrinates_('si_output', this.id_);
   end
   
+  function si_dsa(this, delta)
+      DiscreteOrinates_('si_dsa', this.id_, delta);
+  end
+  
+  function si_set(this, delta)
+      DiscreteOrinates_('si_set', this.id_, delta);
+  end
   % Other methods...
 end
 end

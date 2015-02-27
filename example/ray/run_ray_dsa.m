@@ -1,4 +1,4 @@
-function run_ray()
+function run_ray_dsa()
 
 fem = FEM([0 0 1 0 1 1 0 1]', 1, 1/(2 * 40 * 40), []');
 
@@ -42,13 +42,13 @@ source = source_fcn(fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:));
 
 
 % solve diffusion equation
-% sigma_a_qnodes = sigma_a_fcn(fem.Qnodes(1,:), fem.Qnodes(2,:));
-% sigma_s_qnodes = sigma_s_fcn(fem.Qnodes(1,:), fem.Qnodes(2,:));
-% sigma_t_qnodes = sigma_a_qnodes + sigma_s_qnodes;
+sigma_a_qnodes = sigma_a_fcn(fem.Qnodes(1,:), fem.Qnodes(2,:));
+sigma_s_qnodes = sigma_s_fcn(fem.Qnodes(1,:), fem.Qnodes(2,:));
+sigma_t_qnodes = sigma_a_qnodes + sigma_s_qnodes;
 
 
-% Q = fem.assemlbc(1, bc1) + fem.assemlbc(1, bc2) + fem.assemlbc(1, bc3) + fem.assemlbc(1, bc4);
-% DSA_K = fem.assems((1/3)./sigma_t_qnodes) + fem.assema(sigma_a_qnodes) + 0.5 * Q;
+Q = fem.assemlbc(1, bc1) + fem.assemlbc(1, bc2) + fem.assemlbc(1, bc3) + fem.assemlbc(1, bc4);
+DSA_K = fem.assems((1/3)./sigma_t_qnodes) + fem.assema(sigma_a_qnodes) + 0.5 * Q;
 
 
 % initialize
@@ -62,13 +62,13 @@ dom.si_iter(fem.Promoted.nodes, fem.Promoted.elems);
 pre = dom.si_output();
 dom.si_iter(fem.Promoted.nodes, fem.Promoted.elems);
 %
-% post = dom.si_output();
-% diff = post - pre;
-% sdiff = sigma_s' .* diff'; 
-% tmp_load = focus_mapping(sdiff, fem.Promoted.elems, fem.Facet.Ref');
-% LoadVector = fem.asseml(tmp_load);
-% delta = DSA_K\LoadVector;
-% dom.si_dsa(delta);
+post = dom.si_output();
+diff = post - pre;
+sdiff = sigma_s' .* diff'; 
+tmp_load = focus_mapping(sdiff, fem.Promoted.elems, fem.Facet.Ref');
+LoadVector = fem.asseml(tmp_load);
+delta = DSA_K\LoadVector;
+dom.si_dsa(delta);
 %
 post = dom.si_output;
 
@@ -86,13 +86,13 @@ while (err > 1e-6)
     pre = post;
     dom.si_iter(fem.Promoted.nodes, fem.Promoted.elems);   
     %
-%     post = dom.si_output();
-%     diff = post - pre;
-%     sdiff = sigma_s' .* diff'; 
-%     tmp_load = focus_mapping(sdiff, fem.Promoted.elems, fem.Facet.Ref');
-%     LoadVector = fem.asseml(tmp_load);
-%     delta = DSA_K\LoadVector;
-%     dom.si_dsa(delta);
+    post = dom.si_output();
+    diff = post - pre;
+    sdiff = sigma_s' .* diff'; 
+    tmp_load = focus_mapping(sdiff, fem.Promoted.elems, fem.Facet.Ref');
+    LoadVector = fem.asseml(tmp_load);
+    delta = DSA_K\LoadVector;
+    dom.si_dsa(delta);
     %
     post = dom.si_output;
     err_ = norm(post - pre);
@@ -111,3 +111,4 @@ trisurf(fem.TriMesh', fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), post',..
 
 
 end
+
