@@ -55,9 +55,6 @@ public:
 	std::vector<std::vector<Real_t>> Output;
 //	std::vector<std::vector<Real_t>> Source;
 
-	/*
-	 * isotropic source. less memory
-	 */
 	std::vector<Real_t> RHS;
 	std::vector<Real_t> Source;
 	std::vector<Real_t> Average;
@@ -90,7 +87,8 @@ public:
 			MatlabPtr Sigma_t_Fcn, MatlabPtr Sigma_s_Fcn,
 			MatlabPtr nodes, MatlabPtr elems);
 	void SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems);
-	void SourceIteration_accl();
+	void SourceIteration_accl(MatlabPtr delta);
+	void SourceIteration_set(MatlabPtr delta);
 
 };
 

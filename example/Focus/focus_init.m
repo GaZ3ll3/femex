@@ -57,7 +57,7 @@ hobj.sol = zeros(N, 1);
 ndofs = hobj.ndofs;
 dofs = hobj.dofs;
 
-hobj.DKernel = hobj.S + hobj.mu_a * hobj.M -0.5 * hobj.Q;
+hobj.DKernel = hobj.S + hobj.mu_a * hobj.M + 0.5 * hobj.Q;
 
 hobj.F = (hobj.DKernel(ndofs, ndofs) - hobj.DKernel(ndofs, dofs) * (hobj.DKernel(dofs, dofs)\hobj.DKernel(dofs, ndofs)));
 hobj.G = hobj.DKernel(dofs, dofs)\hobj.DKernel(dofs, ndofs);
