@@ -1,6 +1,6 @@
 function run_ray_dsa()
 
-fem = FEM([0 0 1 0 1 1 0 1]', 1, 1/(2 * 32 * 32), []');
+fem = FEM([0 0 1 0 1 1 0 1]', 1, 1/(2 * 64 * 64), []');
 
 boundary = Boundary();
 boundary.set_boundary('x - 1');
@@ -15,9 +15,7 @@ boundary.setDirichlet(bc2);
 boundary.setDirichlet(bc3);
 boundary.setDirichlet(bc4);
 
-N = size(fem.Promoted.nodes, 2);
-
-dom = DOM(32);
+dom = DOM(128);
 
 % sweeping
 tic;
@@ -34,12 +32,10 @@ sigma_s_fcn = @(x, y) (0.5  + 0.0.*abs(sin(2*pi*x)));
 % source_fcn = @(x,y)(((x - center(1)).^2 + (y - center(2)).^2) <= radius^2) ...
 %     .*(1 + cos(pi*sqrt((x - center(1)).^2 + (y - center(2)).^2)/radius));
 
+source_fcn = @(x, y) (1.0 .* (x > 0.25) .* (x < 0.75) .* (y > 0.6) .* (y < 0.8));
 
 
-% source_fcn = @(x, y) (1.0 .* (x > 0.25) .* (x < 0.75) .* (y > 0.6) .* (y < 0.8));
-
-
-source_fcn = @period;
+% source_fcn = @period;
 
 
 sigma_a = sigma_a_fcn(fem.Promoted.nodes(1,:), fem.Promoted.nodes(2, :));
@@ -60,7 +56,11 @@ DSA_K = fem.assems((1/3)./sigma_t_qnodes) + fem.assema(sigma_a_qnodes) + 0.5 * Q
 
 
 % initialize
-dom.si_init(source, sigma_t, sigma_s, fem.Promoted.nodes, fem.Promoted.elems);
+dom.si_init();
+
+
+% import
+dom.si_import(source, sigma_t, sigma_s);
 
 % source iteration
 tic;

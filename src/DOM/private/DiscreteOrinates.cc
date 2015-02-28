@@ -452,31 +452,19 @@ void DiscreteOrinates::RayShow(){
  *
  */
 
-void DiscreteOrinates::SourceIteration_init(MatlabPtr Fcn,
-		MatlabPtr Sigma_t_Fcn, MatlabPtr Sigma_s_Fcn,
-		MatlabPtr nodes, MatlabPtr elems){
+void DiscreteOrinates::SourceIteration_init(){
 	/*
 	 * consider source as f(x).
 	 */
-	auto numberofnodes = mxGetN(nodes);
-	auto interp        = mxGetPr(Fcn);
-	auto interp_t      = mxGetPr(Sigma_t_Fcn);
-	auto interp_s      = mxGetPr(Sigma_s_Fcn);
 
-	auto pnodes        = mxGetPr(nodes);
-	auto pelems        = (int32_t*)mxGetPr(elems);
-	auto numberofnodesperelem = mxGetM(elems);
+	mxAssert(nAngle > 0,
+			"DiscreteOrinates::SourceIteration_init::nAngle non positive.\n");
 
-	mxAssert(mxGetN(Fcn) == numberofnodes,
-			"DiscreteOrinates::SourceIteration_init::Dimension does not match.\n");
+	auto numberofnodes = Ray[0].size();
 
 	Source.resize(numberofnodes);
 	Sigma_t.resize(numberofnodes);
 	Sigma_s.resize(numberofnodes);
-
-	memcpy(&Source[0], interp, sizeof(Real_t) * numberofnodes);
-	memcpy(&Sigma_t[0], interp_t, sizeof(Real_t) * numberofnodes);
-	memcpy(&Sigma_s[0], interp_s, sizeof(Real_t) * numberofnodes);
 
 	RHS.resize(numberofnodes);
 	Average.resize(numberofnodes);
@@ -486,6 +474,34 @@ void DiscreteOrinates::SourceIteration_init(MatlabPtr Fcn,
 	for (int32_t s_i; s_i < nAngle; s_i ++) {
 		Output[s_i].resize(numberofnodes);
 	}
+}
+
+
+
+void DiscreteOrinates::SourceIteration_port(MatlabPtr Fcn,
+		MatlabPtr Sigma_t_Fcn, MatlabPtr Sigma_s_Fcn){
+
+
+	auto interp        = mxGetPr(Fcn);
+	auto interp_t      = mxGetPr(Sigma_t_Fcn);
+	auto interp_s      = mxGetPr(Sigma_s_Fcn);
+
+	mxAssert(nAngle > 0,
+			"DiscreteOrinates::SourceIteration_port::nAngle non positive.\n");
+
+	auto numberofnodes = Ray[0].size();
+
+	mxAssert(mxGetElementSize(Fcn) == numberofnodes,
+			"DiscreteOrinates::SourceIteration_port::Dimension does not match.\n");
+	mxAssert(mxGetElementSize(Sigma_t_Fcn) == numberofnodes,
+			"DiscreteOrinates::SourceIteration_port::Dimension does not match.\n");
+	mxAssert(mxGetElementSize(Sigma_s_Fcn) == numberofnodes,
+			"DiscreteOrinates::SourceIteration_port::Dimension does not match.\n");
+
+	memcpy(&Source[0], interp, sizeof(Real_t) * numberofnodes);
+	memcpy(&Sigma_t[0], interp_t, sizeof(Real_t) * numberofnodes);
+	memcpy(&Sigma_s[0], interp_s, sizeof(Real_t) * numberofnodes);
+
 }
 
 
@@ -664,13 +680,23 @@ MEX_DEFINE(rayshow) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 }
 
 MEX_DEFINE(si_init) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
-	InputArguments input(nrhs, prhs, 6);
+	InputArguments input(nrhs, prhs, 1);
 	OutputArguments output(nlhs, plhs, 0);
 
 	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
 
-	DOM->SourceIteration_init(CAST(prhs[1]), CAST(prhs[2]),
-			CAST(prhs[3]),CAST(prhs[4]), CAST(prhs[5]));
+	DOM->SourceIteration_init();
+}
+
+
+
+MEX_DEFINE(si_import) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 4);
+	OutputArguments output(nlhs, plhs, 0);
+
+	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
+
+	DOM->SourceIteration_port(CAST(prhs[1]), CAST(prhs[2]), CAST(prhs[3]));
 }
 
 MEX_DEFINE(si_iter) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
