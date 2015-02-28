@@ -82,10 +82,8 @@ public:
 	/*
 	 * solve the transport equation.
 	 */
-
-	void SourceIteration_init(MatlabPtr Fcn,
-			MatlabPtr Sigma_t_Fcn, MatlabPtr Sigma_s_Fcn,
-			MatlabPtr nodes, MatlabPtr elems);
+	void SourceIteration_init();
+	void SourceIteration_port(MatlabPtr Fcn, MatlabPtr Sigma_t_Fcn, MatlabPtr Sigma_s_Fcn);
 	void SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems);
 	void SourceIteration_accl(MatlabPtr delta);
 	void SourceIteration_set(MatlabPtr delta);
