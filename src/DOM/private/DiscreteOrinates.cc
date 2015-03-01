@@ -626,6 +626,18 @@ void DiscreteOrinates::SourceIteration_set(MatlabPtr ave){
 	}
 }
 
+void DiscreteOrinates::SourceIteration_beam(MatlabPtr incoming){
+
+	/*
+	 * incoming is the boundary condition.
+	 *
+	 * On each edge nodes, there are Discrete Orinates for them.
+	 *
+	 * Core algorithm is easy.
+	 */
+
+}
+
 } /* namespace Core */
 
 
