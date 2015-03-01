@@ -498,11 +498,6 @@ void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 
 	auto numberofnodes = mxGetN(nodes);
 
-	/*
-	 * TODO: ADD KERNEL
-	 */
-
-
 	for (int32_t s_j = 0; s_j < numberofnodes; s_j++){
 
 		RHS[s_j] = Sigma_s[s_j] * Average[s_j];
@@ -568,7 +563,14 @@ void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 					length = sqrt(pow(it.first[0] - it.second[0], 2) + pow(it.first[1] - it.second[1], 2));
 
 					/*
-					 * TODO: accurate integral. now using first order.
+					 *
+					 *
+					 * Note: since exp(-x) function is decreasing too fast, the early stage of
+					 * integral should be very careful. Now using Simpson formula.
+					 *
+					 * first part only accurate if sigma_a is linear.
+					 * second part never accurate, can obtain O(h^2) accuracy locally.
+					 *
 					 */
 					accum_v += exp(-accum_s) * lv * length/6.0;
 
