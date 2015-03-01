@@ -88,6 +88,12 @@ public:
 	void SourceIteration_accl(MatlabPtr delta);
 	void SourceIteration_set(MatlabPtr delta);
 
+	/*
+	 * use formula to calculate transport solution.
+	 */
+
+	void SourceIteration_beam(MatlabPtr incoming);
+
 };
 
 } /* namespace Core */
