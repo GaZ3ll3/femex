@@ -1,6 +1,6 @@
 function  ray_diffusion( )
 
-fem = FEM([0 0 1 0 1 1 0 1]', 1, 1/(2 * 64 * 64), []');
+fem = FEM([0 0 1 0 1 1 0 1]', 1, 1/(2 * 128 * 128), []');
 
 boundary = Boundary();
 boundary.set_boundary('x - 1');
@@ -21,13 +21,15 @@ sigma_s_fcn = @(x, y) (5.0  + 0.0.*abs(sin(2*pi*x)));
 
 
 
-center = [0.6, 0.4];
-radius = 0.2;
+% center = [0.6, 0.4];
+% radius = 0.2;
 
-source_fcn = @(x,y)(((x - center(1)).^2 + (y - center(2)).^2) <= radius^2) ...
-    .*(1 + cos(pi*sqrt((x - center(1)).^2 + (y - center(2)).^2)/radius));
+% source_fcn = @(x,y)(((x - center(1)).^2 + (y - center(2)).^2) <= radius^2) ...
+%     .*(1 + cos(pi*sqrt((x - center(1)).^2 + (y - center(2)).^2)/radius));
 % source_fcn = @(x, y) (1.0 .* (x > 0.25) .* (x < 0.75) .* (y > 0.6) .* (y < 0.8));
 % source_fcn = @period;
+
+source_fcn = @ring;
 
 
 % solve diffusion equation
