@@ -24,19 +24,7 @@ DiscreteOrinates::DiscreteOrinates(MatlabPtr _nAngle, MatlabPtr _initAngle) noex
 
 DiscreteOrinates::~DiscreteOrinates() {
 
-	int32_t tmp_i, tmp_j;
-	if (nAngle != 0) {
-		for (int32_t i = 0 ; i < nAngle; i++){
-			tmp_i = Ray[i].size();
-			for (int32_t j = 0; j < tmp_i; j++){
-				Ray[i][j].clear();
-			}
-			Ray[i].clear();
-			Output[i].clear();
-		}
-		Ray.clear();
-	}
-
+	Ray.clear();
 	RHS.clear();
 	Source.clear();
 	Average.clear();
@@ -590,11 +578,11 @@ void DiscreteOrinates::SourceIteration_iter(MatlabPtr nodes, MatlabPtr elems){
 					 */
 					accum_v += exp(-accum_s) * lv * length/6.0;
 
-					accum_s += (rs + ls) * length/ 4.0;
+					accum_s += (0.5 * rs + 1.5 * ls) * length/ 4.0;
 
 					accum_v += exp(-accum_s) * (lv + rv) * length / 3.0;
 
-					accum_s += (rs + ls) * length/ 4.0;
+					accum_s += (1.5 * rs + 0.5 * ls) * length/ 4.0;
 
 					accum_v += exp(-accum_s) * rv * length/6.0;
 				}
@@ -757,7 +745,7 @@ MEX_DEFINE(si_build)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	 * input: id, nodes, elems, sigma_t
 	 */
 	InputArguments input(nrhs, prhs, 4);
-	OutputArguments output(nlhs, plhs, 0);
+	OutputArguments output(nlhs, plhs, 1);
 
 	auto pnodes        = mxGetPr(prhs[1]);
 	auto pelems        = (int32_t *)mxGetPr(prhs[2]);
@@ -765,8 +753,13 @@ MEX_DEFINE(si_build)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	auto numberofnodes = mxGetN(prhs[1]);
 
+	auto Sigma_t       = mxGetPr(prhs[3]);
+
+	plhs[0] = mxCreateNumericMatrix(numberofnodes, numberofnodes, mxDOUBLE_CLASS, mxREAL);
+	auto ptr = mxGetPr(plhs[0]);
+
 	mwSize vertex_1, vertex_2, vertex_3;
-	Real_t x1, y1, x2, y2, x3, y3, det, lambda, eta, length, accum_s, accum_v;
+	Real_t x1, y1, x2, y2, x3, y3, det, lambda1,lambda2, eta1, eta2, length, accum_s;
 
 	Real_t lv, rv, ls, rs;
 
@@ -774,11 +767,16 @@ MEX_DEFINE(si_build)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	auto nAngle = DOM->nAngle;
 
+	/*
+	 * building the matrix will take around 3x time of one iteration.
+	 *
+	 * Since the matrix is a small valued matrix, various methods can be
+	 * used to make the converging process faster.
+	 */
 
 	for (int32_t s_i = 0; s_i < nAngle; s_i++) {
 		for (int32_t s_j = 0; s_j < numberofnodes; s_j++){
 			accum_s = 0.;
-			accum_v = 0.;
 			if (DOM->Ray[s_i][s_j].size()){
 				for (auto it : DOM->Ray[s_i][s_j]){
 					vertex_1 = pelems[it.elem * numberofnodesperelem ] - 1;
@@ -793,61 +791,58 @@ MEX_DEFINE(si_build)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 					y3 = pnodes[2 * vertex_3 + 1];
 
 					/*
+					 * length
+					 */
+					length = sqrt(pow(it.first[0] - it.second[0], 2) + pow(it.first[1] - it.second[1], 2));
+					/*
 					 * first node
 					 */
 					det = (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
 
-					eta = ((y3 - y1) * (it.first[0] - x3) + (x1 - x3) * (it.first[1] - y3));
-					eta /= det;
+					eta1 = ((y3 - y1) * (it.first[0] - x3) + (x1 - x3) * (it.first[1] - y3));
+					eta1 /= det;
 
-					lambda = (y2 - y3) * (it.first[0] - x3) + (x3 -  x2) * (it.first[1] - y3);
-					lambda /= det;
+					lambda1 = (y2 - y3) * (it.first[0] - x3) + (x3 -  x2) * (it.first[1] - y3);
+					lambda1 /= det;
 
-//					lv = lambda * RHS[vertex_1] + eta * RHS[vertex_2] +
-//							(1 - lambda - eta) * RHS[vertex_3];
-//					ls = lambda * Sigma_t[vertex_1] + eta * Sigma_t[vertex_2] +
-//							(1 - lambda - eta) * Sigma_t[vertex_3];
-					//TODO: build matrix
+					ls = lambda1 * Sigma_t[vertex_1] + eta1 * Sigma_t[vertex_2] +
+							(1 - lambda1 - eta1) * Sigma_t[vertex_3];
+
 
 					/*
 					 * second node
 					 */
-					eta = ((y3 - y1) * (it.second[0] - x3) + (x1 - x3) * (it.second[1] - y3));
-					eta /= det;
+					eta2 = ((y3 - y1) * (it.second[0] - x3) + (x1 - x3) * (it.second[1] - y3));
+					eta2 /= det;
 
-					lambda = (y2 - y3) * (it.second[0] - x3) + (x3 -  x2) * (it.second[1] - y3);
-					lambda /= det;
+					lambda2 = (y2 - y3) * (it.second[0] - x3) + (x3 -  x2) * (it.second[1] - y3);
+					lambda2 /= det;
 
-//					rv = lambda * RHS[vertex_1] + eta * RHS[vertex_2] +
-//							(1 - lambda - eta) * RHS[vertex_3];
-//					rs = lambda * Sigma_t[vertex_1] + eta * Sigma_t[vertex_2] +
-//							(1 - lambda - eta) * Sigma_t[vertex_3];
+					rs = lambda2 * Sigma_t[vertex_1] + eta2 * Sigma_t[vertex_2] +
+							(1 - lambda2 - eta2) * Sigma_t[vertex_3];
 
-					//TODO: build matrix
 					/*
-					 * length
+					 * inserting
 					 */
-					length = sqrt(pow(it.first[0] - it.second[0], 2) + pow(it.first[1] - it.second[1], 2));
+					ptr[numberofnodes * s_j + vertex_1] += exp(-accum_s) * lambda1 * length/6.0;
+					ptr[numberofnodes * s_j + vertex_2] += exp(-accum_s) * eta1 * length/ 6.0;
+					ptr[numberofnodes * s_j + vertex_3] += exp(-accum_s) * (1 - lambda1 - eta1) * length/6.0;
 
-					accum_v += exp(-accum_s) * lv * length/6.0;
+					accum_s += (0.5 * rs + 1.5 * ls) * length/ 4.0;
 
-					accum_s += (rs + ls) * length/ 4.0;
+					ptr[numberofnodes * s_j + vertex_1] += exp(-accum_s) * (lambda1 + lambda2) * length/3.0;
+					ptr[numberofnodes * s_j + vertex_2] += exp(-accum_s) * (eta1 + eta2) * length/ 3.0;
+					ptr[numberofnodes * s_j + vertex_3] += exp(-accum_s) * (2 - lambda1 - eta1 - lambda2 - eta2) * length/3.0;
 
-					accum_v += exp(-accum_s) * (lv + rv) * length / 3.0;
+					accum_s += (1.5 * rs + 0.5 * ls) * length / 4.0;
 
-					accum_s += (rs + ls) * length/ 4.0;
-
-					accum_v += exp(-accum_s) * rv * length/6.0;
+					ptr[numberofnodes * s_j + vertex_1] += exp(-accum_s) * lambda2 * length/6.0;
+					ptr[numberofnodes * s_j + vertex_2] += exp(-accum_s) * eta2 * length/ 6.0;
+					ptr[numberofnodes * s_j + vertex_3] += exp(-accum_s) * (1 - lambda2 - eta2) * length/6.0;
 				}
-			}
-			else{
-				accum_v = 0.;
 			}
 		}
 	}
-
-
-
 }
 
 }

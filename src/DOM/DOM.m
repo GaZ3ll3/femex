@@ -2,11 +2,13 @@ classdef DOM < handle
 
 properties (Access = private)
   id_ % ID of the session instance.
+  nAngle
 end
 
 methods
   function this = DOM(nA)
     this.id_ = DiscreteOrinates_('new', nA);
+    this.nAngle = nA;
   end
 
   function delete(this)
@@ -44,6 +46,11 @@ methods
   
   function si_set(this, delta)
       DiscreteOrinates_('si_set', this.id_, delta);
+  end
+  
+  function [T] = si_build(this, nodes, elems, sigma_t)
+      T = DiscreteOrinates_('si_build', this.id_, nodes, elems, sigma_t);
+      T = T/this.nAngle;
   end
   % Other methods...
 end
