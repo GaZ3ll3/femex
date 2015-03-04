@@ -41,6 +41,26 @@ Adjoint::~Adjoint() {
 #endif
 }
 
+void Adjoint::Update_Gradient(){
+
+}
+
+void Adjoint::Update_Solution(MatlabPtr _solution){
+
+}
+void Adjoint::Update_Param(MatlabPtr _parameter){
+
+}
+
+
+void Adjoint::Update_J(){
+
+}
+
+void Adjoint::Update_Adj(){
+
+}
+
 } /* namespace Core */
 
 
