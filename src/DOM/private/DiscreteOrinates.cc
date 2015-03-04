@@ -752,6 +752,103 @@ MEX_DEFINE(si_set) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 	DOM->SourceIteration_set(CAST(prhs[1]));
 }
 
+MEX_DEFINE(si_build)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	/*
+	 * input: id, nodes, elems, sigma_t
+	 */
+	InputArguments input(nrhs, prhs, 4);
+	OutputArguments output(nlhs, plhs, 0);
+
+	auto pnodes        = mxGetPr(prhs[1]);
+	auto pelems        = (int32_t *)mxGetPr(prhs[2]);
+	auto numberofnodesperelem = mxGetM(prhs[2]);
+
+	auto numberofnodes = mxGetN(prhs[1]);
+
+	mwSize vertex_1, vertex_2, vertex_3;
+	Real_t x1, y1, x2, y2, x3, y3, det, lambda, eta, length, accum_s, accum_v;
+
+	Real_t lv, rv, ls, rs;
+
+	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
+
+	auto nAngle = DOM->nAngle;
+
+
+	for (int32_t s_i = 0; s_i < nAngle; s_i++) {
+		for (int32_t s_j = 0; s_j < numberofnodes; s_j++){
+			accum_s = 0.;
+			accum_v = 0.;
+			if (DOM->Ray[s_i][s_j].size()){
+				for (auto it : DOM->Ray[s_i][s_j]){
+					vertex_1 = pelems[it.elem * numberofnodesperelem ] - 1;
+					vertex_2 = pelems[it.elem * numberofnodesperelem + 1] - 1;
+					vertex_3 = pelems[it.elem * numberofnodesperelem + 2] - 1;
+
+					x1 = pnodes[2 * vertex_1];
+					y1 = pnodes[2 * vertex_1 + 1];
+					x2 = pnodes[2 * vertex_2];
+					y2 = pnodes[2 * vertex_2 + 1];
+					x3 = pnodes[2 * vertex_3];
+					y3 = pnodes[2 * vertex_3 + 1];
+
+					/*
+					 * first node
+					 */
+					det = (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
+
+					eta = ((y3 - y1) * (it.first[0] - x3) + (x1 - x3) * (it.first[1] - y3));
+					eta /= det;
+
+					lambda = (y2 - y3) * (it.first[0] - x3) + (x3 -  x2) * (it.first[1] - y3);
+					lambda /= det;
+
+//					lv = lambda * RHS[vertex_1] + eta * RHS[vertex_2] +
+//							(1 - lambda - eta) * RHS[vertex_3];
+//					ls = lambda * Sigma_t[vertex_1] + eta * Sigma_t[vertex_2] +
+//							(1 - lambda - eta) * Sigma_t[vertex_3];
+					//TODO: build matrix
+
+					/*
+					 * second node
+					 */
+					eta = ((y3 - y1) * (it.second[0] - x3) + (x1 - x3) * (it.second[1] - y3));
+					eta /= det;
+
+					lambda = (y2 - y3) * (it.second[0] - x3) + (x3 -  x2) * (it.second[1] - y3);
+					lambda /= det;
+
+//					rv = lambda * RHS[vertex_1] + eta * RHS[vertex_2] +
+//							(1 - lambda - eta) * RHS[vertex_3];
+//					rs = lambda * Sigma_t[vertex_1] + eta * Sigma_t[vertex_2] +
+//							(1 - lambda - eta) * Sigma_t[vertex_3];
+
+					//TODO: build matrix
+					/*
+					 * length
+					 */
+					length = sqrt(pow(it.first[0] - it.second[0], 2) + pow(it.first[1] - it.second[1], 2));
+
+					accum_v += exp(-accum_s) * lv * length/6.0;
+
+					accum_s += (rs + ls) * length/ 4.0;
+
+					accum_v += exp(-accum_s) * (lv + rv) * length / 3.0;
+
+					accum_s += (rs + ls) * length/ 4.0;
+
+					accum_v += exp(-accum_s) * rv * length/6.0;
+				}
+			}
+			else{
+				accum_v = 0.;
+			}
+		}
+	}
+
+
+
+}
 
 }
 

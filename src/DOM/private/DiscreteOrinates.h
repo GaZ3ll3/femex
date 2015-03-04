@@ -38,8 +38,7 @@ namespace Core {
 
 class DiscreteOrinates {
 private:
-	int32_t nAngle;
-	Real_t  initAngle;
+
 public:
 	DiscreteOrinates(MatlabPtr _nAngle) noexcept;
 	DiscreteOrinates(MatlabPtr _nAngle, MatlabPtr _initAngle) noexcept;
@@ -49,6 +48,9 @@ public:
 	/*
 	 *  variables, caution, this might be slow.
 	 */
+
+	int32_t nAngle;
+	Real_t  initAngle;
 
 	std::vector<std::vector<std::vector<Raylet>>> Ray;
 
