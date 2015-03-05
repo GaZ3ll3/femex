@@ -23,13 +23,42 @@ sigma_t = sigma_a + sigma_s;
 
 source = source_fcn(fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:));
 
+% % agmg
+% tic;
+% m = sparse(dom.si_build(fem.Promoted.nodes, fem.Promoted.elems, sigma_t));
+% toc;
+% 
+% I = speye(size(m,1));
+% 
+% solver = Solver('agmg');
+% 
+% tic;
+% ret = solver.solve((I - m' * sparse(1:size(m,1), 1:size(m,1), sigma_s)), (m' * (source')));
+% toc;
 
+% umfpack
+% tic;
+% m = dom.si_build(fem.Promoted.nodes, fem.Promoted.elems, sigma_t);
+% toc;
+% 
+% I = speye(size(m,1));
+% 
+% tic;
+% ret = (I - m' * sparse(1:size(m,1), 1:size(m,1), sigma_s))\(m' * (source'));
+% toc;
+
+
+% gmres
+tic;
 m = dom.si_build(fem.Promoted.nodes, fem.Promoted.elems, sigma_t);
-I = eye(size(m,1));
+toc;
+
+I = speye(size(m,1));
 
 tic;
-ret = (I - m' * diag(sigma_s))\(m' * (source'));
+ret = gmres(I - m' * sparse(1:size(m,1), 1:size(m,1), sigma_s), (m' * (source')), 5, 1e-12, 400);
 toc;
+
 trisurf(fem.TriMesh', fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), ret,...
 'EdgeColor','none','LineStyle','none','FaceLighting','phong');shading interp;
 
