@@ -57,7 +57,7 @@ dom.si_iter(fem.Promoted.nodes, fem.Promoted.elems);
 %
 post = dom.si_output();
 diff = post - pre;
-sdiff = sigma_s' .* diff'; 
+sdiff = sigma_s' .* diff; 
 tmp_load = focus_mapping(sdiff, fem.Promoted.elems, fem.Facet.Ref');
 LoadVector = fem.asseml(tmp_load);
 delta = DSA_K\LoadVector;
@@ -81,7 +81,7 @@ while (err > 1e-6)
     %
     post = dom.si_output();
     diff = post - pre;
-    sdiff = sigma_s' .* diff'; 
+    sdiff = sigma_s' .* diff; 
     tmp_load = focus_mapping(sdiff, fem.Promoted.elems, fem.Facet.Ref');
     LoadVector = fem.asseml(tmp_load);
     delta = DSA_K\LoadVector;
@@ -97,7 +97,7 @@ end
 toc;
 
 figure(2)
-trisurf(fem.TriMesh', fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), post',...
+trisurf(fem.TriMesh', fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), post,...
     'EdgeColor','none','LineStyle','none','FaceLighting','phong');shading interp
 
 

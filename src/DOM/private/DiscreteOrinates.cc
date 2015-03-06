@@ -717,7 +717,7 @@ MEX_DEFINE(si_output) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[
 
 	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
 
-	plhs[0] = mxCreateNumericMatrix(1, DOM->Average.size(), mxDOUBLE_CLASS, mxREAL);
+	plhs[0] = mxCreateNumericMatrix(DOM->Average.size(),1, mxDOUBLE_CLASS, mxREAL);
 	memcpy(mxGetPr(plhs[0]), &(DOM->Average[0]), DOM->Average.size()*sizeof(Real_t));
 }
 
