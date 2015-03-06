@@ -1,4 +1,4 @@
-function [ret] = ray_run_direct(dom, fem, sigma_a_coef, sigma_s_coef)
+function [ret, m] = ray_run_direct(dom, fem, sigma_a_coef, sigma_s_coef)
 
 sigma_a_fcn = @(x, y) (sigma_a_coef  + 0.0.*abs(cos(2*pi*x)));
 sigma_s_fcn = @(x, y) (sigma_s_coef  + 0.0.*abs(sin(2*pi*x)));
@@ -53,14 +53,20 @@ tic;
 m = dom.si_build(fem.Promoted.nodes, fem.Promoted.elems, sigma_t);
 toc;
 
-I = speye(size(m,1));
 
+
+
+I = speye(size(m,1));
+% tic;
+% ret = pcg(I - m' * sparse(1:size(m,1), 1:size(m,1), sigma_s), (m' * (source')),1e-12, 400);
+% toc;
 tic;
 ret = gmres(I - m' * sparse(1:size(m,1), 1:size(m,1), sigma_s), (m' * (source')), 5, 1e-12, 400);
 toc;
 
 trisurf(fem.TriMesh', fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), ret,...
 'EdgeColor','none','LineStyle','none','FaceLighting','phong');shading interp;
+
 
 
 

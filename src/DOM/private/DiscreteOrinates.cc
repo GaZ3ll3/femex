@@ -760,7 +760,6 @@ MEX_DEFINE(si_build)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 
 	mwSize vertex_1, vertex_2, vertex_3;
 	Real_t x1, y1, x2, y2, x3, y3, det, lambda1,lambda2, eta1, eta2, length, accum_s;
-
 	Real_t lv, rv, ls, rs;
 
 	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
@@ -768,10 +767,12 @@ MEX_DEFINE(si_build)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 	auto nAngle = DOM->nAngle;
 
 	/*
-	 * building the matrix will take around 3x time of one iteration.
+	 * building the matrix will take around 1x time of one iteration.
 	 *
 	 * Since the matrix is a small valued matrix, various methods can be
 	 * used to make the converging process faster.
+	 *
+	 * Now use pcg or gmres.
 	 */
 
 	for (int32_t s_i = 0; s_i < nAngle; s_i++) {
