@@ -50,7 +50,7 @@ source = source_fcn(fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:));
 
 % gmres
 tic;
-m = dom.si_build(fem.Promoted.nodes, fem.Promoted.elems, sigma_t);
+m = dom.si_build_omp(fem.Promoted.nodes, fem.Promoted.elems, sigma_t);
 toc;
 
 

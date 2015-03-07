@@ -52,6 +52,11 @@ methods
       T = DiscreteOrinates_('si_build', this.id_, nodes, elems, sigma_t);
       T = T/this.nAngle;
   end
+  
+  function [T] = si_build_omp(this, nodes, elems, sigma_t)
+      T = DiscreteOrinates_('si_build_omp', this.id_, nodes, elems, sigma_t);
+      T = T/this.nAngle;
+  end
   % Other methods...
 end
 end
