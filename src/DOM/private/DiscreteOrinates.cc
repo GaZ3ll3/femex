@@ -950,7 +950,7 @@ MEX_DEFINE(si_build_omp)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	Real_t lv, rv, ls, rs;
 	int32_t s_i, s_j;
 
-	omp_set_num_threads(4);
+	omp_set_num_threads(omp_get_num_procs());
 
 #pragma omp parallel for private(s_i, s_j, vertex_1, vertex_2, vertex_3,x1, y1, x2, y2, x3, y3, det,\
 		lambda1,lambda2, eta1, eta2, length, accum_s, lv, rv, ls, rs) schedule(dynamic,1) collapse(2)
