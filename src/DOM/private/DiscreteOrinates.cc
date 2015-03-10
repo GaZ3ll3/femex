@@ -93,6 +93,9 @@ void DiscreteOrinates::RayIntHelper(size_t& numberofelems, size_t& numberofnodes
 
 	auto nproc = omp_get_num_procs();
 
+	omp_lock_t lock;
+	omp_init_lock(&lock);
+
 	/*
 	 * for loop, main part
 	 */
@@ -101,8 +104,6 @@ void DiscreteOrinates::RayIntHelper(size_t& numberofelems, size_t& numberofnodes
 		tmp_ray, tmp, s_elem, q_elem) num_threads(nproc)
 {
 
-	int32_t tid = omp_get_thread_num();
-
 	for (j = 0; j < numberofelems; j++) {
 		for (k = 0; k < numberofnodesperelem; k++){
 			/*
@@ -110,61 +111,18 @@ void DiscreteOrinates::RayIntHelper(size_t& numberofelems, size_t& numberofnodes
 			 */
 			vertex = pelems[numberofnodesperelem * j + k] - 1;
 
-			if (nproc == 4){
-				if (vertex < 0.25 * numberofnodes && tid != 0) {
-					continue;
-				}
-				if (vertex >= 0.25 * numberofnodes && vertex < 0.5 * numberofnodes && tid != 1) {
-					continue;
-				}
-				if (vertex >= 0.5 * numberofnodes && vertex < 0.75 * numberofnodes && tid != 2) {
-					continue;
-				}
-				if (vertex >= 0.75 * numberofnodes && vertex <  numberofnodes && tid != 3) {
-					continue;
-				}
-			}
-			else if (nproc == 2) {
-				if (vertex < 0.5 * numberofnodes && tid != 0) {
-					continue;
-				}
-				if (vertex >= 0.5 * numberofnodes && vertex < 1.0 * numberofnodes && tid != 1) {
-					continue;
-				}
-			}
-			else if (nproc == 8){
-				if (vertex < 0.125 * numberofnodes && tid != 0) {
-					continue;
-				}
-				if (vertex >= 0.125 * numberofnodes && vertex < 0.25 * numberofnodes && tid != 1) {
-					continue;
-				}
-				if (vertex >= 0.25 * numberofnodes && vertex < 0.375 * numberofnodes && tid != 2) {
-					continue;
-				}
-				if (vertex >= 0.375 * numberofnodes && vertex < 0.5* numberofnodes && tid != 3) {
-					continue;
-				}
-				if (vertex >= 0.5 * numberofnodes && vertex < 0.625 * numberofnodes && tid != 4) {
-					continue;
-				}
-				if (vertex >= 0.625 * numberofnodes && vertex < 0.75 * numberofnodes && tid != 5) {
-					continue;
-				}
-				if (vertex >= 0.75 * numberofnodes && vertex < 0.875 * numberofnodes && tid != 6) {
-					continue;
-				}
-				if (vertex >= 0.875 * numberofnodes && vertex < 1.0 * numberofnodes && tid != 7) {
-					continue;
-				}
-			}
-			else if (nproc > 8) {
-				mexPrintf("DiscreteOrinates::RayIntHelper::Number of Processor exceeds prebuilt value.Please edit the source code.\n");
-			}
 
-
+			omp_set_lock(&lock);
 			if (visited[vertex] == false){
 				visited[vertex] = true;
+				omp_unset_lock(&lock);
+			}
+			else {
+				omp_unset_lock(&lock);
+				continue;
+			}
+
+			if (visited[vertex] == true){
 				/*
 				 * calculate the ray intersects with the boundary.
 				 */
@@ -300,13 +258,14 @@ void DiscreteOrinates::RayIntHelper(size_t& numberofelems, size_t& numberofnodes
 						}
 					}
 				}
+				Ray[i][vertex].shrink_to_fit();
 			}
-			Ray[i][vertex].shrink_to_fit();
 		}
 	}// main part
 	/*
 	 * for loop
 	 */
+	omp_destroy_lock(&lock);
 }
 }
 
