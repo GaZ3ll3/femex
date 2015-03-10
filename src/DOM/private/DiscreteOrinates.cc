@@ -48,23 +48,9 @@ void DiscreteOrinates::RayInt(MatlabPtr nodes, MatlabPtr elems,
 	auto pelems               = (int32_t*)mxGetPr(elems);
 	auto pneighbors           = (int32_t*)mxGetPr(neighbors);
 
-	mwSize vertex, e_vl, e_vr;;
-	Real_t theta , x1, x2, y1, y2,  a, b;
-	std::unordered_set<int32_t> visited;
 
-	Real_t ret, t, eta;
-	Real_t q_x1, q_y1, q_x2, q_y2, q_x3, q_y3;
-	Real_t q_eta, q_t;
-	int32_t index;
-
-	std::vector<Real_t> tmp;
-
-	bool intersect;
-	std::queue<int32_t> q_elem;
-	std::unordered_set<int32_t> s_elem;
-
-	Raylet tmp_ray;
-
+	Real_t theta ;
+	std::vector<bool> visited;
 	/*
 	 * resize Ray to hold raylets
 	 */
@@ -77,175 +63,251 @@ void DiscreteOrinates::RayInt(MatlabPtr nodes, MatlabPtr elems,
 	for (int32_t i = 0; i < nAngle; i++) {
 		theta = initAngle + 2 * i * M_PIl / nAngle;
 		visited.clear();
-		for (int32_t j = 0; j < numberofelems; j++) {
-			for (int32_t k = 0; k < numberofnodesperelem; k++){
+		visited.resize(numberofnodes, false);
+		RayIntHelper(numberofelems, numberofnodesperelem,
+				numberofnodes,
+				pelems, pnodes, pneighbors, i , theta, visited);
+	}
+}
+
+
+void DiscreteOrinates::RayIntHelper(size_t& numberofelems, size_t& numberofnodesperelem,
+		size_t& numberofnodes,
+		int32_t* pelems, Real_t* pnodes, int32_t* pneighbors,int32_t& i, Real_t& theta,
+		std::vector<bool>& visited){
+
+
+	mwSize vertex, e_vl, e_vr;
+	Real_t x1, x2, y1, y2,  a, b;
+	Real_t ret, t, eta;
+	Real_t q_x1, q_y1, q_x2, q_y2, q_x3, q_y3;
+	Real_t q_eta, q_t;
+	int32_t index, j, k;
+	bool intersect;
+	Raylet tmp_ray;
+
+	std::vector<Real_t> tmp;
+	std::unordered_set<int32_t> s_elem;
+	std::queue<int32_t> q_elem;
+
+
+	auto nproc = omp_get_num_procs();
+
+	/*
+	 * for loop, main part
+	 */
+#pragma omp parallel private(vertex, e_vl, e_vr,x1, x2, y1, y2,  a, b , ret, t,\
+		eta,q_x1, q_y1, q_x2, q_y2, q_x3, q_y3, q_eta, q_t, index, j, k,intersect ,\
+		tmp_ray, tmp, s_elem, q_elem) num_threads(nproc)
+{
+
+	int32_t tid = omp_get_thread_num();
+
+	for (j = 0; j < numberofelems; j++) {
+		for (k = 0; k < numberofnodesperelem; k++){
+			/*
+			 * index of vertex in nodes.
+			 */
+			vertex = pelems[numberofnodesperelem * j + k] - 1;
+
+			if (nproc == 4){
+				if (vertex < 0.25 * numberofnodes && tid != 0) {
+					continue;
+				}
+				if (vertex >= 0.25 * numberofnodes && vertex < 0.5 * numberofnodes && tid != 1) {
+					continue;
+				}
+				if (vertex >= 0.5 * numberofnodes && vertex < 0.75 * numberofnodes && tid != 2) {
+					continue;
+				}
+				if (vertex >= 0.75 * numberofnodes && vertex <  numberofnodes && tid != 3) {
+					continue;
+				}
+			}
+			else if (nproc == 2) {
+				if (vertex < 0.5 * numberofnodes && tid != 0) {
+					continue;
+				}
+				if (vertex >= 0.5 * numberofnodes && vertex < 1.0 * numberofnodes && tid != 1) {
+					continue;
+				}
+			}
+			else if (nproc == 8){
+				if (vertex < 0.125 * numberofnodes && tid != 0) {
+					continue;
+				}
+				if (vertex >= 0.125 * numberofnodes && vertex < 0.25 * numberofnodes && tid != 1) {
+					continue;
+				}
+				if (vertex >= 0.25 * numberofnodes && vertex < 0.375 * numberofnodes && tid != 2) {
+					continue;
+				}
+				if (vertex >= 0.375 * numberofnodes && vertex < 0.5* numberofnodes && tid != 3) {
+					continue;
+				}
+				if (vertex >= 0.5 * numberofnodes && vertex < 0.625 * numberofnodes && tid != 4) {
+					continue;
+				}
+				if (vertex >= 0.625 * numberofnodes && vertex < 0.75 * numberofnodes && tid != 5) {
+					continue;
+				}
+				if (vertex >= 0.75 * numberofnodes && vertex < 0.875 * numberofnodes && tid != 6) {
+					continue;
+				}
+				if (vertex >= 0.875 * numberofnodes && vertex < 1.0 * numberofnodes && tid != 7) {
+					continue;
+				}
+			}
+			else if (nproc > 8) {
+				mexPrintf("DiscreteOrinates::RayIntHelper::Number of Processor exceeds prebuilt value.Please edit the source code.\n");
+			}
+
+
+			if (visited[vertex] == false){
+				visited[vertex] = true;
 				/*
-				 * index of vertex in nodes.
+				 * calculate the ray intersects with the boundary.
 				 */
-				vertex = pelems[numberofnodesperelem * j + k] - 1;
-				if (visited.find(vertex) == visited.end()){
-					visited.insert(vertex);
-					/*
-					 * calculate the ray intersects with the boundary.
-					 */
-					a = pnodes[2 * vertex    ];
-					b = pnodes[2 * vertex + 1];
+				a = pnodes[2 * vertex    ];
+				b = pnodes[2 * vertex + 1];
 
-					// clean up set.
-					s_elem.clear();
-					// push current element
-					q_elem.push(j);
-					s_elem.insert(j);
-					/*
-					 * check the jth.
-					 */
-					index = j;
+				// clean up set.
+				s_elem.clear();
+				// push current element
+				q_elem.push(j);
+				s_elem.insert(j);
+				/*
+				 * check the jth.
+				 */
+				index = j;
 
-					q_x1 = pnodes[2 * (pelems[numberofnodesperelem * index] - 1)];
-					q_y1 = pnodes[2 * (pelems[numberofnodesperelem * index] - 1) + 1];
+				q_x1 = pnodes[2 * (pelems[numberofnodesperelem * index] - 1)];
+				q_y1 = pnodes[2 * (pelems[numberofnodesperelem * index] - 1) + 1];
 
-					q_x2 = pnodes[2 * (pelems[numberofnodesperelem * index + 1] - 1)];
-					q_y2 = pnodes[2 * (pelems[numberofnodesperelem * index + 1] - 1) + 1];
+				q_x2 = pnodes[2 * (pelems[numberofnodesperelem * index + 1] - 1)];
+				q_y2 = pnodes[2 * (pelems[numberofnodesperelem * index + 1] - 1) + 1];
 
-					q_x3 = pnodes[2 * (pelems[numberofnodesperelem * index + 2] - 1)];
-					q_y3 = pnodes[2 * (pelems[numberofnodesperelem * index + 2] - 1) + 1];
+				q_x3 = pnodes[2 * (pelems[numberofnodesperelem * index + 2] - 1)];
+				q_y3 = pnodes[2 * (pelems[numberofnodesperelem * index + 2] - 1) + 1];
 
-					RayTrace(tmp, intersect, q_t, q_eta,
-							q_x1, q_y1, q_x2, q_y2, q_x3, q_y3,
-							a, b, theta);
+				RayTrace(tmp, intersect, q_t, q_eta,
+						q_x1, q_y1, q_x2, q_y2, q_x3, q_y3,
+						a, b, theta);
 
-					RayTrim(tmp, a, b);
+				RayTrim(tmp, a, b);
 
-					if (tmp.size()) {
-							tmp_ray.elem = index;
-						if (tmp.size() == 2) {
-							tmp_ray.first[0] = a;
-							tmp_ray.first[1] = b;
-							tmp_ray.second[0] = tmp[0];
-							tmp_ray.second[1] = tmp[1];
-						}
-						else {
-							tmp_ray.first[0] = tmp[0];
-							tmp_ray.first[1] = tmp[1];
-							tmp_ray.second[0] = tmp[2];
-							tmp_ray.second[1] = tmp[3];
-						}
-
-						/*
-						 * remove duplicates, since sorted, only test first two.
-						 */
-
-						if (!Ray[i][vertex].size() || fabs(tmp_ray.first[0] - Ray[i][vertex].back().first[0]) > MEX_EPS ||
-							fabs(tmp_ray.first[1] - Ray[i][vertex].back().first[1]) > MEX_EPS){
-
-							Ray[i][vertex].push_back(tmp_ray);
-						}
+				if (tmp.size()) {
+						tmp_ray.elem = index;
+					if (tmp.size() == 2) {
+						tmp_ray.first[0] = a;
+						tmp_ray.first[1] = b;
+						tmp_ray.second[0] = tmp[0];
+						tmp_ray.second[1] = tmp[1];
 					}
-#ifdef DEBUG
-					if (tmp.size()){
-						if (tmp.size() == 2){
-							std::cout << index << " ["<<a<< "," << b << "] -> ["<< tmp[0] << "," << tmp[1] <<"]" << std::endl;
-						}
-						else {
-							std::cout << index << " ["<<tmp[0]<< "," << tmp[1] << "] -> ["<< tmp[2] << "," << tmp[3] <<"]" << std::endl;
-						}
-
+					else {
+						tmp_ray.first[0] = tmp[0];
+						tmp_ray.first[1] = tmp[1];
+						tmp_ray.second[0] = tmp[2];
+						tmp_ray.second[1] = tmp[3];
 					}
-#endif
-					while (!q_elem.empty()){
-						auto top = q_elem.front();
-						q_elem.pop();
-						// loop over neighbors.
-						// fail safe strategy, if it is possible to intersect, must push.
-						for (int32_t q_elem_i = 0; q_elem_i < 3; q_elem_i ++){
 
-							index = pneighbors[3 * top + q_elem_i] - 1;
+					/*
+					 * remove duplicates, since sorted, only test first two.
+					 */
 
-							// test if it is going to push them in.
-							// first : valid index of element
-							if (index > -1 && s_elem.find(index) == s_elem.end()) {
+					if (!Ray[i][vertex].size() || fabs(tmp_ray.first[0] - Ray[i][vertex].back().first[0]) > MEX_EPS ||
+						fabs(tmp_ray.first[1] - Ray[i][vertex].back().first[1]) > MEX_EPS){
 
+						Ray[i][vertex].push_back(tmp_ray);
+					}
+				}
+				while (!q_elem.empty()){
+					auto top = q_elem.front();
+					q_elem.pop();
+					// loop over neighbors.
+					// fail safe strategy, if it is possible to intersect, must push.
+					for (int32_t q_elem_i = 0; q_elem_i < 3; q_elem_i ++){
+
+						index = pneighbors[3 * top + q_elem_i] - 1;
+
+						// test if it is going to push them in.
+						// first : valid index of element
+						if (index > -1 && s_elem.find(index) == s_elem.end()) {
+
+							/*
+							 * calculate the open angle limit. And find the suitable one.
+							 *
+							 * Target function is max(min(abs(langle - angle), abs(rangle - angle)))
+							 *
+							 * if both gives 0, then push both into queue.
+							 */
+
+							q_x1 = pnodes[2 * (pelems[numberofnodesperelem * index] - 1)];
+							q_y1 = pnodes[2 * (pelems[numberofnodesperelem * index] - 1) + 1];
+
+							q_x2 = pnodes[2 * (pelems[numberofnodesperelem * index + 1] - 1)];
+							q_y2 = pnodes[2 * (pelems[numberofnodesperelem * index + 1] - 1) + 1];
+
+							q_x3 = pnodes[2 * (pelems[numberofnodesperelem * index + 2] - 1)];
+							q_y3 = pnodes[2 * (pelems[numberofnodesperelem * index + 2] - 1) + 1];
+
+
+							/*
+							 * [a , b] 's angle for the element,
+							 */
+
+							RayTrace(tmp, intersect, q_t, q_eta,
+									q_x1, q_y1, q_x2, q_y2, q_x3, q_y3,
+									a, b, theta);
+
+							if (intersect){
+								q_elem.push(index);
+								s_elem.insert(index);
 								/*
-								 * calculate the open angle limit. And find the suitable one.
+								 * calculate integral over this element
 								 *
-								 * Target function is max(min(abs(langle - angle), abs(rangle - angle)))
-								 *
-								 * if both gives 0, then push both into queue.
+								 * first step: calculate the intersection,
+								 * second step: integral
 								 */
+								RayTrim(tmp, a, b);
 
-								q_x1 = pnodes[2 * (pelems[numberofnodesperelem * index] - 1)];
-								q_y1 = pnodes[2 * (pelems[numberofnodesperelem * index] - 1) + 1];
+								if (tmp.size()) {
+										tmp_ray.elem = index;
+									if (tmp.size() == 2) {
+										tmp_ray.first[0] = a;
+										tmp_ray.first[1] = b;
+										tmp_ray.second[0] = tmp[0];
+										tmp_ray.second[1] = tmp[1];
+									}
+									else {
+										tmp_ray.first[0] = tmp[0];
+										tmp_ray.first[1] = tmp[1];
+										tmp_ray.second[0] = tmp[2];
+										tmp_ray.second[1] = tmp[3];
+									}
 
-								q_x2 = pnodes[2 * (pelems[numberofnodesperelem * index + 1] - 1)];
-								q_y2 = pnodes[2 * (pelems[numberofnodesperelem * index + 1] - 1) + 1];
-
-								q_x3 = pnodes[2 * (pelems[numberofnodesperelem * index + 2] - 1)];
-								q_y3 = pnodes[2 * (pelems[numberofnodesperelem * index + 2] - 1) + 1];
-
-
-								/*
-								 * [a , b] 's angle for the element,
-								 */
-
-								RayTrace(tmp, intersect, q_t, q_eta,
-										q_x1, q_y1, q_x2, q_y2, q_x3, q_y3,
-										a, b, theta);
-
-								if (intersect){
-									q_elem.push(index);
-									s_elem.insert(index);
 									/*
-									 * calculate integral over this element
-									 *
-									 * first step: calculate the intersection,
-									 * second step: integral
+									 * remove duplicates, since sorted, only test first two.
 									 */
-									RayTrim(tmp, a, b);
+									if (!Ray[i][vertex].size() || fabs(tmp_ray.first[0] - Ray[i][vertex].back().first[0]) > MEX_EPS ||
+										fabs(tmp_ray.first[1] - Ray[i][vertex].back().first[1]) > MEX_EPS){
 
-									if (tmp.size()) {
-											tmp_ray.elem = index;
-										if (tmp.size() == 2) {
-											tmp_ray.first[0] = a;
-											tmp_ray.first[1] = b;
-											tmp_ray.second[0] = tmp[0];
-											tmp_ray.second[1] = tmp[1];
-										}
-										else {
-											tmp_ray.first[0] = tmp[0];
-											tmp_ray.first[1] = tmp[1];
-											tmp_ray.second[0] = tmp[2];
-											tmp_ray.second[1] = tmp[3];
-										}
-
-										/*
-										 * remove duplicates, since sorted, only test first two.
-										 */
-										if (!Ray[i][vertex].size() || fabs(tmp_ray.first[0] - Ray[i][vertex].back().first[0]) > MEX_EPS ||
-											fabs(tmp_ray.first[1] - Ray[i][vertex].back().first[1]) > MEX_EPS){
-
-											Ray[i][vertex].push_back(tmp_ray);
-										}
-									}
-#ifdef DEBUG
-									if (tmp.size()){
-										if (tmp.size() == 2){
-											std::cout << index << " ["<<a<< "," << b << "] -> ["<< tmp[0] << "," << tmp[1] <<"]" << std::endl;
-										}
-										else {
-											std::cout << index << " ["<<tmp[0]<< "," << tmp[1] << "] -> ["<< tmp[2] << "," << tmp[3] <<"]" << std::endl;
-										}
+										Ray[i][vertex].push_back(tmp_ray);
 
 									}
-#endif
 								}
 							}
 						}
 					}
 				}
-				Ray[i][vertex].shrink_to_fit();
 			}
+			Ray[i][vertex].shrink_to_fit();
 		}
-	}
+	}// main part
+	/*
+	 * for loop
+	 */
+}
 }
 
 void DiscreteOrinates::RayTrace(std::vector<Real_t>& tmp, bool& intersect, Real_t& q_t, Real_t& q_eta,
@@ -459,7 +521,7 @@ void DiscreteOrinates::SourceIteration_init(){
 
 	Output.resize(nAngle);
 
-	for (int32_t s_i; s_i < nAngle; s_i ++) {
+	for (int32_t s_i; s_i < nAngle; s_i++) {
 		Output[s_i].resize(numberofnodes);
 	}
 }

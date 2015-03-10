@@ -27,7 +27,6 @@ using namespace mexplus;
 
 #define SCALE 1.0L
 
-
 typedef struct Raylet {
 	int32_t elem;
 	Real_t first[2];
@@ -71,6 +70,11 @@ public:
 	void RayInt(MatlabPtr nodes, MatlabPtr elems,
 			MatlabPtr neighbors);
 
+	void RayIntHelper(size_t& numberofelems, size_t& numberofnodesperelem,
+			size_t& numberofnodes,
+			int32_t* pelems, Real_t* pnodes, int32_t* pneighbors,
+			int32_t& i, Real_t& theta, std::vector<bool>& visited
+			);
 	void RayTrace(std::vector<Real_t>& tmp, bool& intersect, Real_t& q_t, Real_t& q_eta,
 			Real_t& q_x1, Real_t& q_y1, Real_t& q_x2,
 			Real_t& q_y2, Real_t& q_x3, Real_t& q_y3,
