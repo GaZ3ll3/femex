@@ -83,7 +83,7 @@ fem.Solution(dofs) = - solver.solve(A, b);
 toc;
 [DX, DY] = solver.reference(fem.Ref_points);
 [GX, GY] = solver.grad(fem.Solution, fem.Promoted.nodes, fem.Promoted.elems, DX, DY);
-solver.delete();
+% solver.delete();
 
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
@@ -145,10 +145,10 @@ disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)
 
 
 
-solver = Solver('agmg');
-tic;
-fem.Solution(dofs) = - solver.solve(A, b);
-toc;
+% solver = Solver('agmg');
+% tic;
+% fem.Solution(dofs) = - solver.solve(A, b);
+% toc;
 
 
 disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
