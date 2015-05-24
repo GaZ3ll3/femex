@@ -33,10 +33,19 @@
  * 	  need to adjust order to match interface.
  */
 
+using namespace std;
+using namespace mexplus;
+
+typedef Real_t (*Flux)(Real_t, Real_t);
+
 class DG {
 public:
 	DG();
 	virtual ~DG();
+	Flux flux_ptr;
+
 };
+
+
 
 #endif /* SRC_DG_PRIVATE_DG_H_ */
