@@ -85,8 +85,8 @@ toc;
 [GX, GY] = solver.grad(fem.Solution, fem.Promoted.nodes, fem.Promoted.elems, DX, DY);
 % solver.delete();
 
-disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
-
+fprintf('The L2 norm of error is %6.8f.\n', norm(fem.Solution(1:numofnodes) -...
+    v(1:numofnodes)')/sqrt(double(numofnodes)));
 
 %%% use MA57
 % control.order = 0; % AMD control.ordering
@@ -151,7 +151,7 @@ disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)
 % toc;
 
 
-disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
+% disp(norm(fem.Solution(1:numofnodes) - v(1:numofnodes)')/sqrt(double(numofnodes)));
 
 % needs to allocate memory for u and v.
 
