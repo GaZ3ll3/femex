@@ -46,6 +46,12 @@ options = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'NormControl', 'on');
     
 % todo: use pre-allocated array to hold u, v, w, z, tmp instead of doing so
 % for each round. Have to compare the timig.
+
+% update: almost 90% time is consumed at the function below, the mldivide
+% function. it is kind of impossible to avoid such a huge amount of time of
+% computing, since it is already parallelized. 
+
+
     function [u, v, w ,z] = f(t, U, V, W, Z) 
         
         u = V;
