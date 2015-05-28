@@ -44,7 +44,8 @@ options = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'NormControl', 'on');
 
 
     
-
+% todo: use pre-allocated array to hold u, v, w, z, tmp instead of doing so
+% for each round. Have to compare the timig.
     function [u, v, w ,z] = f(t, U, V, W, Z) 
         
         u = V;
