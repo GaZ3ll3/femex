@@ -152,7 +152,8 @@ void Mesh::Promote(int32_t _deg) noexcept{
 				(deg - 1)*_meshdata.numberofedges +
 				(id - 3*deg)*_meshdata.numberoftriangles),
 				((deg + 1) * (deg + 2)/2) * _meshdata.numberoftriangles,
-				(deg + 1) * _meshdata.numberofsegments);
+				(deg + 1) * _meshdata.numberofsegments,
+				_meshdata.numberofedges);
 
 
 		/*
@@ -200,6 +201,7 @@ void Mesh::Promote(int32_t _deg) noexcept{
 
 		// make a hash-set for boundary element
 		std::unordered_set<std::string> _boundary_set;
+		_boundary_set.reserve(_meshdata.numberofsegments);
 		// temporary for storage
 		std::unordered_map<std::string, int32_t>  boundary_elems;
 		// setup _boundary_set

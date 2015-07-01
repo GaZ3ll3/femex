@@ -45,10 +45,11 @@ typedef	struct Topology {
 			neighbors.clear();
 		}
 
-		void resize(int32_t _nsize,int32_t _esize,int32_t _bsize){
+		void resize(int32_t _nsize,int32_t _esize,int32_t _bsize, int32_t _edsize){
 			nodes.resize(_nsize);
 			elems.resize(_esize);
 			boundary.resize(_bsize);
+			edges.reserve(_edsize);
 		}
 } Topology;
 
