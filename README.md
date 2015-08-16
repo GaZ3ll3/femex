@@ -18,6 +18,7 @@ ILUPACK is already included for a choice of solvers.
 How to use:
 -----------
 * For those who hadn't change the default gcc/gfortran .so files within Matlab, you should PRELOAD the system's gcc/gfortran libs first before starting Matlab.
+* ``femex`` only works in shell mode, window mode will report TLS problem.
 
 In your shell, type in something like:
 
