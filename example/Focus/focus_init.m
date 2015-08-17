@@ -2,7 +2,7 @@ function [hobj, t] = focus_init(prec, min_area, sigma, freq)
 % initialize all setups, without any PML.
 
 
-addpath(genpath('~/Documents/github/femex'));
+addpath(genpath('../'));
 hobj.fem = FEM([-0.5, -.5, .5, -.5, .5, .5, -.5, .5]', ...
     prec, min_area);
 
