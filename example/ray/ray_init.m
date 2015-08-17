@@ -1,6 +1,6 @@
 function [fem, dom] = ray_init()
 
-addpath(genpath('../'));
+addpath(genpath('../../'));
 
 global bc1 bc2 bc3 bc4
 fem = FEM([0 0 1 0 1 1 0 1]', 1, 1/(2 * 64 * 64), []');
