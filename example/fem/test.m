@@ -2,7 +2,7 @@ function  [fem, neumann] = test(prec, min_area)
 % TEST solves Neumann/Dirichlet/Robin boundary condition PDE with h-p
 % finite element method.
 
-addpath(genpath('../../'));
+%addpath(genpath('../../'));
 
 fem = FEM([0 0 1 0 1 1 0 1]', prec, min_area, [-0.25 -0.25 1.25 -0.25 1.25 1.25 -0.25 1.25]');
 
