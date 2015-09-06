@@ -306,7 +306,7 @@ void mexFunction(int nlhs, mxArray *plhs[], \
   std::string operation_name( \
       mxGetChars(prhs[0]), \
       mxGetChars(prhs[0]) + mxGetNumberOfElements(prhs[0])); \
-  std::auto_ptr<mexplus::Operation> operation( \
+  std::unique_ptr<mexplus::Operation> operation( \
       mexplus::OperationFactory::create(operation_name)); \
   if (operation.get() == NULL) \
     mexErrMsgIdAndTxt("mexplus:dispatch:argumentError", \
