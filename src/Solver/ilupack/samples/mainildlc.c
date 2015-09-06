@@ -284,7 +284,7 @@ int main(int argc, char **argv)
     
     if(i!=0) {
       fprintf(STDERR, "SPDSCALE: a zero row/column...\n" );
-      return;
+      return 0;
     }
 #endif /* USE_SCALE */
 
