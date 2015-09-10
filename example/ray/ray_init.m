@@ -18,7 +18,7 @@ boundary.setDirichlet(bc2);
 boundary.setDirichlet(bc3);
 boundary.setDirichlet(bc4);
 
-dom = DOM(16);
+dom = DOM(128);
 
 % sweeping
 tic;

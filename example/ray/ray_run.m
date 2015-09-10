@@ -100,7 +100,7 @@ figure(2)
 trisurf(fem.TriMesh', fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), post,...
     'EdgeColor','none','LineStyle','none','FaceLighting','phong');shading interp
 
-
+colormap('jet');
 
 end
 

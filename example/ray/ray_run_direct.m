@@ -67,7 +67,7 @@ toc;
 trisurf(fem.TriMesh', fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), ret,...
 'EdgeColor','none','LineStyle','none','FaceLighting','phong');shading interp;
 
-
+colormap('jet');
 
 
 end
