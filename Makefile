@@ -120,15 +120,15 @@ $(DOM)%_.mexa64: %.dom.o
 
 
 
-ADJ = $(SRC)Adjoint/private/
-ADJ_SRCS = $(wildcard $(ADJ)*.cc)
-ADJ_OBJS = $(patsubst $(ADJ)%.cc, %.adj.o, $(ADJ_SRCS))
-ADJ_BINS = $(patsubst $(ADJ)%.cc, $(ADJ)%_.mexa64, $(ADJ_SRCS))
+#ADJ = $(SRC)Adjoint/private/
+#ADJ_SRCS = $(wildcard $(ADJ)*.cc)
+#ADJ_OBJS = $(patsubst $(ADJ)%.cc, %.adj.o, $(ADJ_SRCS))
+#ADJ_BINS = $(patsubst $(ADJ)%.cc, $(ADJ)%_.mexa64, $(ADJ_SRCS))
 
-%.adj.o: $(ADJ)%.cc
-	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
-$(ADJ)%_.mexa64: %.adj.o
-	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
+#%.adj.o: $(ADJ)%.cc
+#	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
+#$(ADJ)%_.mexa64: %.adj.o
+#	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 ##############################################################
 
 Optimize=$(SRC)Optimize/
@@ -158,7 +158,7 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 
 ##############################################################	
 # The action starts here.
-all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) $(DOM_BINS) $(ADJ_BINS)
+all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) $(DOM_BINS) 
 	rm -rf $(TRIANGLELIB)triangle.o
 
 distclean:
