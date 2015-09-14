@@ -25,22 +25,22 @@ void Cell::deleteParticles() {
 		delete p;
 	}
 }
-
+/*
+ * split grid into 4 equal parts until empty or only one particle inside.
+ *
+ */
 void Cell::split() noexcept {
 	if (getNumParticles() == 0) {
-		//std::cout << "reach empty cell" << std::endl;
 		setStatus(CellStatus::EMPTY);
 		return;
 	}
 	else if (getNumParticles() == 1) {
-		//std::cout << "reach leaf" <<std::endl;
 		setStatus(CellStatus::LEAF);
 		return;
 	}
 	else {
 
 		if (getStatus() != CellStatus::ROOT) {
-			//std::cout << "into branch" << std::endl;
 			setStatus(CellStatus::BRANCH);
 		}
 
@@ -65,6 +65,11 @@ void Cell::split() noexcept {
 			size_t index = 0;
 			for (auto j = 0; j < 2; j++) {
 				int temp = (photon->position[j] - this->position[j])/(this->size/2.0);
+				/*
+				 * the only case that temp == 2 is locating on right most edge. This case
+				 * is considered as inside. A zero measure difference will result in 4 sections.
+				 *
+				 */
 				temp = (temp == 2) ? temp - 1 : temp;
 				index |= (temp << j);
 			}
@@ -76,7 +81,6 @@ void Cell::split() noexcept {
 		}
 	}
 }
-
 
 size_t Cell::getNumParticles() const noexcept {
 	return particles.size();
