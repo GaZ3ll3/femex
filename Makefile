@@ -118,7 +118,15 @@ DOM_BINS = $(patsubst $(DOM)%.cc, $(DOM)%_.mexa64, $(DOM_SRCS))
 $(DOM)%_.mexa64: %.dom.o
 	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 
+CEL = $(SRC)FMM/private/
+CEL_SRCS = $(wildcard $(CEL)*.cc)
+CEL_OBJS = $(patsubst $(CEL)%.cc, %.cel.o, $(CEL_SRCS))
+CEL_BINS = $(patsubst $(CEL)%.cc, $(CEL)%_.mexa64, $(CEL_SRCS))
 
+%.cel.o: $(CEL)%.cc
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
+$(CEL)%_.mexa64: %.cel.o
+	$(CXX) $(MATLAB_LINKS) -o $@ $< $(CXX_LIBS)
 
 #ADJ = $(SRC)Adjoint/private/
 #ADJ_SRCS = $(wildcard $(ADJ)*.cc)
@@ -158,11 +166,14 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 
 ##############################################################	
 # The action starts here.
-all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) $(DOM_BINS) 
+all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) $(DOM_BINS) $(CEL_BINS)
 	rm -rf $(TRIANGLELIB)triangle.o
 
 distclean:
-	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(ASE)*_.mexa64 $(MSE)*_.mexa64 $(TRIANGLELIB)triangle.o $(ILUPACK_PATH)*.mexa64 $(Optimize)ipopt/ipopt.mexa64 $(DOM)*_.mexa64
+	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(ASE)*_.mexa64 \
+	 $(MSE)*_.mexa64 $(TRIANGLELIB)triangle.o $(ILUPACK_PATH)*.mexa64 $(Optimize)ipopt/ipopt.mexa64 \
+	 $(DOM)*_.mexa64 $(CEL)*_.mexa64
 
 clean:
-	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(ASE)*_.mexa64 $(MSE)*_.mexa64  $(DOM)*_.mexa64 $(TRIANGLELIB)triangle.o 
+	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 \
+	$(ASE)*_.mexa64 $(MSE)*_.mexa64  $(DOM)*_.mexa64 $(CEL)*_.mexa64 $(TRIANGLELIB)triangle.o 
