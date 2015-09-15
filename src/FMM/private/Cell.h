@@ -27,16 +27,16 @@ using namespace mexplus;
 
 class Photon {
 public:
-	Photon(double x, double y, double intensity) {
-		position[0] = x;
-		position[1] = y;
-		this->intensity = intensity;
-	};
+	Photon(double _x, double _y, double _intensity) :
+		position {_x, _y},
+		intensity(_intensity),
+		id(0){};
 	virtual ~Photon() {
 
 	};
-	double position[2];
+	std::vector<double> position;
 	double intensity;
+	int id;
 };
 
 enum class CellStatus {
@@ -82,17 +82,23 @@ public:
 
 	void setParent(Cell* parent) noexcept;
 
+	friend void buildmatrix(Cell* cell) noexcept;
+
+	std::vector<Photon*> particles;
+
 
 private:
 	std::vector<double> position;
 	double size;
-	std::vector<Photon*> particles;
 	std::vector<Cell*> children;
 	CellStatus status;
 
 	double intensity;
 	std::vector<double> center;
 	Cell* parent;
+
+
+
 };
 
 #endif /* CELL_H_ */

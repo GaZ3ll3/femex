@@ -22,8 +22,8 @@ methods
     Cell_('split', this.id_); 
   end
   
-  function trasverse(this)
-    Cell_('trasverse', this.id_);
+  function m = buildmatrix(this)
+    m = Cell_('buildmatrix', this.id_);
   end
   
 end

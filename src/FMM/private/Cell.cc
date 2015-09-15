@@ -96,6 +96,7 @@ void Cell::updateCenterIntensity() noexcept {
 			this->center[0] += photon->intensity * photon->position[0];
 			this->center[1] += photon->intensity * photon->position[1];
 		}
+		this->intensity /= this->getNumParticles();
 		this->center[0] /= this->getNumParticles();
 		this->center[1] /= this->getNumParticles();
 	}
@@ -152,24 +153,49 @@ std::vector<double>& Cell::getCenter() noexcept {
 /*
  * test function
  */
-void visit(Cell* cell) {
-	std::cout << "this cell has " << cell->getNumParticles() << " particles, intensity "
-			<< cell->getIntensity() << " at "<<cell->getCenter() << std::endl;
+inline double eval(std::vector<double>& x, std::vector<double>& y) {
+	return exp(-0.1 * sqrt((x[0] - y[0]) * (x[0] - y[0]) + (x[1] - y[1]) * (x[1] - y[1])));
 }
 
-void updateInteractionMatrix() {
-//todo
+inline double visit(Photon* photon, Cell* cell) {
+//	std::cout << "this cell has " << cell->getNumParticles() << " particles, intensity "
+//			<< cell->getIntensity() << " at "<<cell->getCenter() << std::endl;
+
+	return eval(photon->position, cell->getCenter()) * cell->getSize() * cell->getSize() /
+			sqrt(
+					(photon->position[0] - cell->getCenter()[0]) *
+					(photon->position[0] - cell->getCenter()[0]) +
+					(photon->position[1] - cell->getCenter()[1]) *
+					(photon->position[1] - cell->getCenter()[1])
+				);
 }
 
-void trasverse(Cell* cell) {
-	if (cell != nullptr) {
-		visit(cell);
+inline void trasverse(Photon* photon, Cell* cell, double* ptr, size_t n) {
+	double distance = sqrt(
+			(photon->position[0] - cell->getCenter()[0]) *
+			(photon->position[0] - cell->getCenter()[0]) +
+			(photon->position[1] - cell->getCenter()[1]) *
+			(photon->position[1] - cell->getCenter()[1])
+		);
+	if (cell != nullptr && (cell->getStatus()== CellStatus::LEAF ||
+			cell->getSize()/distance < 0.2) ) {
+		auto result = visit(photon, cell);
+		for (auto _photon : cell->particles) {
+			if (photon->id != _photon->id) {
+				ptr[photon->id * n + _photon->id] = result/cell->getNumParticles();
+			}
+		}
 	}
-
-	for(auto child : cell->getChildren()) {
-		trasverse(child);
+	else{
+		for(auto child : cell->getChildren()) {
+			if (child->getStatus() != CellStatus::EMPTY) {
+				trasverse(photon, child, ptr, n);
+			}
+		}
 	}
 }
+
+
 
 template class mexplus::Session<Cell>;
 
@@ -212,6 +238,7 @@ MEX_DEFINE(import) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 		 * photon is (x, y, value) form
 		 */
 		auto ph = new Photon(particles[3 * i], particles[3 *  i + 1], particles[3 * i + 2]);
+		ph->id = i;
 		root->addParticle(ph);
 	}
 
@@ -227,14 +254,25 @@ MEX_DEFINE(split) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	root->split();
 }
 
-MEX_DEFINE(trasverse) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+MEX_DEFINE(buildmatrix) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	InputArguments input(nrhs, prhs, 1);
-	OutputArguments output(nlhs, plhs, 0);
+	OutputArguments output(nlhs, plhs, 1);
 
 	auto root = Session<Cell>::get(input.get(0));
 
-	trasverse(root);
+	auto num = root->getNumParticles();
+	if (num == 0) {
+		std::cout << "empty cell, stopped" << std::endl;
+		return;
+	}
+	plhs[0] = mxCreateNumericMatrix(num, num,mxDOUBLE_CLASS, mxREAL);
+	auto Radptr  = mxGetPr(plhs[0]);
+
+	for (auto photon : root->particles) {
+		trasverse(photon, root, Radptr, num);
+	}
 }
+
 }
 
 MEX_DISPATCH
