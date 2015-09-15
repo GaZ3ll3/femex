@@ -22,6 +22,10 @@ methods
     Cell_('split', this.id_); 
   end
   
+  function trasverse(this)
+    Cell_('trasverse', this.id_);
+  end
+  
 end
 end
 

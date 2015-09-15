@@ -12,7 +12,7 @@ Cell::Cell(const std::vector<double>& pos, double sz) :
 	size(sz),
 	parent(nullptr),
 	intensity(0.),
-	status(CellStatus::UNSET){};
+	status(CellStatus::UNSET){center.resize(2);};
 
 Cell::~Cell() {
 	for(auto child : children) {
@@ -20,7 +20,7 @@ Cell::~Cell() {
 	}
 }
 
-void Cell::deleteParticles() {
+void Cell::deleteParticles() noexcept {
 	for(auto p : particles) {
 		delete p;
 	}
@@ -77,8 +77,27 @@ void Cell::split() noexcept {
 		}
 
 		for(auto child : children) {
+			/*
+			 * calculate intensity and center
+			 *
+			 * slow top bottom swiping
+			 */
+			child->updateCenterIntensity();
 			child->split();
 		}
+	}
+}
+
+void Cell::updateCenterIntensity() noexcept {
+	if (this->getNumParticles() != 0) {
+		this->intensity = 0.;
+		for(auto photon : this->particles) {
+			this->intensity += photon->intensity;
+			this->center[0] += photon->intensity * photon->position[0];
+			this->center[1] += photon->intensity * photon->position[1];
+		}
+		this->center[0] /= this->getNumParticles();
+		this->center[1] /= this->getNumParticles();
 	}
 }
 
@@ -106,6 +125,10 @@ void Cell::setSize(double size) noexcept {
 	this->size = size;
 }
 
+double Cell::getIntensity() noexcept {
+	return this->intensity;
+}
+
 double Cell::getSize() const noexcept{
 	return size;
 }
@@ -118,6 +141,35 @@ void Cell::setParent(Cell* parent) noexcept {
 	this->parent = parent;
 }
 
+std::vector<Cell*>& Cell::getChildren() noexcept {
+	return this->children;
+}
+
+std::vector<double>& Cell::getCenter() noexcept {
+	return this->center;
+}
+
+/*
+ * test function
+ */
+void visit(Cell* cell) {
+	std::cout << "this cell has " << cell->getNumParticles() << " particles, intensity "
+			<< cell->getIntensity() << " at "<<cell->getCenter() << std::endl;
+}
+
+void updateInteractionMatrix() {
+//todo
+}
+
+void trasverse(Cell* cell) {
+	if (cell != nullptr) {
+		visit(cell);
+	}
+
+	for(auto child : cell->getChildren()) {
+		trasverse(child);
+	}
+}
 
 template class mexplus::Session<Cell>;
 
@@ -153,21 +205,35 @@ MEX_DEFINE(import) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 	auto particles = mxGetPr(prhs[1]);
 	auto numofparticle = mxGetN(prhs[1]);
 
-	Cell* root = Session<Cell>::get(input.get(0));
+	auto root = Session<Cell>::get(input.get(0));
 
 	for (int i = 0; i < numofparticle; i++) {
-		auto ph = new Photon(particles[2 * i], particles[2 *  i + 1]);
+		/*
+		 * photon is (x, y, value) form
+		 */
+		auto ph = new Photon(particles[3 * i], particles[3 *  i + 1], particles[3 * i + 2]);
 		root->addParticle(ph);
 	}
+
+	root->updateCenterIntensity();
 }
 
 MEX_DEFINE(split) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	InputArguments input(nrhs, prhs, 1);
 	OutputArguments output(nlhs, plhs, 0);
 
-	Cell* root = Session<Cell>::get(input.get(0));
+	auto root = Session<Cell>::get(input.get(0));
 	root->setStatus(CellStatus::ROOT);
 	root->split();
+}
+
+MEX_DEFINE(trasverse) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 1);
+	OutputArguments output(nlhs, plhs, 0);
+
+	auto root = Session<Cell>::get(input.get(0));
+
+	trasverse(root);
 }
 }
 

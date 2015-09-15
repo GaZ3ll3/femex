@@ -27,14 +27,16 @@ using namespace mexplus;
 
 class Photon {
 public:
-	Photon(double x, double y) {
+	Photon(double x, double y, double intensity) {
 		position[0] = x;
 		position[1] = y;
+		this->intensity = intensity;
 	};
 	virtual ~Photon() {
 
 	};
 	double position[2];
+	double intensity;
 };
 
 enum class CellStatus {
@@ -51,10 +53,9 @@ public:
 
 	virtual ~Cell();
 
-	void deleteParticles();
+	void deleteParticles() noexcept;
 
 	void split() noexcept;
-
 
 	size_t getNumParticles() const noexcept;
 
@@ -66,11 +67,18 @@ public:
 
 	void clearParticles() noexcept;
 
+	void updateCenterIntensity() noexcept;
+
+	double getIntensity() noexcept;
+
+	std::vector<double>& getCenter() noexcept;
+
 	void setSize(double size) noexcept;
 
 	double getSize() const noexcept;
 
 	Cell* getParent() const noexcept;
+	std::vector<Cell*>& getChildren() noexcept;
 
 	void setParent(Cell* parent) noexcept;
 
@@ -83,6 +91,7 @@ private:
 	CellStatus status;
 
 	double intensity;
+	std::vector<double> center;
 	Cell* parent;
 };
 
