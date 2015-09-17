@@ -9,19 +9,19 @@
 
 
 static std::vector<double> x {
-	-sqrt(5.0 + 2 * sqrt(10./7.))/3.,
-	-sqrt(5.0 - 2 * sqrt(10./7.))/3.,
-	0.,
-	sqrt(5.0 - 2 * sqrt(10./7.))/3.,
-	sqrt(5.0 + 2 * sqrt(10./7.))/3.
+	-0.90617984593866396370032134655048,
+	 -0.53846931010568310771446931539685,
+	                                   0,
+	  0.53846931010568310771446931539685,
+	  0.90617984593866396370032134655048
 
 };
 static std::vector<double> w {
-	(322 - 13 * sqrt(70))/900.,
-	(322 + 13 * sqrt(70))/900.,
-	128./225.,
-	(322 + 13 * sqrt(70))/900.,
-	(322 - 13 * sqrt(70))/900.
+	 0.23692688505618908489935847683228,
+	 0.47862867049936647090291330641776,
+	 0.56888888888888888888888888888889,
+	 0.47862867049936647090291330641776,
+	 0.23692688505618908489935847683228
 };
 
 Cell::Cell(const std::vector<double>& pos, double sz) :
@@ -188,13 +188,13 @@ inline double visit(double sigma_t, Photon* photon, Cell* cell) {
 	};
 
 	for (size_t i = 0, l = x.size(); i < l; i++) {
+		center[0] += x[i] * s/2;
 		for (size_t j = 0, k = x.size(); j < k; j++) {
-			center[0] += x[i] * s/2;
 			center[1] += x[j] * s/2;
 			sum += eval(sigma_t, photon->position, center) * w[i] * w[j]/4.0;
-			center[0] -= x[i] * s/2;
 			center[1] -= x[j] * s/2;
 		}
+		center[0] -= x[i] * s/2;
 	}
 	return sum * s * s;
 }
@@ -296,8 +296,13 @@ MEX_DEFINE(buildmatrix) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	plhs[0] = mxCreateNumericMatrix(num, num,mxDOUBLE_CLASS, mxREAL);
 	auto Radptr  = mxGetPr(plhs[0]);
 
-	for (auto photon : root->particles) {
-		trasverse(*sigma_t_ptr, *theta_ptr, photon, root, Radptr, num);
+	omp_set_num_threads(omp_get_num_procs());
+
+	int i;
+
+#pragma omp parallel for shared(sigma_t_ptr, theta_ptr, root, Radptr, num) private(i)
+	for (i = 0; i < num; i++) {
+		trasverse(*sigma_t_ptr, *theta_ptr, root->particles[i], root, Radptr, num);
 	}
 }
 

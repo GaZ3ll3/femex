@@ -31,7 +31,7 @@ toc;
 f = ring(x(1,:), x(2,:));
 p = m' * f'/(2*pi);
 
-ret = gmres(eye(size(m, 1)) - sigma_s/(2*pi) * m', p, 5, 1e-10);
+ret = gmres(eye(size(m, 1)) - sigma_s/(2*pi) * m', p, 10, 1e-12);
 
 [X, Y] = meshgrid(1/n : 2/n:(n-1)/n);
 surf(X,Y,reshape(ret, n/2,n/2))
