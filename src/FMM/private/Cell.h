@@ -25,6 +25,11 @@
 using namespace std;
 using namespace mexplus;
 
+
+class Integral {
+
+};
+
 class Photon {
 public:
 	Photon(double _x, double _y, double _intensity) :
@@ -85,10 +90,11 @@ public:
 	friend void buildmatrix(Cell* cell) noexcept;
 
 	std::vector<Photon*> particles;
+	std::vector<double> position;
 
 
 private:
-	std::vector<double> position;
+
 	double size;
 	std::vector<Cell*> children;
 	CellStatus status;
@@ -96,9 +102,6 @@ private:
 	double intensity;
 	std::vector<double> center;
 	Cell* parent;
-
-
-
 };
 
 #endif /* CELL_H_ */

@@ -7,6 +7,23 @@
 
 #include "Cell.h"
 
+
+static std::vector<double> x {
+	-sqrt(5.0 + 2 * sqrt(10./7.))/3.,
+	-sqrt(5.0 - 2 * sqrt(10./7.))/3.,
+	0.,
+	sqrt(5.0 - 2 * sqrt(10./7.))/3.,
+	sqrt(5.0 + 2 * sqrt(10./7.))/3.
+
+};
+static std::vector<double> w {
+	(322 - 13 * sqrt(70))/900.,
+	(322 + 13 * sqrt(70))/900.,
+	128./225.,
+	(322 + 13 * sqrt(70))/900.,
+	(322 - 13 * sqrt(70))/900.
+};
+
 Cell::Cell(const std::vector<double>& pos, double sz) :
 	position(pos),
 	size(sz),
@@ -150,46 +167,56 @@ std::vector<double>& Cell::getCenter() noexcept {
 	return this->center;
 }
 
-/*
- * test function
- */
-inline double eval(std::vector<double>& x, std::vector<double>& y) {
-	return exp(-0.1 * sqrt((x[0] - y[0]) * (x[0] - y[0]) + (x[1] - y[1]) * (x[1] - y[1])));
+
+inline double distance(std::vector<double>& x, std::vector<double>& y) noexcept {
+	return sqrt((x[0] - y[0]) * (x[0] - y[0]) + (x[1] - y[1]) * (x[1] - y[1]));
 }
 
-inline double visit(Photon* photon, Cell* cell) {
-//	std::cout << "this cell has " << cell->getNumParticles() << " particles, intensity "
-//			<< cell->getIntensity() << " at "<<cell->getCenter() << std::endl;
-
-	return eval(photon->position, cell->getCenter()) * cell->getSize() * cell->getSize() /
-			sqrt(
-					(photon->position[0] - cell->getCenter()[0]) *
-					(photon->position[0] - cell->getCenter()[0]) +
-					(photon->position[1] - cell->getCenter()[1]) *
-					(photon->position[1] - cell->getCenter()[1])
-				);
+inline double eval(double sigma_t, std::vector<double>& x, std::vector<double>& y) {
+	return exp(-sigma_t * distance(x, y))/distance(x, y);
 }
 
-inline void trasverse(Photon* photon, Cell* cell, double* ptr, size_t n) {
-	double distance = sqrt(
-			(photon->position[0] - cell->getCenter()[0]) *
-			(photon->position[0] - cell->getCenter()[0]) +
-			(photon->position[1] - cell->getCenter()[1]) *
-			(photon->position[1] - cell->getCenter()[1])
-		);
+inline double visit(double sigma_t, Photon* photon, Cell* cell) {
+
+	auto s = cell->getSize();
+
+	double sum = 0;
+
+	std::vector<double> center {
+		cell->position[0] + s/2.,
+		cell->position[1] + s/2.
+	};
+
+	for (size_t i = 0, l = x.size(); i < l; i++) {
+		for (size_t j = 0, k = x.size(); j < k; j++) {
+			center[0] += x[i] * s/2;
+			center[1] += x[j] * s/2;
+			sum += eval(sigma_t, photon->position, center) * w[i] * w[j]/4.0;
+			center[0] -= x[i] * s/2;
+			center[1] -= x[j] * s/2;
+		}
+	}
+	return sum * s * s;
+}
+
+inline void trasverse(double sigma_t, double theta, Photon* photon, Cell* cell, double* ptr, size_t n) {
+	double d = distance(photon->position, cell->getCenter());
 	if (cell != nullptr && (cell->getStatus()== CellStatus::LEAF ||
-			cell->getSize()/distance < 0.2) ) {
-		auto result = visit(photon, cell);
+			cell->getSize()/d< theta) ) {
+		auto result = visit(sigma_t , photon, cell);
 		for (auto _photon : cell->particles) {
 			if (photon->id != _photon->id) {
 				ptr[photon->id * n + _photon->id] = result/cell->getNumParticles();
+			}
+			else {
+				ptr[photon->id * n + _photon->id] = 2* M_PI * (1 - exp(-sigma_t * cell->getSize()))/(sigma_t);
 			}
 		}
 	}
 	else{
 		for(auto child : cell->getChildren()) {
 			if (child->getStatus() != CellStatus::EMPTY) {
-				trasverse(photon, child, ptr, n);
+				trasverse(sigma_t, theta, photon, child, ptr, n);
 			}
 		}
 	}
@@ -255,12 +282,13 @@ MEX_DEFINE(split) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 }
 
 MEX_DEFINE(buildmatrix) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
-	InputArguments input(nrhs, prhs, 1);
+	InputArguments input(nrhs, prhs, 3);
 	OutputArguments output(nlhs, plhs, 1);
 
 	auto root = Session<Cell>::get(input.get(0));
-
 	auto num = root->getNumParticles();
+	auto sigma_t_ptr = mxGetPr(prhs[1]);
+	auto theta_ptr = mxGetPr(prhs[2]);
 	if (num == 0) {
 		std::cout << "empty cell, stopped" << std::endl;
 		return;
@@ -269,7 +297,7 @@ MEX_DEFINE(buildmatrix) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	auto Radptr  = mxGetPr(plhs[0]);
 
 	for (auto photon : root->particles) {
-		trasverse(photon, root, Radptr, num);
+		trasverse(*sigma_t_ptr, *theta_ptr, photon, root, Radptr, num);
 	}
 }
 

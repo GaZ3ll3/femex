@@ -1,4 +1,4 @@
-function  [ret] = ray_diffusion(fem)
+function  [ret] = ray_diffusion(fem, sigma_a, sigma_s)
 
 %fem = FEM([0 0 1 0 1 1 0 1]', 1, 1/(2 * 128 * 128), []');
 
@@ -16,8 +16,8 @@ boundary.setDirichlet(bc3);
 boundary.setDirichlet(bc4);
 
 
-sigma_a_fcn = @(x, y) (0.1  + 0.0.*abs(cos(2*pi*x)));
-sigma_s_fcn = @(x, y) (5.0  + 0.0.*abs(sin(2*pi*x)));
+sigma_a_fcn = @(x, y) (sigma_a  + 0.0.*abs(cos(2*pi*x)));
+sigma_s_fcn = @(x, y) (sigma_s  + 0.0.*abs(sin(2*pi*x)));
 
 
 

@@ -22,8 +22,8 @@ methods
     Cell_('split', this.id_); 
   end
   
-  function m = buildmatrix(this)
-    m = Cell_('buildmatrix', this.id_);
+  function m = buildmatrix(this, sigma_t, theta)
+    m = Cell_('buildmatrix', this.id_, sigma_t, theta);
   end
   
 end
