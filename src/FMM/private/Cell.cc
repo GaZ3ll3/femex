@@ -296,11 +296,11 @@ MEX_DEFINE(buildmatrix) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	plhs[0] = mxCreateNumericMatrix(num, num,mxDOUBLE_CLASS, mxREAL);
 	auto Radptr  = mxGetPr(plhs[0]);
 
-	omp_set_num_threads(omp_get_num_procs());
+//	omp_set_num_threads(omp_get_num_procs());
 
 	int i;
 
-#pragma omp parallel for shared(sigma_t_ptr, theta_ptr, root, Radptr, num) private(i)
+//#pragma omp parallel for shared(sigma_t_ptr, theta_ptr, root, Radptr, num) private(i)
 	for (i = 0; i < num; i++) {
 		trasverse(*sigma_t_ptr, *theta_ptr, root->particles[i], root, Radptr, num);
 	}

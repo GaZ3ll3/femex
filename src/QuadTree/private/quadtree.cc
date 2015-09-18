@@ -73,6 +73,31 @@ MEX_DEFINE(split) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	root->setStatus(Status::ROOT);
 	root->populate();
 }
+
+MEX_DEFINE(buildmatrix) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 3);
+	OutputArguments output(nlhs, plhs, 1);
+
+	auto root = Session<QuadTree>::get(input.get(0));
+	auto num = root->getPhotonSize();
+	auto sigma_t_ptr = mxGetPr(prhs[1]);
+	auto theta_ptr = mxGetPr(prhs[2]);
+	if (num == 0) {
+		std::cout << "empty cell, stopped" << std::endl;
+		return;
+	}
+	plhs[0] = mxCreateNumericMatrix(num, num,mxDOUBLE_CLASS, mxREAL);
+	auto Radptr  = mxGetPr(plhs[0]);
+
+	omp_set_num_threads(omp_get_num_procs());
+
+	int i;
+
+#pragma omp parallel for shared(sigma_t_ptr, theta_ptr, root, Radptr, num) private(i)
+	for (i = 0; i < num; i++) {
+		trasverse(*sigma_t_ptr, *theta_ptr, root->photons[i], root, Radptr, num);
+	}
+}
 }
 
 MEX_DISPATCH
