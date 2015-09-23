@@ -66,6 +66,10 @@ methods
      [I, J, V] =  Assembler_('assemex_lm',  this.id_, pnodes, pelems, ref, weights, extern);
   end
   
+  function [w] = assemble_elem(this, pnodes, pelems, ref, refx, refy, weights, extern_s, extern_a, u, v)
+    w = Assembler_('assemex_elem', this.id_, pnodes, pelems, ref, refx, refy, weights, extern_s, extern_a, u, v);
+  end
+  
   % Other methods...
 end
 end

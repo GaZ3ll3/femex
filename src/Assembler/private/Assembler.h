@@ -116,6 +116,12 @@ public:
 			MatlabPtr Weights, MatlabPtr Fcn);
 
 
+	void AssembleOverElement(Real_t*& w, MatlabPtr Nodes, MatlabPtr Elems,
+			MatlabPtr Ref, MatlabPtr RefX,
+			MatlabPtr RefY, MatlabPtr Weights, MatlabPtr Fcn_s, MatlabPtr Fcn_a,
+			MatlabPtr u, MatlabPtr v);
+
+
 };
 
 #endif /* ASSEMBLER_PRIVATE_ASSEMBLER_C_ */

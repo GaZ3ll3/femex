@@ -105,6 +105,12 @@ classdef FEM < handle
                 this.Edge.Qnodes, BC, this.Edge.Ref, this.Edge.Weights, Fcn);
         end
         
+        function [w] = assemelem(this, u, v, Fcn_s, Fcn_a)
+            w = this.Assembler.assemble_elem(this.Promoted.nodes,...
+            this.Promoted.elems, this.Facet.Ref, this.Facet.RefX, this.Facet.RefY,...
+            this.Facet.Weights, Fcn_s, Fcn_a, u, v);
+        end
+        
         
     end
     
