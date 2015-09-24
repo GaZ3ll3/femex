@@ -67,7 +67,7 @@ methods
   end
   
   function [w] = assemble_elem(this, pnodes, pelems, ref, refx, refy, weights, extern_s, extern_a, u, v)
-    w = Assembler_('assemex_elem', this.id_, pnodes, pelems, ref, refx, refy, weights, extern_s, extern_a, u, v);
+    w = Assembler_('assemloe', this.id_, pnodes, pelems, ref, refx, refy, weights, extern_s, extern_a, u, v);
   end
   
   % Other methods...

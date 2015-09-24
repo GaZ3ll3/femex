@@ -1703,7 +1703,7 @@ MEX_DEFINE(assemex_lm) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs
 
 }
 
-MEX_DEFINE(assemex_elem)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+MEX_DEFINE(assemloe)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	InputArguments input(nrhs, prhs, 11);
 	OutputArguments output(nlhs, plhs, 1);
 	Assembler* assembler = Session<Assembler>::get(input.get(0));

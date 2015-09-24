@@ -28,7 +28,7 @@ classdef FEM < handle
     end
     
     methods
-        function this = FEM(edge_points, prec, min_area, PML)
+        function this = FEM(edge_points, prec, min_area, PML, degree)
             
             if nargin == 3
                 
@@ -36,17 +36,23 @@ classdef FEM < handle
                 
             end
             
+            if nargin == 5
+                d = max(degree, 2 * prec);
+            else
+                d = 2 * prec;
+            end
+            
             this.Ref_mesh = Mesh([0 0 1 0 0 1]', 0.5);
             [this.Ref_points, ~, ~, ~, ~] = this.Ref_mesh.promote(prec);
             
             this.Assembler = Assembler();
             
-            this.Facet.Integrator = Integrator(2, 2*prec);
+            this.Facet.Integrator = Integrator(2, d);
             [this.Facet.Qnodes, this.Facet.Weights] = this.Facet.Integrator.export();
             [this.Facet.Ref, this.Facet.RefX, this.Facet.RefY] = ...
                 this.Assembler.reference2D(this.Ref_points, this.Facet.Qnodes);
         
-            this.Edge.Integrator = Integrator(1, 2*prec);
+            this.Edge.Integrator = Integrator(1, d);
             [this.Edge.Qnodes, this.Edge.Weights] = this.Edge.Integrator.export();
             [this.Edge.Ref, this.Edge.RefX] = ...
                 this.Assembler.reference1D(prec, this.Edge.Qnodes);

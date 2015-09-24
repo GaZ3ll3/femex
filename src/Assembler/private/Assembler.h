@@ -116,6 +116,11 @@ public:
 			MatlabPtr Weights, MatlabPtr Fcn);
 
 
+	/*
+	 * calculate elementwise inner product
+	 *
+	 * w_K = u' M_{K} v
+	 */
 	void AssembleOverElement(Real_t*& w, MatlabPtr Nodes, MatlabPtr Elems,
 			MatlabPtr Ref, MatlabPtr RefX,
 			MatlabPtr RefY, MatlabPtr Weights, MatlabPtr Fcn_s, MatlabPtr Fcn_a,
