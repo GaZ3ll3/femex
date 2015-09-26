@@ -70,6 +70,10 @@ methods
     w = Assembler_('assemloe', this.id_, pnodes, pelems, ref, refx, refy, weights, extern_s, extern_a, u, v);
   end
   
+  function [w] = assemble_node(this, pnodes, pelems, ref, refx, refy, weights, extern_s, extern_a, u, v)
+    w = Assembler_('assemlon', this.id_, pnodes, pelems, ref, refx, refy, weights, extern_s, extern_a, u, v);
+  end
+  
   % Other methods...
 end
 end
