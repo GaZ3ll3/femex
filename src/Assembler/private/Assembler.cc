@@ -1315,8 +1315,6 @@ void Assembler::AssembleOverElement(Real_t*& w, MatlabPtr Nodes, MatlabPtr Elems
 	Real_t det, area;
 	Real_t Jacobian[2][2];
 
-
-//todo
 	if (mxGetNumberOfElements(Fcn_S)  == numberofelem &&
 			mxGetNumberOfElements(Fcn_A) == numberofelem) {
 		for (size_t i =0; i < numberofelem; i++){
