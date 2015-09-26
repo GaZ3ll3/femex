@@ -132,7 +132,6 @@ $(CEL)%_.mexa64: %.cel.o
 QUA = $(SRC)/QuadTree/private/
 QUA_BINS = $(QUA)QuadTree_.mexa64
 
-
 quadtree.qua.o: $(QUA)quadtree.cc
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
 QuadTree.qua.o: $(QUA)QuadTree.cc
