@@ -7,7 +7,7 @@ include Makefile.in
 
 CXX_FLAGS = -DMATLAB_MEX_FILE -std=c++11 -fopenmp -march=native \
 			-D_GNU_SOURCE -fPIC -fno-omit-frame-pointer -Wno-write-strings -pthread\
-			-DMX_COMPAT_32 $(Opt) -DNDEBUG -fopenmp -ffast-math
+			-DMX_COMPAT_32 $(Opt) -DNDEBUG -fopenmp -ffast-math 
 
 CXX_INCLUDE = -I./include/mexplus \
 			  -I./include/pprint \
