@@ -132,12 +132,12 @@ $(CEL)%_.mexa64: %.cel.o
 QUA = $(SRC)/QuadTree/private/
 QUA_BINS = $(QUA)QuadTree_.mexa64
 
-quadtree.qua.o: $(QUA)quadtree.cc
+Quadtree_.qua.o: $(QUA)Quadtree_.cc
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
 QuadTree.qua.o: $(QUA)QuadTree.cc
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
-$(QUA)QuadTree_.mexa64: quadtree.qua.o QuadTree.qua.o
-	$(CXX) $(MATLAB_LINKS) -o $@ quadtree.qua.o QuadTree.qua.o $(CXX_LIBS)
+$(QUA)QuadTree_.mexa64: Quadtree_.qua.o QuadTree.qua.o
+	$(CXX) $(MATLAB_LINKS) -o $@ Quadtree_.qua.o QuadTree.qua.o $(CXX_LIBS)
 #ADJ = $(SRC)Adjoint/private/
 #ADJ_SRCS = $(wildcard $(ADJ)*.cc)
 #ADJ_OBJS = $(patsubst $(ADJ)%.cc, %.adj.o, $(ADJ_SRCS))
