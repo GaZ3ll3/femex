@@ -172,7 +172,7 @@ void Assembler::Reference(MatlabPtr& F, MatlabPtr& DX, MatlabPtr Degree, MatlabP
 				*VanderX_ptr++ = 0.;
 			}
 			else{
-				*VanderX_ptr++ = pow(qnodes_ptr[col], i - 1);
+				*VanderX_ptr++ = i * pow(qnodes_ptr[col], i - 1);
 			}
 		}
 	}
