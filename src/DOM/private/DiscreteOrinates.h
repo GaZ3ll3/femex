@@ -84,7 +84,6 @@ public:
 
 	void RayShow();
 
-
 	/*
 	 * solve the transport equation.
 	 */
@@ -100,8 +99,24 @@ public:
 
 	void SourceIteration_beam(MatlabPtr incoming);
 
-};
 
+};
 } /* namespace Core */
 
+Real_t ZeroOrder(Real_t l, Real_t r, Real_t L) {
+		auto a = L*(l - r) * 0.5;
+		auto b = -L * l;
+		return 1 + b * (0.25 * a + b/6.0 + 0.5) + a * (a * 0.1 + 1.0/3.0);
+}
+Real_t FirstOrder(Real_t l, Real_t r, Real_t L) {
+		auto a = L * (l - r) * 0.5;
+		auto b = -L * l;
+		return 1.0/2.0 + b * (1.0/3.0 + 0.2 * a + 0.125 * b) + a * (1.0/12.0 + 0.25);
+}
+
+Real_t SecondOrder(Real_t l, Real_t r, Real_t L) {
+		auto a = L * (l - r) * 0.5;
+		auto b = -L * l;
+		return 1.0/3.0 + b * (1.0/4.0 + 0.1 * b + a/6.0) + a * (a / 14.0 + 0.2);
+}
 #endif /* SRC_DOM_PRIVATE_DISCRETEORINATES_H_ */
