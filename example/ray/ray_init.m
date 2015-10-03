@@ -3,7 +3,7 @@ function [fem, dom] = ray_init()
 %addpath(genpath('../../'));
 
 global bc1 bc2 bc3 bc4
-fem = FEM([0 0 1 0 1 1 0 1]', 1, 1/(2 * 64 * 64), []');
+fem = FEM([0 0 1 0 1 1 0 1]', 1, 1/(2 * 80 * 80), []');
 
 boundary = Boundary();
 boundary.set_boundary('x - 1');
@@ -18,7 +18,7 @@ boundary.setDirichlet(bc2);
 boundary.setDirichlet(bc3);
 boundary.setDirichlet(bc4);
 
-dom = DOM(127);
+dom = DOM(16);
 
 % sweeping
 tic;

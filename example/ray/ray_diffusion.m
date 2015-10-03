@@ -16,8 +16,8 @@ boundary.setDirichlet(bc3);
 boundary.setDirichlet(bc4);
 
 
-sigma_a_fcn = @(x, y) (sigma_a  + 0.0.*abs(cos(2*pi*x)));
-sigma_s_fcn = @(x, y) (sigma_s  + 0.0.*abs(sin(2*pi*x)));
+sigma_a_fcn = @(x, y) (sigma_a  + 0.2.*abs(cos(2*pi*x)));
+sigma_s_fcn = @(x, y) (sigma_s  + 0.2.*abs(sin(2*pi*x)));
 
 
 
@@ -50,7 +50,8 @@ ret = DSA_K\load;
 
 figure(2)
 trisurf(fem.TriMesh', fem.Promoted.nodes(1,:), fem.Promoted.nodes(2,:), ret,...
-    'EdgeColor','none','LineStyle','none','FaceLighting','phong');shading interp
+    'EdgeColor','none','LineStyle','none','FaceLighting','phong');shading interp;colormap jet;
+colorbar;view(2);
 
 
 end

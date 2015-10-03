@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <iterator>
+#include <unordered_map>
 #include <string.h>
 
 #include <mexplus.h>

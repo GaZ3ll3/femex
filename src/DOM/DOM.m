@@ -63,6 +63,10 @@ methods
       T = T/this.nAngle;
       M = M/this.nAngle;
   end
+  
+  function g = ray_scatter_grad(this, nodes, elems, u, v, sigma_t)
+      g = DiscreteOrinates_('ray_scatter_grad', this.id_, nodes, elems, u, v, sigma_t);
+  end
   % Other methods...
 end
 end

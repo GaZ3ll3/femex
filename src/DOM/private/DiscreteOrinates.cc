@@ -730,13 +730,13 @@ MEX_DEFINE(ray_build_omp) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 	mwSize vertex_1, vertex_2, vertex_3;
 	Real_t x1, y1, x2, y2, x3, y3, det, lambda1,lambda2, eta1, eta2, length, accum_s;
 	Real_t lv, rv, ls, rs;
-	Real_t common1, common2, common3;
+	Real_t common1, common2, common3, common4;
 	int32_t s_i, s_j;
 
 	omp_set_num_threads(omp_get_num_procs());
 
 #pragma omp parallel for private(s_i, s_j, vertex_1, vertex_2, vertex_3,x1, y1, x2, y2, x3, y3, det,\
-		lambda1,lambda2, eta1, eta2, length, accum_s, lv, rv, ls, rs, common1, common2, common3) schedule(dynamic,1) collapse(2)
+		lambda1,lambda2, eta1, eta2, length, accum_s, lv, rv, ls, rs, common1, common2, common3, common4) schedule(dynamic,1) collapse(2)
 	for (s_i = 0; s_i < nAngle; s_i++) {
 		for (s_j = 0; s_j < numberofnodes; s_j++) {
 			accum_s = 0.;
@@ -792,27 +792,30 @@ MEX_DEFINE(ray_build_omp) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 
 
 					/*
-					 * assume linear function
+					 * assume linear function, lose high order information.
+					 * should lose some radiation from nearby.
 					 */
 
 					common1 = (ZeroOrder(ls, rs, length));
 					common2 = (FirstOrder(ls, rs, length));
 					common3 = (SecondOrder(ls, rs, length));
+					common4 = length * exp(-accum_s);
 
 					mptr[numberofnodes * s_j + vertex_1] +=
-							length * exp(-accum_s) *
+							common4 *
 							(common1 * lambda1 + common2 * (lambda2 - lambda1));
+
 					mptr[numberofnodes * s_j + vertex_2] +=
-							length * exp(-accum_s) *
+							common4 *
 							(common1 * eta1 + common2 * (eta2 - eta1));
 
 					mptr[numberofnodes * s_j + vertex_3] +=
-							length * exp(-accum_s) *
+							common4 *
 							(common1 * (1 - eta1 - lambda1) +
 							 common2 * (lambda1 - lambda2 + eta1 - eta2));
 
 					ptr[numberofnodes * s_j + vertex_1] +=
-							length * exp(-accum_s) *
+							common4 *
 							(lv *
 							(common1 * lambda1 + common2 * (lambda2 - lambda1))
 							+
@@ -820,7 +823,7 @@ MEX_DEFINE(ray_build_omp) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 							(common2 * lambda1 + common3 *(lambda2 - lambda1))
 							);
 					ptr[numberofnodes * s_j + vertex_2] +=
-							length * exp(-accum_s) *
+							common4 *
 							(lv *
 							(common1 * eta1 + common2 * (eta2 - eta1))
 							 +
@@ -829,7 +832,7 @@ MEX_DEFINE(ray_build_omp) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 							);
 
 					ptr[numberofnodes * s_j + vertex_3] +=
-							length * exp(-accum_s) *
+							common4 *
 							(lv *
 							(common1 * (1 - eta1 - lambda1) + common2 * (lambda1 - lambda2 + eta1 - eta2))
 							+
@@ -844,6 +847,185 @@ MEX_DEFINE(ray_build_omp) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* p
 	}
 }
 
+MEX_DEFINE(ray_scatter_grad)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 6);
+	OutputArguments output(nlhs, plhs, 1);
+
+	auto pnodes        = mxGetPr(prhs[1]);
+	auto pelems        = (int32_t *)mxGetPr(prhs[2]);
+	auto numberofnodesperelem = mxGetM(prhs[2]);
+
+	auto numberofnodes = mxGetN(prhs[1]);
+
+	auto uptr          = mxGetPr(prhs[4]);
+	auto vptr          = mxGetPr(prhs[3]);
+	auto Sigma_t       = mxGetPr(prhs[5]);
+
+	plhs[0] = mxCreateNumericMatrix(numberofnodes, 1, mxDOUBLE_CLASS, mxREAL);
+
+	auto ptr = mxGetPr(plhs[0]);
+
+	DiscreteOrinates* DOM = Session<DiscreteOrinates>::get(input.get(0));
+
+	auto nAngle = DOM->nAngle;
+
+	mwSize vertex_1, vertex_2, vertex_3;
+	Real_t x1, y1, x2, y2, x3, y3, det, lambda1,lambda2, eta1, eta2, length, accum_s;
+	Real_t lv, rv, ls, rs;
+	Real_t common1, common2, common3, common4;
+	Real_t coeff1, coeff2, coeff3;
+	int32_t s_i, s_j;
+
+	std::unordered_map<int32_t, Real_t> record;
+
+	omp_set_num_threads(omp_get_num_procs());
+
+#pragma omp parallel for private(s_i, s_j, vertex_1, vertex_2, vertex_3,x1, y1, x2, y2, x3, y3, det,\
+		lambda1,lambda2, eta1, eta2, length, accum_s, lv, rv, ls, rs, common1, common2, common3, common4,\
+		record, coeff1, coeff2, coeff3) schedule(dynamic,1) collapse(2)
+	for (s_i = 0; s_i < nAngle; s_i++) {
+		for (s_j = 0; s_j < numberofnodes; s_j++) {
+			accum_s = 0.;
+			record.clear();
+			if (DOM->Ray[s_i][s_j].size()){
+				// records all information along the ray
+				for (auto it : DOM->Ray[s_i][s_j]){
+
+					vertex_1 = pelems[it.elem * numberofnodesperelem ] - 1;
+					vertex_2 = pelems[it.elem * numberofnodesperelem + 1] - 1;
+					vertex_3 = pelems[it.elem * numberofnodesperelem + 2] - 1;
+
+					x1 = pnodes[2 * vertex_1];
+					y1 = pnodes[2 * vertex_1 + 1];
+					x2 = pnodes[2 * vertex_2];
+					y2 = pnodes[2 * vertex_2 + 1];
+					x3 = pnodes[2 * vertex_3];
+					y3 = pnodes[2 * vertex_3 + 1];
+
+					/*
+					 * length
+					 */
+					length = sqrt(pow(it.first[0] - it.second[0], 2) + pow(it.first[1] - it.second[1], 2));
+					/*
+					 * first node
+					 */
+					det = (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
+
+					eta1 = ((y3 - y1) * (it.first[0] - x3) + (x1 - x3) * (it.first[1] - y3));
+					eta1 /= det;
+
+					lambda1 = (y2 - y3) * (it.first[0] - x3) + (x3 -  x2) * (it.first[1] - y3);
+					lambda1 /= det;
+
+					ls = lambda1 * Sigma_t[vertex_1] + eta1 * Sigma_t[vertex_2] +
+							(1 - lambda1 - eta1) * Sigma_t[vertex_3];
+
+
+
+					/*
+					 * second node
+					 */
+					eta2 = ((y3 - y1) * (it.second[0] - x3) + (x1 - x3) * (it.second[1] - y3));
+					eta2 /= det;
+
+					lambda2 = (y2 - y3) * (it.second[0] - x3) + (x3 -  x2) * (it.second[1] - y3);
+					lambda2 /= det;
+
+					rs = lambda2 * Sigma_t[vertex_1] + eta2 * Sigma_t[vertex_2] +
+							(1 - lambda2 - eta2) * Sigma_t[vertex_3];
+
+
+					coeff1 = exp(-accum_s) * lambda1 * length/6.0;
+					coeff2 = exp(-accum_s) * eta1 * length/ 6.0;
+					coeff3 = exp(-accum_s) * (1 - lambda1 - eta1) * length/6.0;
+
+
+					for (auto record_it : record) {
+						ptr[record_it.first] -= uptr[s_j] * record_it.second * vptr[vertex_1] * coeff1;
+						ptr[record_it.first] -= uptr[s_j] * record_it.second * vptr[vertex_2] * coeff2;
+						ptr[record_it.first] -= uptr[s_j] * record_it.second * vptr[vertex_3] * coeff3;
+					}
+
+					accum_s += (0.5 * rs + 1.5 * ls) * length/ 4.0;
+
+					if (record.find(vertex_1) != record.end()) {
+						record[vertex_1] += (0.5 * lambda2 + 1.5 * lambda1) * length / 4.0;
+					}
+					else {
+						record[vertex_1] = (0.5 * lambda2  + 1.5 * lambda2) * length / 4.0;
+					}
+
+					if (record.find(vertex_2) != record.end()) {
+						record[vertex_2] += (0.5 * eta2 + 1.5 * eta1)* length /4.0;
+					}
+					else {
+						record[vertex_2] = (0.5 * eta2 + 1.5 * eta1)* length /4.0;
+					}
+
+					if (record.find(vertex_3) != record.end()) {
+						record[vertex_3] += (0.5 * (1 - lambda2 - eta2) + 1.5 * (1 - lambda1 - eta1)) * length / 4.0;
+					}
+					else {
+						record[vertex_3] = (0.5 * (1 - lambda2 - eta2) + 1.5 * (1 - lambda1 - eta1)) * length / 4.0;
+					}
+
+
+					coeff1 = exp(-accum_s) * (lambda1 + lambda2) * length/3.0;
+					coeff2 = exp(-accum_s) * (eta1 + eta2) * length/ 3.0;
+					coeff3 = exp(-accum_s) * (2 - lambda1 - eta1 - lambda2 - eta2) * length/3.0;
+
+					for (auto record_it : record) {
+						ptr[record_it.first] -= uptr[s_j] * record_it.second * vptr[vertex_1] * coeff1;
+						ptr[record_it.first] -= uptr[s_j] * record_it.second * vptr[vertex_2] * coeff2;
+						ptr[record_it.first] -= uptr[s_j] * record_it.second * vptr[vertex_3] * coeff3;
+					}
+
+//
+//					ptr[numberofnodes * s_j + vertex_1] += exp(-accum_s) * (lambda1 + lambda2) * length/3.0;
+//					ptr[numberofnodes * s_j + vertex_2] += exp(-accum_s) * (eta1 + eta2) * length/ 3.0;
+//					ptr[numberofnodes * s_j + vertex_3] += exp(-accum_s) * (2 - lambda1 - eta1 - lambda2 - eta2) * length/3.0;
+
+					accum_s += (1.5 * rs + 0.5 * ls) * length / 4.0;
+
+					if (record.find(vertex_1) != record.end()) {
+						record[vertex_1] += (1.5 * lambda2 + 0.5 * lambda1) * length / 4.0;
+					}
+					else {
+						record[vertex_1] = (1.5 * lambda2  + 0.5 * lambda2) * length / 4.0;
+					}
+
+					if (record.find(vertex_2) != record.end()) {
+						record[vertex_2] += (1.5 * eta2 + 0.5 * eta1)* length /4.0;
+					}
+					else {
+						record[vertex_2] = (1.5 * eta2 + 0.5 * eta1)* length /4.0;
+					}
+
+					if (record.find(vertex_3) != record.end()) {
+						record[vertex_3] += (1.5 * (1 - lambda2 - eta2) + 0.5 * (1 - lambda1 - eta1)) * length / 4.0;
+					}
+					else {
+						record[vertex_3] = (1.5 * (1 - lambda2 - eta2) + 0.5 * (1 - lambda1 - eta1)) * length / 4.0;
+					}
+
+					coeff1 = exp(-accum_s) * lambda2 * length/6.0;
+					coeff2 = exp(-accum_s) * eta2 * length/ 6.0;
+					coeff3 = exp(-accum_s) * (1 - lambda2 - eta2) * length/6.0;
+
+					for (auto record_it : record) {
+						ptr[record_it.first] -= uptr[s_j] * record_it.second * vptr[vertex_1] * coeff1;
+						ptr[record_it.first] -= uptr[s_j] * record_it.second * vptr[vertex_2] * coeff2;
+						ptr[record_it.first] -= uptr[s_j] * record_it.second * vptr[vertex_3] * coeff3;
+					}
+//					ptr[numberofnodes * s_j + vertex_1] += exp(-accum_s) * lambda2 * length/6.0;
+//					ptr[numberofnodes * s_j + vertex_2] += exp(-accum_s) * eta2 * length/ 6.0;
+//					ptr[numberofnodes * s_j + vertex_3] += exp(-accum_s) * (1 - lambda2 - eta2) * length/6.0;
+				}
+			}
+		}
+	}
+
+}
 
 
 MEX_DEFINE(si_init) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
