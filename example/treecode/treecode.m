@@ -1,4 +1,4 @@
-function [ret] = treecode(n, sigma_t, sigma_s, theta)
+function treecode(n, theta)
 x = 1/n:2/n:(n-1)/n;
 y = 1/n:2/n:(n-1)/n;
 z = zeros(2, n/2 * n/2);
@@ -8,15 +8,16 @@ for i = 1:n/2
         z(2, n/2 * (i - 1) + j) = y(j);
     end
 end
-x = [z; ones(1, n/2 * n/2)];
 
+attr = sigma_t(z(1,:), z(2,:));
+num = size(x, 2)^2;
 
 tic;
-tree = Tree([0, 0], 1);
+tree = Treecode(0, 0, 1, 6);
 toc;
 
 tic;
-tree.import(x);
+tree.set(attr);
 toc;
 
 tic;
@@ -24,18 +25,26 @@ tree.split();
 toc;
 
 tic;
-m = tree.buildmatrix(sigma_t, theta);
+m = tree.buildmatrix(theta);
 toc;
 
+s = sigma_s(z(1,:), z(2,:));
+f = ring(z(1,:), z(2,:));
+p = m * f'/(2*pi);
 
-f = ring(x(1,:), x(2,:));
-p = m' * f'/(2*pi);
 
-ret = gmres(eye(size(m, 1)) - sigma_s/(2*pi) * m', p, 10, 1e-12);
+ret = gmres(eye(size(m, 1)) -  m * sparse(1:num, 1:num, s) /(2 * pi), p, 10, 1e-12);
 
 [X, Y] = meshgrid(1/n : 2/n:(n-1)/n);
 surf(X,Y,reshape(ret, n/2,n/2), 'EdgeColor','None');
-shading interp;colorbar;
+shading interp;colorbar; colormap jet;
 
+end
 
+function val = sigma_t(x, y)
+    val = 5.1 * ones(size(x));
+end
+
+function val = sigma_s(x, y)
+    val = 5.0 * ones(size(x));
 end
