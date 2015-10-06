@@ -1,6 +1,6 @@
-CXX = g++-5
-CC  = gcc-5
-FF  = gfortran-5
+CXX = g++
+CC  = gcc
+FF  = gfortran
 Opt = -Ofast
 
 include Makefile.in
