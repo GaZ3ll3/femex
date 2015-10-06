@@ -14,7 +14,11 @@ attr = sigma_t(z(1,:), z(2,:));
 num = size(x, 2)^2;
 
 fprintf('\n1. initializing treecode root ...');
+<<<<<<< HEAD
 tic;
+=======
+t = tic;
+>>>>>>> branch 'master' of https://github.com/GaZ3ll3/femex.git
 tree = Treecode(0, 0, 1, log2(n) - 1);
 t1 = toc - t;
 
