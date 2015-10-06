@@ -78,8 +78,7 @@ MEX_DEFINE(buildmatrix) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	plhs[0] = mxCreateNumericMatrix(num, num,mxDOUBLE_CLASS, mxREAL);
 	auto Radptr  = mxGetPr(plhs[0]);
 
-//	omp_set_num_threads(omp_get_num_procs());
-	omp_set_num_threads(2048);
+	omp_set_num_threads(omp_get_num_procs());
 
 	int i;
 
@@ -88,6 +87,12 @@ MEX_DEFINE(buildmatrix) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 		traversal(root, *theta_ptr, root->root->points[i], root->root, num, Radptr);
 	}
 }
+
+MEX_DEFINE(buildop)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+// not implemented, since the source class only permits int32_t as size.
+}
+
+
 }
 
 MEX_DISPATCH

@@ -1,4 +1,4 @@
-function treecode(n, theta)
+function ret = treecode(n, theta)
 
 x = 1/n:2/n:(n-1)/n;
 y = 1/n:2/n:(n-1)/n;
@@ -14,13 +14,9 @@ attr = sigma_t(z(1,:), z(2,:));
 num = size(x, 2)^2;
 
 fprintf('\n1. initializing treecode root ...');
-<<<<<<< HEAD
 tic;
-=======
-t = tic;
->>>>>>> branch 'master' of https://github.com/GaZ3ll3/femex.git
 tree = Treecode(0, 0, 1, log2(n) - 1);
-t1 = toc - t;
+t1 = toc;
 
 fprintf('done, using %f\n2. initializing attributes of all points ...', t1);
 tic;
