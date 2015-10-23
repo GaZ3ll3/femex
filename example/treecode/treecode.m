@@ -1,5 +1,9 @@
 function ret = treecode(n, theta)
 
+global tree s theta_
+
+theta_ = theta;
+
 x = 1/n:2/n:(n-1)/n;
 y = 1/n:2/n:(n-1)/n;
 z = zeros(2, n/2 * n/2);
@@ -28,19 +32,20 @@ tic;
 tree.split();
 t1 = toc ;
 
-fprintf('done, using %f\n4. building matrix of %d x %d  ...',t1, num, num);
-tic;
-m = tree.buildmatrix(theta);
-t1 = toc;
-
 s = sigma_s(z(1,:), z(2,:));
 f = ring(z(1,:), z(2,:));
 
-p = m * f'/(2*pi);
+fprintf('done, using %f\n4. applying K(x, y) to source term ... ',t1);
+tic;
+% m = tree.buildmatrix(theta);
+tree.preprocess(f'/(2 * pi));
+p = tree.apply(theta, f'/(2*pi));
+t1 = toc;
+
 
 fprintf('done, using %f\n5. solving linear system using GMres ... ', t1);
 tic;
-[ret, ~, ~, ~, ~] = gmres(eye(size(m, 1)) -  m * sparse(1:num, 1:num, s) /(2 * pi), p, 10, 1e-12);
+ret=gmres(@forward, p, 30, 1e-3, 30,[],[], p);
 t1 =toc ;
 fprintf('done, using %f\n', t1);
 [X, Y] = meshgrid(1/n : 2/n:(n-1)/n);
@@ -49,10 +54,16 @@ shading interp;colorbar; colormap jet;
 
 end
 
+function lhs = forward(rhs)
+global tree theta_ s
+tree.preprocess(s'.*rhs/(2 * pi));
+lhs = rhs - tree.apply(theta_, s'.*rhs/(2 * pi));
+end
+
 function val = sigma_t(x, y)
-    val = 5.1 * ones(size(x));
+    val = 0.1 + 5.0 * (x.^2 + y.^2 + 1);
 end
 
 function val = sigma_s(x, y)
-    val = 5.0 * ones(size(x));
+    val = 5.0 * (x.^2 + y.^2 + 1);
 end

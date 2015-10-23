@@ -25,6 +25,17 @@ methods
   function m = buildmatrix(this, theta)
     m = Treecode_('buildmatrix', this.id_,  theta);
   end
+  
+  function lhs = apply(this, theta, rhs)
+    lhs = Treecode_('apply', this.id_,  theta, rhs);
+  end
     
+  function lhs = fast_apply(this, theta, rhs)
+    lhs = Treecode_('fast_apply', this.id_,  theta, rhs);
+  end
+  
+  function preprocess(this, rhs) 
+    Treecode_('preprocess', this.id_, rhs);
+  end
 end
 end

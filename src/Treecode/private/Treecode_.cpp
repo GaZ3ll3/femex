@@ -89,6 +89,85 @@ MEX_DEFINE(buildmatrix) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prh
 	}
 }
 
+MEX_DEFINE(apply) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 3);
+	OutputArguments output(nlhs, plhs, 1);
+
+	auto root = Session<treecode>::get(input.get(0));
+	auto num = root->size * root->size;
+
+	auto theta_ptr = mxGetPr(prhs[1]);
+	auto rhs_ptr = mxGetPr(prhs[2]);
+
+
+	if (num == 0) {
+		std::cout << "empty cell, stopped" << std::endl;
+		return;
+	}
+
+	/*
+	 * already zero vector
+	 */
+	plhs[0] = mxCreateNumericMatrix(num, 1,mxDOUBLE_CLASS, mxREAL);
+	auto Radptr  = mxGetPr(plhs[0]);
+
+//	omp_set_num_threads(omp_get_num_procs());
+	omp_set_num_threads(2048);
+
+	int i;
+
+#pragma omp parallel for shared(theta_ptr, root, Radptr, num) private(i)
+	for (i = 0; i < num; i++) {
+		traversal(root, *theta_ptr, root->root->points[i], root->root, num, Radptr, rhs_ptr);
+	}
+}
+
+MEX_DEFINE(fast_apply) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 3);
+	OutputArguments output(nlhs, plhs, 1);
+
+	auto root = Session<treecode>::get(input.get(0));
+	auto num = root->size * root->size;
+
+	auto theta_ptr = mxGetPr(prhs[1]);
+	auto rhs_ptr = mxGetPr(prhs[2]);
+
+
+	if (num == 0) {
+		std::cout << "empty cell, stopped" << std::endl;
+		return;
+	}
+
+	/*
+	 * already zero vector
+	 */
+	plhs[0] = mxCreateNumericMatrix(num, 1,mxDOUBLE_CLASS, mxREAL);
+	auto Radptr  = mxGetPr(plhs[0]);
+
+//	omp_set_num_threads(omp_get_num_procs());
+	omp_set_num_threads(2048);
+
+	int i;
+
+#pragma omp parallel for shared(theta_ptr, root, Radptr, num) private(i)
+	for (i = 0; i < num; i++) {
+		fast_traversal(root, *theta_ptr, root->root->points[i], root->root, num, Radptr, rhs_ptr);
+	}
+}
+
+MEX_DEFINE(preprocess) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 2);
+	OutputArguments output(nlhs, plhs, 0);
+
+	auto root = Session<treecode>::get(input.get(0));
+	auto rhs_ptr = mxGetPr(prhs[1]);
+
+	traversal_down(root->root, rhs_ptr);
+	traversal_up(root->root);
+
+
+}
+
 MEX_DEFINE(buildop)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 // not implemented, since the source class only permits int32_t as size.
 }

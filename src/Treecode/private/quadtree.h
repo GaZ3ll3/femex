@@ -51,11 +51,12 @@ typedef struct point{
     scalar_t      x;
     scalar_t      y;
     attribute_t   attribute;
+    attribute_t   value;
 
     point(scalar_t _x, scalar_t _y, attribute_t _attribute) :
-            x(_x), y(_y), attribute(_attribute), id(0) {}
+            x(_x), y(_y), attribute(_attribute), id(0), value(0){}
     point(scalar_t _x, scalar_t _y) :
-            x(_x), y(_y), attribute(0.0f), id(0) {}
+            x(_x), y(_y), attribute(0.0f), id(0), value(0) {}
     // non-copyable
     point(const point&) = delete;
     point& operator=(const point&) = delete;
@@ -83,6 +84,7 @@ typedef struct quadtree {
     vector<shared_ptr<point>>      points;
     scalar_t                       length;
     attribute_t                    attribute;
+    attribute_t                    value;
     Status                         status;
 
 
@@ -99,6 +101,7 @@ typedef struct quadtree {
             x(_x_start),
             y(_y_start),
             attribute(0.0f),
+            value(0.0f),
             parent(nullptr),
             status(Status::UNSET){}
     // non-copyable

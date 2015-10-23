@@ -6,8 +6,8 @@
 #define QUADTREE_TREECODE_H
 #define EPS 1e-2
 
+#include <unordered_map>
 #include "quadtree.h"
-
 
 /*
  * static arrays for integration
@@ -28,6 +28,9 @@ static std::vector<scalar_t> W {
         0.23692688505618908489935847683228
 };
 
+//static std::vector<scalar_t> X {0};
+//static std::vector<scalar_t> W {2.0};
+
 typedef int level_t;
 /*
  * treecode structure
@@ -46,6 +49,7 @@ typedef struct treecode {
     scalar_t  length;
     level_t   size;
     quadtree*  root;
+    vector<vector<scalar_t>> interactions;
 
     /*
      * treecode constructor
@@ -69,6 +73,10 @@ typedef struct treecode {
                 root->addPoint(ptr);
             }
         }
+        /*
+         * initialize interaction table
+         */
+        interactions.resize(root->points.size());
     }
     /*
      * treecode destructor
@@ -137,6 +145,18 @@ inline scalar_t integral(treecode *tree, scalar_t x0, scalar_t y0, scalar_t x1, 
 inline scalar_t eval_helper(treecode *tree, scalar_t x0, scalar_t y0, scalar_t x1, scalar_t y1) noexcept {
     return exp(-integral(tree, x0, y0, x1, y1)) / distance(x0, y0, x1, y1);
 }
+
+inline scalar_t integral_corner(scalar_t sigma_t, scalar_t length) {
+    scalar_t ret = 0.;
+    scalar_t mid = (sqrt(2) + 1.0) * length/4.0;
+    scalar_t rad = (sqrt(2) - 1.0) * length/4.0;
+    for (int i = 0; i < X.size(); ++i) {
+        scalar_t val = (mid + rad * X[i]);
+        ret += exp(-sigma_t * val) * (M_PI/2.0 - 2 * acos(length/2.0/val)) * W[i];
+    }
+    ret *= 4.0 * rad;
+    return ret;
+}
 /*
  * return evaluation of kernel over a grid
  * @params
@@ -181,14 +201,18 @@ inline void traversal(treecode *tree, scalar_t& theta,
     if (branch_ptr->status == Status::LEAF || branch_ptr->length/ d < theta) {
         // if reaches a leaf or in far field
         auto ret = eval(tree, point_ptr->x, point_ptr->y, branch_ptr);
-        for (auto point : branch_ptr->points) {
+        for (auto& point : branch_ptr->points) {
             if (point->id != point_ptr->id) {
                 matrix_ptr[n * point->id + point_ptr->id] = ret / branch_ptr->points.size();
             }
             else {
                 matrix_ptr[n * point->id + point_ptr->id] =
+                        /*
+                         * todo: corner parts missing. needs erf function to be implemented.
+                         */
                         2 * scalar_t(M_PI) *
-                        (1 - exp(-branch_ptr->attribute * branch_ptr->length))/branch_ptr->attribute;
+                        (1 - exp(-branch_ptr->attribute * branch_ptr->length)/2.0)/branch_ptr->attribute +
+                        integral_corner(branch_ptr->attribute, branch_ptr->length);
             }
         }
     }
@@ -197,6 +221,148 @@ inline void traversal(treecode *tree, scalar_t& theta,
         for (auto child : branch_ptr->children) {
             if (child->status != Status::EMPTY) {
                 traversal(tree, theta, point_ptr, child.get(), n, matrix_ptr);
+            }
+        }
+    }
+}
+
+/*
+ * import rhs into tree, take point's value slot.
+ *
+ * @treecode treecode structure pointer
+ * @n number of points at finest level
+ * @rhs array of values to assign to treecode
+ *
+ *
+ * top-bottom to leaf. assign values to quadtree
+ *
+ */
+inline void traversal_down(quadtree *root,scalar_t* rhs) {
+    for(auto& child : root->children) {
+        if (child->status == Status::LEAF) {
+            child->value = rhs[child->points[0]->id];
+        }
+        else {
+            traversal_down(child.get(), rhs);
+        }
+    }
+}
+
+
+inline bool traversal_check(quadtree *root){
+	auto ret = 0.;
+	auto ret_ = true;
+	for(auto& child : root->children) {
+		ret += child->value;
+	}
+	if (ret != 4 * root->value) return false;
+	else return true;
+}
+
+
+/*
+ * bottom-top post-order traversal of tree, averaging
+ */
+inline scalar_t traversal_up(quadtree *root) {
+    scalar_t ret = 0.;
+    if (root->status != Status::LEAF) {
+        for (auto& child : root->children) {
+            ret += traversal_up(child.get());
+        }
+        ret /= 4.0;
+    }
+    else {
+    	ret = root->value;
+    }
+    root->value = ret;
+    return ret;
+}
+
+
+/*
+ * traversal quadtree, without matrix, calculate iteration.
+ *
+ * @params
+ *
+ * @tree : treecode structure pointer
+ * @theta : parameter to control accuracy
+ * @point_ptr : point pointer
+ * @branch_ptr: target quadtree
+ * @n : matrix size
+ * @lhs : vector result
+ * @rhs : input source term
+ */
+inline void traversal (treecode *tree, scalar_t& theta,
+                       shared_ptr<point> point_ptr, quadtree* branch_ptr,
+                       ord_t& n, scalar_t* lhs, scalar_t* rhs) noexcept {
+    /*
+     * distance from current node to target branch
+     */
+    auto d = distance(point_ptr->x, point_ptr->y, branch_ptr->x, branch_ptr->y);
+    /*
+     * pre-order traversal quadtree.
+     */
+    if (branch_ptr->status == Status::LEAF || branch_ptr->length / d < theta) {
+        // if target branch is a leaf or at far field.
+        // todo: finish iteration
+        auto ret = eval(tree, point_ptr->x, point_ptr->y, branch_ptr);
+        tree->interactions[point_ptr->id].push_back(ret);
+
+        if (branch_ptr->points[0]->id != point_ptr->id) {
+        	lhs[point_ptr->id] += ret * branch_ptr->value;
+
+        }
+        else {
+            lhs[point_ptr->id] +=
+                    (2 * scalar_t(M_PI) *
+                     (1 - exp(-branch_ptr->attribute * branch_ptr->length))
+                     /2.0/branch_ptr->attribute +
+                     integral_corner(branch_ptr->attribute, branch_ptr->length))
+                     * rhs[point_ptr->id];
+        }
+    }
+    else {
+        for (auto child : branch_ptr->children) {
+            if (child->status != Status::EMPTY) {
+                traversal(tree, theta, point_ptr, child.get(), n, lhs, rhs);
+            }
+        }
+    }
+}
+
+inline void fast_traversal (treecode *tree, scalar_t& theta,
+                       shared_ptr<point> point_ptr, quadtree* branch_ptr,
+                       ord_t& n, scalar_t* lhs, scalar_t* rhs) noexcept {
+    /*
+     * distance from current node to target branch
+     */
+    auto d = distance(point_ptr->x, point_ptr->y, branch_ptr->x, branch_ptr->y);
+    size_t interaction_id = 0;
+    /*
+     * pre-order traversal quadtree.
+     */
+    if (branch_ptr->status == Status::LEAF || branch_ptr->length / d < theta) {
+        // if target branch is a leaf or at far field.
+        // todo: finish iteration
+        auto ret = tree->interactions[point_ptr->id][interaction_id++];
+
+        if (branch_ptr->points[0]->id != point_ptr->id) {
+
+        	lhs[point_ptr->id] += ret * branch_ptr->value;
+        }
+        else {
+            lhs[point_ptr->id] +=
+                    (2 * scalar_t(M_PI) *
+                     (1 - exp(-branch_ptr->attribute * branch_ptr->length))
+                     /2.0/branch_ptr->attribute +
+                     integral_corner(branch_ptr->attribute, branch_ptr->length))
+                     * rhs[point_ptr->id];
+        }
+    }
+    else {
+        for (auto child : branch_ptr->children) {
+            if (child->status != Status::EMPTY) {
+                traversal(tree, theta, point_ptr, child.get(), n, lhs, rhs);
             }
         }
     }

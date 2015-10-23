@@ -1,7 +1,7 @@
 function [ret] = ray_run_direct(dom, fem, sigma_a_coef, sigma_s_coef)
 
-sigma_a_fcn = @(x, y) (sigma_a_coef  + 0.2.*abs(cos(2*pi*x)));
-sigma_s_fcn = @(x, y) (sigma_s_coef  + 0.2.*abs(sin(2*pi*x)));
+sigma_a_fcn = @(x, y) (sigma_a_coef  + 0.0.*abs(cos(2*pi*x)));
+sigma_s_fcn = @(x, y) (sigma_s_coef  + 0.0.*abs(sin(2*pi*x)));
 
 % center = [0.6, 0.4];
 % radius = 0.2;
