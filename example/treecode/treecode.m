@@ -57,7 +57,7 @@ end
 function lhs = forward(rhs)
 global tree theta_ s
 tree.preprocess(s'.*rhs/(2 * pi));
-lhs = rhs - tree.apply(theta_, s'.*rhs/(2 * pi));
+lhs = rhs - tree.fast_apply(theta_, s'.*rhs/(2 * pi));
 end
 
 function val = sigma_t(x, y)
