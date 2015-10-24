@@ -116,7 +116,7 @@ MEX_DEFINE(apply) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 
 	int i;
 
-#pragma omp parallel for shared(theta_ptr, root, Radptr, num) private(i)
+#pragma omp parallel for shared(theta_ptr, root, Radptr, num, rhs_ptr) private(i)
 	for (i = 0; i < num; i++) {
 		traversal(root, *theta_ptr, root->root->points[i], root->root, num, Radptr, rhs_ptr);
 	}
@@ -149,7 +149,7 @@ MEX_DEFINE(fast_apply) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs
 
 	int i;
 
-#pragma omp parallel for shared(theta_ptr, root, Radptr, num) private(i)
+#pragma omp parallel for shared(theta_ptr, root, Radptr, num, rhs_ptr) private(i)
 	for (i = 0; i < num; i++) {
 		fast_traversal(root, *theta_ptr, root->root->points[i], root->root, num, Radptr, rhs_ptr);
 	}

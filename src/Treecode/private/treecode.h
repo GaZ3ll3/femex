@@ -337,7 +337,6 @@ inline void fast_traversal (treecode *tree, scalar_t& theta,
      * distance from current node to target branch
      */
     auto d = distance(point_ptr->x, point_ptr->y, branch_ptr->x, branch_ptr->y);
-    size_t interaction_id = 0;
     /*
      * pre-order traversal quadtree.
      */
@@ -362,7 +361,7 @@ inline void fast_traversal (treecode *tree, scalar_t& theta,
     else {
         for (auto child : branch_ptr->children) {
             if (child->status != Status::EMPTY) {
-                traversal(tree, theta, point_ptr, child.get(), n, lhs, rhs);
+                fast_traversal(tree, theta, point_ptr, child.get(), n, lhs, rhs);
             }
         }
     }
