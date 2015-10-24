@@ -4,7 +4,7 @@
 
 #ifndef QUADTREE_TREECODE_H
 #define QUADTREE_TREECODE_H
-#define EPS 1e-2
+//#define EPS 1e-2
 
 #include <unordered_map>
 #include "quadtree.h"
@@ -49,7 +49,7 @@ typedef struct treecode {
     scalar_t  length;
     level_t   size;
     quadtree*  root;
-    vector<vector<scalar_t>> interactions;
+    vector<unordered_map<quadtree*, scalar_t>> interactions;
 
     /*
      * treecode constructor
@@ -130,7 +130,7 @@ inline scalar_t integral_helper(treecode *tree, scalar_t x0, scalar_t y0, scalar
  */
 inline scalar_t integral(treecode *tree, scalar_t x0, scalar_t y0, scalar_t x1, scalar_t y1) noexcept {
 
-    if (distance(x0, y0, x1, y1) < EPS) return integral_helper(tree, x0, y0, x1, y1);
+    if (distance(x0, y0, x1, y1) < 1.0/tree->size) return integral_helper(tree, x0, y0, x1, y1);
     else {
         auto xm = (x0 + x1)/2;
         auto ym = (y0 + y1)/2;
@@ -306,7 +306,7 @@ inline void traversal (treecode *tree, scalar_t& theta,
         // if target branch is a leaf or at far field.
         // todo: finish iteration
         auto ret = eval(tree, point_ptr->x, point_ptr->y, branch_ptr);
-        tree->interactions[point_ptr->id].push_back(ret);
+        tree->interactions[point_ptr->id][branch_ptr] = ret;
 
         if (branch_ptr->points[0]->id != point_ptr->id) {
         	lhs[point_ptr->id] += ret * branch_ptr->value;
@@ -344,7 +344,7 @@ inline void fast_traversal (treecode *tree, scalar_t& theta,
     if (branch_ptr->status == Status::LEAF || branch_ptr->length / d < theta) {
         // if target branch is a leaf or at far field.
         // todo: finish iteration
-        auto ret = tree->interactions[point_ptr->id][interaction_id++];
+        auto ret = tree->interactions[point_ptr->id][branch_ptr];
 
         if (branch_ptr->points[0]->id != point_ptr->id) {
 
