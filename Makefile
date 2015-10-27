@@ -155,13 +155,13 @@ $(TRE)Treecode_.mexa64: Treecode_.tre.o treecode.tre.o quadtree.tre.o
 	
 RAD = $(SRC)Radfmm/private/
 RAD_SRCS = $(wildcard $(RAD)*.cpp)
-RAD_OBJS = $(patsubst $(RAD)%.cpp, %.rad.o, $(RAD_SRCS))
-RAD_BINS = $(RAD)Radfmm_.mexa64
+RAD_OBJS = $(patsubst $(RAD)%.cpp, %.rad.o, $(RAD_SRCS))4
+RADK_BINS = $(RAD)Radfmmk_.mexa64
 
 %.rad.o: $(RAD)%.cpp
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
-$(RAD)Radfmm_.mexa64: H2_2D_Node.rad.o H2_2D_Tree.rad.o kernel_Base.rad.o kernel_Types.rad.o  Radfmm.rad.o
-	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.rad.o H2_2D_Tree.rad.o kernel_Base.rad.o kernel_Types.rad.o  Radfmm.rad.o $(CXX_LIBS)
+$(RAD)Radfmmk_.mexa64: H2_2D_Node.rad.o H2_2D_Tree.rad.o kernel_Base.rad.o kernel_Types.rad.o Radfmmk.rad.o
+	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.rad.o H2_2D_Tree.rad.o kernel_Base.rad.o kernel_Types.rad.o  Radfmmk.rad.o $(CXX_LIBS)
 	
 #ADJ = $(SRC)Adjoint/private/
 #ADJ_SRCS = $(wildcard $(ADJ)*.cc)
@@ -201,7 +201,8 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 
 ##############################################################	
 # The action starts here.
-all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) $(DOM_BINS) $(CEL_BINS) $(QUA_BINS) $(TRE_BINS) $(RAD_BINS)
+all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) \
+$(DOM_BINS) $(CEL_BINS) $(QUA_BINS) $(TRE_BINS) $(RAD_BINS) $(RADK_BINS)
 	rm -rf $(TRIANGLELIB)triangle.o \
 	rm -rf *.o
 

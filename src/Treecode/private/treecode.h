@@ -321,8 +321,8 @@ inline void traversal (treecode *tree, scalar_t& theta,
         else {
             lhs[point_ptr->id] +=
                     (2 * scalar_t(M_PI) *
-                     (1 - exp(-branch_ptr->attribute * branch_ptr->length))
-                     /2.0/branch_ptr->attribute +
+                     (1 - exp(-branch_ptr->attribute * branch_ptr->length/2.0))
+                     /branch_ptr->attribute +
                      integral_corner(branch_ptr->attribute, branch_ptr->length))
                      * rhs[point_ptr->id];
         }
@@ -358,8 +358,8 @@ inline void fast_traversal (treecode *tree, scalar_t& theta,
         else {
             lhs[point_ptr->id] +=
                     (2 * scalar_t(M_PI) *
-                     (1 - exp(-branch_ptr->attribute * branch_ptr->length))
-                     /2.0/branch_ptr->attribute +
+                     (1 - exp(-branch_ptr->attribute * branch_ptr->length/2.0))
+                     /branch_ptr->attribute +
                      integral_corner(branch_ptr->attribute, branch_ptr->length))
                      * rhs[point_ptr->id];
         }
