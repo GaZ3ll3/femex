@@ -27,7 +27,7 @@ static std::vector<scalar_t> W {
         0.47862867049936647090291330641776,
         0.23692688505618908489935847683228
 };
-
+//
 //static std::vector<scalar_t> X {0};
 //static std::vector<scalar_t> W {2.0};
 
@@ -167,18 +167,24 @@ inline scalar_t integral_corner(scalar_t sigma_t, scalar_t length) {
  * @branch_ptr : target quadtree
  */
 inline scalar_t eval(treecode *tree, scalar_t x0, scalar_t y0, quadtree* branch_ptr) noexcept {
-    auto sum = scalar_t(0.0);
-    auto center_x = branch_ptr->x +  branch_ptr->length/2;
-    auto center_y = branch_ptr->y +  branch_ptr->length/2;
-    for (auto i = 0; i < X.size(); i++) {
-        auto x_ = center_x +  X[i] * branch_ptr->length/2;
-        for (auto j = 0; j < X.size(); j++) {
-            sum += eval_helper(tree, x0, y0,
-                               x_,
-                               center_y + X[j] * branch_ptr->length/2) * W[i] * W[j] / 4;
-        }
-    }
-    return sum * branch_ptr->length * branch_ptr->length;
+//    auto sum = scalar_t(0.0);
+//    auto center_x = branch_ptr->x +  branch_ptr->length/2;
+//    auto center_y = branch_ptr->y +  branch_ptr->length/2;
+//    for (auto i = 0; i < X.size(); i++) {
+//        auto x_ = center_x +  X[i] * branch_ptr->length/2;
+//        for (auto j = 0; j < X.size(); j++) {
+//            sum += eval_helper(tree, x0, y0,
+//                               x_,
+//                               center_y + X[j] * branch_ptr->length/2) * W[i] * W[j] / 4;
+//        }
+//    }
+//    return sum * branch_ptr->length * branch_ptr->length;
+	    auto center_x = branch_ptr->x +  branch_ptr->length/2;
+	    auto center_y = branch_ptr->y +  branch_ptr->length/2;
+
+	    return eval_helper(tree, x0, y0,
+						   center_x,
+						   center_y) * branch_ptr->length * branch_ptr->length;
 }
 /*
  * traversal quadtree

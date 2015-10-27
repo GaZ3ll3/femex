@@ -45,7 +45,7 @@ t1 = toc;
 
 fprintf('done, using %f\n5. solving linear system using GMres ... ', t1);
 tic;
-ret=gmres(@forward, p, 30, 1e-3, 30,[],[], p);
+ret=gmres(@forward, p, 30, 1e-12, 30,[],[], p);
 t1 =toc ;
 fprintf('done, using %f\n', t1);
 [X, Y] = meshgrid(1/n : 2/n:(n-1)/n);
@@ -61,9 +61,9 @@ lhs = rhs - tree.fast_apply(theta_, s'.*rhs/(2 * pi));
 end
 
 function val = sigma_t(x, y)
-    val = 0.1 + 5.0 * (x.^2 + y.^2 + 1);
+    val = 2.1 * ones(size(x));
 end
 
 function val = sigma_s(x, y)
-    val = 5.0 * (x.^2 + y.^2 + 1);
+    val = 2.0 * ones(size(x));
 end
