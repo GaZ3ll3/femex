@@ -38,14 +38,10 @@ H2_2D_Tree::H2_2D_Tree(const unsigned short nChebNodes, double* const charge, co
     root->radius        =   radius;
     
 	root->index.setLinSpaced(N,0,N-1);
-//    std::cout << "Assigning children..." << std::endl;
 	assign_Children(root);
-//	std::cout << "Assigned children." << std::endl;
     build_Tree(root);
-//    std::cout << "Maximum levels is: " << this->maxLevels << std::endl;
 }
 
-//	Assigns children;
 void H2_2D_Tree::assign_Children(H2_2D_Node*& node){
 	if(node->N==0){
 		node->isLeaf	=	true;
@@ -74,8 +70,8 @@ void H2_2D_Tree::assign_Children(H2_2D_Node*& node){
 			for(unsigned short k=0; k<4; ++k){
 				node->child[k]              =	new H2_2D_Node(node->nLevel+1, k);
 				node->child[k]->parent		=	node;
-				node->child[k]->center.x	=	node->center.x+((k%2)-0.5)*node->radius.x;
-				node->child[k]->center.y	=	node->center.y+((k/2)-0.5)*node->radius.y;
+				node->child[k]->center.x	=	node->center.x+((k & 1)-0.5)*node->radius.x;
+				node->child[k]->center.y	=	node->center.y+((k >> 1)-0.5)*node->radius.y;
 				node->child[k]->radius      =	node->radius*0.5;
                 node->child[k]->N           =	0;
 			}
@@ -122,7 +118,7 @@ void H2_2D_Tree::build_Tree(H2_2D_Node*& node){
 		if(!node->isLeaf){
 			assign_Siblings(node);
 			for(unsigned short k=0;k<8;++k){
-				if(node->neighbor[k]!=NULL){
+				if(node->neighbor[k]!=nullptr){
 					if(!node->neighbor[k]->isLeaf  && !node->neighbor[k]->isEmpty){
                         assign_Cousin(node,k);
 					}
@@ -154,20 +150,20 @@ void H2_2D_Tree::get_Charge(H2_2D_Node*& node){
 
 //	Obtains standard Chebyshev nodes in interval [-1,1];
 void H2_2D_Tree::get_Standard_Chebyshev_Nodes(const unsigned short nChebNodes, VectorXd& cNode){
-	cNode	=	VectorXd(nChebNodes);
+	cNode = VectorXd(nChebNodes);
 	for(unsigned short k=0;k<nChebNodes;++k){
-		cNode(k)	=	-cos((k+0.5)*PI/nChebNodes);
+		cNode(k) = -cos((k + 0.5)*M_PI/nChebNodes);
 	}
 }
 
 //	Obtains standard Chebyshev polynomials evaluated at given set of Points;
 void H2_2D_Tree::get_Standard_Chebyshev_Polynomials(const unsigned short nChebPoly, const unsigned long N, const VectorXd& x, MatrixXd& T){
-	T	=	MatrixXd::Zero(N,nChebPoly);
-	T.col(0)=	VectorXd::Ones(N);
+	T = MatrixXd::Zero(N,nChebPoly);
+	T.col(0) = VectorXd::Ones(N);
 	if(nChebPoly>1){
-		T.col(1)	=	x;
-		for(unsigned short k=2; k<nChebPoly; ++k){
-			T.col(k)=	2.0*x.cwiseProduct(T.col(k-1))-T.col(k-2);
+		T.col(1) = x;
+		for(unsigned short k=2; k < nChebPoly; ++k){
+			T.col(k) = 2.0*x.cwiseProduct(T.col(k-1))-T.col(k-2);
 		}
 	}
 }
@@ -179,31 +175,31 @@ void H2_2D_Tree::get_Center_Radius(const vector<Point>& location, Point& center,
 	double minX;
 	double minY;
     max_And_Min_Coordinates(location, maxX, maxY, minX, minY);
-	center.x	=	0.5*(maxX+minX);
-	center.y	=	0.5*(maxY+minY);
-	radius.x	=	0.5*(maxX-minX);
-	radius.y	=	0.5*(maxY-minY);
+	center.x = 0.5*(maxX + minX);
+	center.y = 0.5*(maxY + minY);
+	radius.x = 0.5*(maxX - minX);
+	radius.y = 0.5*(maxY - minY);
 }
 
 
 
 void H2_2D_Tree::max_And_Min_Coordinates(const vector<Point>& vec, double& maxX, double& maxY, double& minX, double& minY) {
-    maxX   =   vec[0].x;
-    maxY   =   vec[0].y;
-    minX   =   maxX;
-    minY   =   maxY;
+    maxX = vec[0].x;
+    maxY = vec[0].y;
+    minX = maxX;
+    minY = maxY;
     for (unsigned int i = 0; i < vec.size(); i++) {
         if (vec[i].x>maxX) {
-            maxX   =   vec[i].x;
+            maxX = vec[i].x;
         }
         if (vec[i].y>maxY) {
-            maxY   =   vec[i].y;
+            maxY = vec[i].y;
         }
         if (vec[i].x<minX) {
-            minX   =   vec[i].x;
+            minX = vec[i].x;
         }
         if (vec[i].y<minY) {
-            minY   =   vec[i].y;
+            minY = vec[i].y;
         }
     }
 }
@@ -211,7 +207,7 @@ void H2_2D_Tree::max_And_Min_Coordinates(const vector<Point>& vec, double& maxX,
 
 //	Obtains interpolation operator, which interpolates information from Chebyshev nodes of parent to Points in children;
 void H2_2D_Tree::get_Transfer_From_Parent_To_Children(const unsigned short nChebNodes, const vector<Point>& location, const Point& center, const Point& radius, const VectorXd& cNode, const MatrixXd& TNode, MatrixXd& R){
-	unsigned long N		=	location.size();
+	unsigned long N	= location.size();
     VectorXd standlocation[2];
     standlocation[0].resize(N);
     standlocation[1].resize(N);
@@ -223,14 +219,14 @@ void H2_2D_Tree::get_Transfer_From_Parent_To_Children(const unsigned short nCheb
 	MatrixXd Transfer[2];
 	for(unsigned short k=0;k<2;++k){
 		get_Standard_Chebyshev_Polynomials(nChebNodes, N, standlocation[k], Transfer[k]);
-		Transfer[k]	=	(2.0*Transfer[k]*TNode.transpose()-MatrixXd::Ones(N,nChebNodes))/nChebNodes;
+		Transfer[k]	=	(2.0 * Transfer[k] * TNode.transpose() - MatrixXd::Ones(N,nChebNodes))/nChebNodes;
 	}
-	unsigned short rank	=	nChebNodes*nChebNodes;
-	R			=	MatrixXd::Zero(N,rank);
-	for(unsigned short k=0;k<N;++k){
-		for(unsigned short i=0; i<nChebNodes; ++i){
-			for(unsigned short j=0;j<nChebNodes;++j){
-				R(k,i+nChebNodes*j)=Transfer[0](k,i)*Transfer[1](k,j);
+	unsigned short rank	= nChebNodes*nChebNodes;
+	R = MatrixXd::Zero(N,rank);
+	for(unsigned short k=0;k < N; ++k){
+		for(unsigned short i=0; i < nChebNodes; ++i){
+			for(unsigned short j=0;j < nChebNodes;++j){
+				R(k,i + nChebNodes * j) = Transfer[0](k , i) * Transfer[1](k ,j);
 			}
 		}
 	}
@@ -239,11 +235,11 @@ void H2_2D_Tree::get_Transfer_From_Parent_To_Children(const unsigned short nCheb
 
 //	Obtains interpolation operator, which interpolates information from Chebyshev nodes of parent to Chebyshev nodes of children;
 void H2_2D_Tree::get_Transfer_From_Parent_CNode_To_Children_CNode(const unsigned short nChebNodes, const VectorXd& cNode, const MatrixXd& TNode, MatrixXd& Transfer){
-	VectorXd childcNode(2*nChebNodes);
-	childcNode.segment(0,nChebNodes)		=	0.5*(cNode-VectorXd::Ones(nChebNodes));
-	childcNode.segment(nChebNodes,nChebNodes)	=	0.5*(cNode+VectorXd::Ones(nChebNodes));
-	get_Standard_Chebyshev_Polynomials(nChebNodes, 2*nChebNodes, childcNode, Transfer);
-	Transfer	=	(2.0*Transfer*TNode.transpose()-MatrixXd::Ones(2*nChebNodes,nChebNodes))/nChebNodes;
+	VectorXd childcNode(nChebNodes << 1);
+	childcNode.segment(0,nChebNodes)		=	0.5 *(cNode - VectorXd::Ones(nChebNodes));
+	childcNode.segment(nChebNodes,nChebNodes)	=	0.5 * (cNode+VectorXd::Ones(nChebNodes));
+	get_Standard_Chebyshev_Polynomials(nChebNodes, nChebNodes << 1, childcNode, Transfer);
+	Transfer	=	(2.0 * Transfer*TNode.transpose()- MatrixXd::Ones(nChebNodes << 1,nChebNodes))/nChebNodes;
 }
 
 //	Evaluates transfer from four children to parent;
@@ -274,9 +270,8 @@ void H2_2D_Tree::get_Transfer(const unsigned short nChebNodes, const VectorXd& c
 
 //	Evaluates 'nChebNodes' standardized chebyshev nodes in any interval;
 void H2_2D_Tree::get_Scaled_ChebNode(const unsigned short& nChebNodes, const VectorXd& cNode, const Point& center, const Point& radius, vector<Point>& chebNode){
-	for(unsigned short k=0;k<nChebNodes;++k){
-		const Point tmp = center+radius*cNode(k);
-		chebNode.push_back(tmp);
+	for(unsigned short k = 0;k<nChebNodes;++k){
+		chebNode.push_back((const Point)(center + radius*cNode(k)));
 	}
 }
 
@@ -321,7 +316,7 @@ void H2_2D_Tree:: assign_Siblings(H2_2D_Node*& node){
 //	Assign cousins to children of the node
 void H2_2D_Tree:: assign_Cousin(H2_2D_Node*& node, unsigned short neighborNumber){
 //	Assigning children of neighbor 0
-	if(neighborNumber==0 && node->neighbor[0] != NULL ){
+	if(neighborNumber==0 && node->neighbor[0] != nullptr ){
 //	Assigning the cousins to child0. One neighbor and three well-separated cousins.
 		node->child[0]->interaction[node->child[0]->nInteraction++]	=	node->neighbor[0]->child[0];
 		node->child[0]->interaction[node->child[0]->nInteraction++]	=	node->neighbor[0]->child[1];
@@ -351,7 +346,7 @@ void H2_2D_Tree:: assign_Cousin(H2_2D_Node*& node, unsigned short neighborNumber
 		node->child[0]->nNeighbor					=	node->child[0]->nNeighbor+1;
 	}
 //	Assigning children of neighbor 1
-	else if(neighborNumber==1 && node->neighbor[1] != NULL ){
+	else if(neighborNumber==1 && node->neighbor[1] != nullptr ){
 //	Assigning the cousins to child0. One neighbor and three well-separated cousins.
 		node->child[0]->interaction[node->child[0]->nInteraction++]	=	node->neighbor[1]->child[0];
 		node->child[0]->interaction[node->child[0]->nInteraction++]	=	node->neighbor[1]->child[1];
@@ -385,7 +380,7 @@ void H2_2D_Tree:: assign_Cousin(H2_2D_Node*& node, unsigned short neighborNumber
 		node->child[1]->nNeighbor					=	node->child[1]->nNeighbor+2;
 	}
 //	Assigning children of neighbor 2
-	else if (neighborNumber==2 && node->neighbor[2] != NULL ){
+	else if (neighborNumber==2 && node->neighbor[2] != nullptr ){
 //	Assigning the cousins to child0. One neighbor and three well-separated cousins.
 
 		node->child[0]->interaction[node->child[0]->nInteraction++]	=	node->neighbor[2]->child[0];
@@ -419,7 +414,7 @@ void H2_2D_Tree:: assign_Cousin(H2_2D_Node*& node, unsigned short neighborNumber
 		node->child[1]->nNeighbor					=	node->child[1]->nNeighbor+1;
 	}
 //	Assigning children of neighbor 3
-	else if(neighborNumber==3 && node->neighbor[3] != NULL ){
+	else if(neighborNumber==3 && node->neighbor[3] != nullptr ){
 //	Assigning the cousins to child0. One neighbor and three well-separated cousins.
 
 		node->child[0]->interaction[node->child[0]->nInteraction++]	=	node->neighbor[3]->child[0];
@@ -454,7 +449,7 @@ void H2_2D_Tree:: assign_Cousin(H2_2D_Node*& node, unsigned short neighborNumber
 		node->child[3]->nNeighbor					=	node->child[3]->nNeighbor+2;
 	}
 //	Assigning children of neighbor 4
-	else if(neighborNumber==4 && node->neighbor[4] != NULL ){
+	else if(neighborNumber==4 && node->neighbor[4] != nullptr ){
 //	Assigning the cousins to child0. One neighbor and three well-separated cousins.
 
 		node->child[0]->interaction[node->child[0]->nInteraction++]	=	node->neighbor[4]->child[0];
@@ -488,7 +483,7 @@ void H2_2D_Tree:: assign_Cousin(H2_2D_Node*& node, unsigned short neighborNumber
 		node->child[3]->nNeighbor					=	node->child[3]->nNeighbor+1;
 	}
 //	Assigning children of neighbor 5
-	else if(neighborNumber==5 && node->neighbor[5] != NULL ){
+	else if(neighborNumber==5 && node->neighbor[5] != nullptr ){
 //	Assigning the cousins to child0. One neighbor and three well-separated cousins.
 
 		node->child[0]->interaction[node->child[0]->nInteraction++]	=	node->neighbor[5]->child[0];
@@ -523,7 +518,7 @@ void H2_2D_Tree:: assign_Cousin(H2_2D_Node*& node, unsigned short neighborNumber
 		node->child[3]->nNeighbor					=	node->child[3]->nNeighbor+2;
 }
 //	Assigning children of neighbor 6
-	else if (neighborNumber==6 && node->neighbor[6] != NULL ){
+	else if (neighborNumber==6 && node->neighbor[6] != nullptr ){
 //	Assigning the cousins to child0. One neighbor and three well-separated cousins.
 
 		node->child[0]->interaction[node->child[0]->nInteraction++]	=	node->neighbor[6]->child[0];
@@ -557,7 +552,7 @@ void H2_2D_Tree:: assign_Cousin(H2_2D_Node*& node, unsigned short neighborNumber
 		node->child[2]->nNeighbor					=	node->child[2]->nNeighbor+1;
 	}
 //	Assigning children of neighbor 7
-	else if (neighborNumber==7 && node->neighbor[7] != NULL ){
+	else if (neighborNumber==7 && node->neighbor[7] != nullptr ){
 //	Assigning the cousins to child0. One neighbor and three well-separated cousins.
 
 		node->child[0]->interaction[node->child[0]->nInteraction++]	=	node->neighbor[7]->child[0];
@@ -594,9 +589,9 @@ void H2_2D_Tree:: assign_Cousin(H2_2D_Node*& node, unsigned short neighborNumber
 }
 
 H2_2D_Tree::~H2_2D_Tree() {
-    if(root!=NULL){
+    if(root!=nullptr){
 		delete root;
-		root = NULL;
+		root = nullptr;
 	}
 }
 

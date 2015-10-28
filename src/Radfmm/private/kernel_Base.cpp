@@ -13,6 +13,7 @@ void kernel_Base::calculate_Potential_cache(H2_2D_Node*& node, MatrixXd& potenti
     if(!node->isEmpty){
 		if(node->isLeaf){
 			MatrixXd tempK;
+
 			for(unsigned short k=0;k<8;++k){
 				if(node->neighbor[k]!=NULL){
 					if(!node->neighbor[k]->isEmpty){
@@ -183,14 +184,14 @@ void kernel_Base::calculate_Potential(H2_2D_Node*& node, MatrixXd& potential,H2_
 			for(unsigned short k=0;k<8;++k){
 				if(node->neighbor[k]!=NULL){
 					if(!node->neighbor[k]->isEmpty){
-					if(node->neighbor[k]->isLeaf){
-						MatrixXd tempK;
-						kernel_2D(node->N, node->location, node->neighbor[k]->N, node->neighbor[k]->location, tempK);
-						tree.get_Charge(node->neighbor[k]);
-						node->potential+=tempK*node->neighbor[k]->charge;
-						computePotential	=	true;
+						if(node->neighbor[k]->isLeaf){
+							MatrixXd tempK;
+							kernel_2D(node->N, node->location, node->neighbor[k]->N, node->neighbor[k]->location, tempK);
+							tree.get_Charge(node->neighbor[k]);
+							node->potential+=tempK*node->neighbor[k]->charge;
+							computePotential	=	true;
+						}
 					}
-				}
 				}
 			}
 			calculate_NodePotential_From_Wellseparated_Clusters(node,tree.rank,tree.nChebNodes);
@@ -203,7 +204,6 @@ void kernel_Base::calculate_Potential(H2_2D_Node*& node, MatrixXd& potential,H2_
 			}
 		}
 	}
-    
 }
 
 void kernel_Base::set_Tree_Potential_Zero(H2_2D_Node* node){
@@ -235,9 +235,6 @@ void kernel_Base::calculate_NodePotential_From_Wellseparated_Clusters(H2_2D_Node
 			for(unsigned short i=0; i<node->child[k]->nInteraction; ++i){
 				if (node->child[k]->interaction[i] != NULL && !node->child[k]->interaction[i]->isEmpty) {
 					kernel_Cheb_2D(nChebNodes,node->child[k]->scaledCnode,nChebNodes,node->child[k]->interaction[i]->scaledCnode,K);
-
-					//cached, copied.
-//					cache.push_back(K);
 
 					node->child[k]->nodePotential	=	node->child[k]->nodePotential+K*node->child[k]->interaction[i]->nodeCharge;
 

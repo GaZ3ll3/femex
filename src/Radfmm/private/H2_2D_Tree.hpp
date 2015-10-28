@@ -18,7 +18,7 @@ using namespace Eigen;
 using namespace std;
 
 
-const double PI	=	4.0*atan(1.0);
+//const double PI	=	4.0*atan(1.0);
 
 
 /*! The fmm tree */
@@ -55,11 +55,8 @@ private:
 /*!  Build tree(assign siblings and cousins);*/
     void build_Tree(H2_2D_Node*& node);
 
-
-
 /*!	Obtains charge to node when needed;*/
 	void get_Charge(H2_2D_Node*& node);
-
 
 /*!	Obtains standard Chebyshev nodes in interval [-1,1];*/
 	void get_Standard_Chebyshev_Nodes(const unsigned short nChebNodes, VectorXd& cNode);

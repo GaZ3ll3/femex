@@ -21,8 +21,9 @@ N = size(x, 2)^2;
                                                     
 charge = ring(z(1,:), z(2,:));
 
-mu_t = 5.1 * ones(N, 1);
-mu_s = 5.0 * ones(N, 1);
+mu_s = 5.0 * (1 + z(1,:).^2 + z(2, :).^2)';
+mu_t = 0.1 + mu_s;
+
 
 tic;
 ker = Radfmmk();

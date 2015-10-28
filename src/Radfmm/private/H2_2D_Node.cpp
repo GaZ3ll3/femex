@@ -25,36 +25,36 @@ Point Point::operator* (double rhs ) const {
 
 H2_2D_Node::H2_2D_Node(unsigned short nLevel, unsigned short nodeNumber){
 //	Set parent NULL
-	parent	=	NULL;
+	parent = nullptr;
 //	Set children NULL
 	for(unsigned short k=0; k<4; ++k){
-		child[k]	=	NULL;
+		child[k] = nullptr;
 	}
 //	Set neighbors NULL
 	for(unsigned short k=0; k<8; ++k){
-		neighbor[k]	=	NULL;
+		neighbor[k]	= nullptr;
 	}
 //	Set interactions NULL
     for(unsigned short k=0; k<27; ++k){
-		interaction[k]	=	NULL;
+		interaction[k] = nullptr;
 	}
-	nNeighbor	=	0;
-	nInteraction	=	0;
+	nNeighbor = 0;
+	nInteraction = 0;
 	N = 0;
 
-	isLeaf		=	false;
-	isEmpty		=	false;
-	chargeComputed	=	false;
+	isLeaf = false;
+	isEmpty = false;
+	chargeComputed = false;
 
-	this->nLevel	=	nLevel;
-	this->nodeNumber=	nodeNumber;
+	this->nLevel = nLevel;
+	this->nodeNumber = nodeNumber;
 }
 
 H2_2D_Node::~H2_2D_Node(){
-    for (unsigned short k=0; k<4; ++k) {
-        if (child[k]!=NULL) {
+    for (unsigned short k=0; k < 4; ++k) {
+        if (child[k]!= nullptr) {
             delete child[k];
-            child[k]    =   NULL;
+            child[k] = nullptr;
         }
     }
 }
