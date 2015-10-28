@@ -76,7 +76,6 @@ void kernel_Base::calculate_Potential_cache(H2_2D_Tree& tree, double* potential)
 //    std::cout << "Calculated potential caching at storage of "<< cache.size() << "." << std::endl;
 }
 
-
 void kernel_Base::calculate_Potential_fast(H2_2D_Node*& node, MatrixXd& potential,H2_2D_Tree& tree, int*& index) {
     if(!node->isEmpty){
 		if(node->isLeaf){
@@ -144,7 +143,6 @@ void kernel_Base::calculate_Potential_fast(H2_2D_Node*& node, MatrixXd& potentia
 		}
 	}
 }
-
 
 void kernel_Base::calculate_Potential_fast(H2_2D_Tree& tree, double* potential){
 	int index = 0;

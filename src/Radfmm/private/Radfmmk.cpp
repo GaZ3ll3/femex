@@ -125,7 +125,6 @@ MEX_DEFINE(calc) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 
 }
 
-
 MEX_DEFINE(calc_cache) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	InputArguments input(nrhs, prhs, 7);
 	OutputArguments output(nlhs, plhs, 1);
@@ -172,7 +171,6 @@ MEX_DEFINE(calc_cache) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs
 
 }
 
-
 MEX_DEFINE(calc_fast) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	InputArguments input(nrhs, prhs, 7);
 	OutputArguments output(nlhs, plhs, 1);
@@ -218,6 +216,21 @@ MEX_DEFINE(calc_fast) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[
 
 	delete root;
 
+}
+
+MEX_DEFINE(disp) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 1);
+	OutputArguments output(nlhs, plhs, 0);
+
+	auto kern = Session<kernel_Radfmm>::get(input.get(0));
+
+	std::cout << "Storage of Matrices : " << kern->cache.size() << std::endl;
+
+	size_t sum = 0;
+	for (auto& m : kern->cache) {
+		sum += m.size();
+	}
+	std::cout << "Memory allocated : " << sum * 8 / 1024 / 1024 << " MB" << std::endl;
 }
 }
 MEX_DISPATCH

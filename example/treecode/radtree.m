@@ -34,6 +34,8 @@ tic;
 rhs = ker.calcc(ncheb, charge, z, N, m, mu_t);
 t = toc;
 
+ker.disp();
+
 fprintf('2. Caching necessary kernel evaluations ... with time %f\n', t);
 % 
 

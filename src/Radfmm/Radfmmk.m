@@ -26,6 +26,11 @@ methods
   function ret = calcf(this, ncheb,x, z, N, m, mu_t) 
     ret =  Radfmmk_('calc_fast', this.id_,ncheb,x, z, N, m, mu_t);
   end
+  
+  function disp(this)
+    Radfmmk_('disp', this.id_);
+  end
+  
 end
 
 end
