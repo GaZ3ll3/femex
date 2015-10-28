@@ -132,23 +132,18 @@ $(CEL)%_.mexa64: %.cel.o
 QUA = $(SRC)/QuadTree/private/
 QUA_BINS = $(QUA)QuadTree_.mexa64
 
-Quadtree_.qua.o: $(QUA)Quadtree_.cc
-	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
-QuadTree.qua.o: $(QUA)QuadTree.cc
-	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
-$(QUA)QuadTree_.mexa64: Quadtree_.qua.o QuadTree.qua.o
+$(QUA)QuadTree_.mexa64: $(QUA)Quadtree_.cc $(QUA)QuadTree.cc
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(QUA)Quadtree_.cc -o Quadtree_.qua.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(QUA)QuadTree.cc -o QuadTree.qua.o
 	$(CXX) $(MATLAB_LINKS) -o $@ Quadtree_.qua.o QuadTree.qua.o $(CXX_LIBS)
 	
 TRE = $(SRC)/Treecode/private/
 TRE_BINS = $(TRE)Treecode_.mexa64
-
-Treecode_.tre.o: $(TRE)Treecode_.cpp
-	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
-treecode.tre.o: $(TRE)treecode.cpp
-	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
-quadtree.tre.o: $(TRE)quadtree.cpp
-	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
-$(TRE)Treecode_.mexa64: Treecode_.tre.o treecode.tre.o quadtree.tre.o
+	
+$(TRE)Treecode_.mexa64: $(TRE)quadtree.cpp $(TRE)treecode.cpp $(TRE)Treecode_.cpp
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(TRE)quadtree.cpp -o quadtree.tre.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(TRE)treecode.cpp -o treecode.tre.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(TRE)Treecode_.cpp -o Treecode_.tre.o
 	$(CXX) $(MATLAB_LINKS) -o $@ Treecode_.tre.o treecode.tre.o quadtree.tre.o $(CXX_LIBS)
 	
 	
@@ -158,9 +153,13 @@ RAD_SRCS = $(wildcard $(RAD)*.cpp)
 RAD_OBJS = $(patsubst $(RAD)%.cpp, %.rad.o, $(RAD_SRCS))4
 RADK_BINS = $(RAD)Radfmmk_.mexa64
 
-%.rad.o: $(RAD)%.cpp
-	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
-$(RAD)Radfmmk_.mexa64: H2_2D_Node.rad.o H2_2D_Tree.rad.o kernel_Base.rad.o kernel_Types.rad.o Radfmmk.rad.o
+
+$(RAD)Radfmmk_.mexa64: $(RAD)H2_2D_Node.cpp $(RAD)H2_2D_Tree.cpp $(RAD)kernel_Base.cpp $(RAD)kernel_Types.cpp $(RAD)Radfmmk.cpp
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(RAD)H2_2D_Node.cpp -o H2_2D_Node.rad.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(RAD)H2_2D_Tree.cpp -o H2_2D_Tree.rad.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(RAD)kernel_Base.cpp -o kernel_Base.rad.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(RAD)kernel_Types.cpp -o kernel_Types.rad.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(RAD)Radfmmk.cpp -o Radfmmk.rad.o
 	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.rad.o H2_2D_Tree.rad.o kernel_Base.rad.o kernel_Types.rad.o  Radfmmk.rad.o $(CXX_LIBS)
 	
 #ADJ = $(SRC)Adjoint/private/

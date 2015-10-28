@@ -19,7 +19,7 @@ void kernel_Base::calculate_Potential_cache(H2_2D_Node*& node, MatrixXd& potenti
 					if(!node->neighbor[k]->isEmpty){
 					kernel_2D(node->N , node->location, node->neighbor[k]->N, node->neighbor[k]->location, tempK);
 					// cached, copied.
-					cache.push_back(tempK);
+					cache.push_back(std::move(tempK));
                     //	Potential from neighbors
 					tree.get_Charge(node->neighbor[k]);
 					node->potential+=tempK*node->neighbor[k]->charge;
@@ -31,7 +31,7 @@ void kernel_Base::calculate_Potential_cache(H2_2D_Node*& node, MatrixXd& potenti
             //			Self potential
 			kernel_2D(node->N , node->location, node->N , node->location, tempK);
 			//cached, copied
-			cache.push_back(tempK);
+			cache.push_back(std::move(tempK));
 
 			node->potential+=tempK*node->charge;
 
@@ -46,7 +46,7 @@ void kernel_Base::calculate_Potential_cache(H2_2D_Node*& node, MatrixXd& potenti
 						MatrixXd tempK;
 						kernel_2D(node->N, node->location, node->neighbor[k]->N, node->neighbor[k]->location, tempK);
 						//cached, copied
-						cache.push_back(tempK);
+						cache.push_back(std::move(tempK));
 
 						tree.get_Charge(node->neighbor[k]);
 						node->potential+=tempK*node->neighbor[k]->charge;
@@ -253,7 +253,7 @@ void kernel_Base::calculate_NodePotential_From_Wellseparated_Clusters_cache(H2_2
 					kernel_Cheb_2D(nChebNodes,node->child[k]->scaledCnode,nChebNodes,node->child[k]->interaction[i]->scaledCnode,K);
 
 					//cached, copied.
-					cache.push_back(K);
+					cache.push_back(std::move(K));
 
 					node->child[k]->nodePotential	=	node->child[k]->nodePotential+K*node->child[k]->interaction[i]->nodeCharge;
 
