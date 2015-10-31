@@ -47,9 +47,9 @@ fprintf('3. GMRES takes time %f\n', t);
 
 [X, Y] = meshgrid(1/n : 2/n:(n-1)/n);
 surf(X,Y,reshape(ret, n/2,n/2), 'EdgeColor','None');
-shading interp;colorbar; colormap jet;
+shading interp;colorbar; colormap jet;view(2);
 
-
+% export_fig result.png
 
 end
 
