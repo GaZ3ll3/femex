@@ -86,7 +86,6 @@ double kernel_Radfmm::getAttribute(double x, double y) {
     return mu_t[row * side + col];
 }
 
-template class mexplus::Session<H2_2D_Tree>;
 template class mexplus::Session<kernel_Radfmm>;
 
 namespace {
