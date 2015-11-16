@@ -13,6 +13,7 @@ CXX_INCLUDE = -I./include/mexplus \
 			  -I./include/pprint \
 			  -I./include/Utility \
 			  -I./include/exprtk \
+                          -I/usr/include/eigen3\
 			  -I$(MATLAB_ROOT)extern/include \
 			  -I$(MATLAB_ROOT)simulink/include
 

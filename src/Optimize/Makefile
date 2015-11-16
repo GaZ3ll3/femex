@@ -49,7 +49,7 @@ all:
 	@echo " "
 	@echo "4. Compiling Ipopt..."
 	@cd $(coinipopt) && ./configure CC=gcc F77=gfortran-4.4 CXX=g++ --disable-shared --with-pic\
-	 --with-blas=BUILD --with-lapack=BUILD --with-matlab-home=$(MATLAB_ROOT)
+	 --with-blas=BUILD --with-lapack=BUILD --with-matlab-home=$(MATLAB_ROOT) coin_skip_warn_cxxflags=yes
 	@cd $(coinipopt) && make -j4
 	@cd $(coinipopt) && make install
  	
