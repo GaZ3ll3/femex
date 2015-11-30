@@ -229,6 +229,7 @@ MEX_DEFINE(disp) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	for (auto& m : kern->cache) {
 		sum += m.size();
 	}
+
 	std::cout << "Memory allocated : " << sum * 8 / 1024 / 1024 << " MB" << std::endl;
 }
 }
