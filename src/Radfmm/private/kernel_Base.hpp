@@ -22,6 +22,11 @@ public:
 
 	vector<MatrixXd> cache;
 
+    void calculate_Potential_cache_svd(H2_2D_Node*& node, MatrixXd& potential,H2_2D_Tree& tree);
+    void calculate_Potential_cache_svd(H2_2D_Tree& tree, double* potential);
+    void calculate_NodePotential_From_Wellseparated_Clusters_cache_svd(
+    		H2_2D_Node*& node, unsigned short rank,unsigned short nChebNodes);
+
     void calculate_Potential_cache(H2_2D_Node*& node, MatrixXd& potential,H2_2D_Tree& tree);
     void calculate_Potential_cache(H2_2D_Tree& tree, double* potential);
     void calculate_NodePotential_From_Wellseparated_Clusters_cache(

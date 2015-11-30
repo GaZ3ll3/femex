@@ -232,6 +232,7 @@ void kernel_Base::calculate_NodePotential_From_Wellseparated_Clusters_cache(H2_2
 					//cached, copied.
 					cache.push_back(K);
 
+
 					node->child[k]->nodePotential	=	node->child[k]->nodePotential+K*node->child[k]->interaction[i]->nodeCharge;
 
 				}
