@@ -2,7 +2,6 @@ classdef Radfmmk < handle
 
 properties (Access = private)
     id_
-    id__
 end
 
 methods
@@ -15,16 +14,20 @@ methods
     Radfmmk_('delete', this.id_);
   end
   
-  function ret = calc(this, N, m, mu_t) 
-    ret =  Radfmmk_('calc', this.id_, id_, N, m, mu_t);
-  end
-  
   function ret = calcc(this, ncheb, charge, z, N, m, mu_t) 
     ret =  Radfmmk_('calc_cache', this.id_,ncheb, charge, z, N, m, mu_t);
   end
   
   function ret = calcf(this, ncheb,x, z, N, m, mu_t) 
     ret =  Radfmmk_('calc_fast', this.id_,ncheb,x, z, N, m, mu_t);
+  end
+  
+  function ret = calccs(this, ncheb, charge, z, N, m, mu_t) 
+    ret =  Radfmmk_('calc_cache_svd', this.id_,ncheb, charge, z, N, m, mu_t);
+  end
+  
+  function ret = calcfs(this, ncheb,x, z, N, m, mu_t) 
+    ret =  Radfmmk_('calc_fast_svd', this.id_,ncheb,x, z, N, m, mu_t);
   end
   
   function disp(this)

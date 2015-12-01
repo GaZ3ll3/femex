@@ -9,6 +9,226 @@
 */
 
 #include"kernel_Base.hpp"
+#include <omp.h>
+
+#define scal  0.1
+
+void kernel_Base::calculate_Potential_cache_svd(H2_2D_Node*& node, MatrixXd& potential,H2_2D_Tree& tree) {
+    if(!node->isEmpty){
+		if(node->isLeaf){
+			MatrixXd tempK;
+
+			for(unsigned short k=0;k<8;++k){
+				if(node->neighbor[k]!=NULL){
+					if(!node->neighbor[k]->isEmpty){
+					kernel_2D(node->N , node->location, node->neighbor[k]->N, node->neighbor[k]->location, tempK);
+					// cached, copied.
+
+					int row = int(tempK.rows() * scal);
+					JacobiSVD<MatrixXd> svd(tempK, ComputeThinU | ComputeThinV);
+					MatrixXd u = svd.matrixU().leftCols(row);
+					MatrixXd v = svd.matrixV().leftCols(row);
+					VectorXd s = svd.singularValues().head(row);
+					cache.push_back(u);
+					cache.push_back(v);
+					sigma.push_back(s);
+					tree.get_Charge(node->neighbor[k]);
+					node->potential+=u *
+							(s.asDiagonal() *
+							(v.transpose() *node->neighbor[k]->charge));
+
+					}
+				}
+			}
+            //			Potential from Chebyshev nodes
+			node->potential+=node->R*node->nodePotential;
+            //			Self potential
+			kernel_2D(node->N , node->location, node->N , node->location, tempK);
+			//cached, copied
+			const int row = int(tempK.rows() *scal );
+			JacobiSVD<MatrixXd> svd(tempK, ComputeThinU | ComputeThinV);
+			MatrixXd u = svd.matrixU().leftCols(row);
+			MatrixXd v = svd.matrixV().leftCols(row);
+			VectorXd s = svd.singularValues().head(row);
+			cache.push_back(u);
+			cache.push_back(v);
+			sigma.push_back(s);
+
+
+			node->potential+=u *
+					(s.asDiagonal() *
+					(v.transpose() *node->charge));
+			tranfer_Potential_To_Potential_Tree(node, potential);
+		}
+		else{
+			bool computePotential	=	false;
+			for(unsigned short k=0;k<8;++k){
+				if(node->neighbor[k]!=NULL){
+					if(!node->neighbor[k]->isEmpty){
+					if(node->neighbor[k]->isLeaf){
+						MatrixXd tempK;
+						kernel_2D(node->N, node->location, node->neighbor[k]->N, node->neighbor[k]->location, tempK);
+						//cached, copied
+
+						const int row = int(tempK.rows() *scal );
+						JacobiSVD<MatrixXd> svd(tempK, ComputeThinU | ComputeThinV);
+						MatrixXd u = svd.matrixU().leftCols(row);
+						MatrixXd v = svd.matrixV().leftCols(row);
+						VectorXd s = svd.singularValues().head(row);
+						cache.push_back(u);
+						cache.push_back(v);
+						sigma.push_back(s);
+
+						tree.get_Charge(node->neighbor[k]);
+						node->potential+=u *
+								(s.asDiagonal() *
+								(v.transpose() *node->neighbor[k]->charge));
+						computePotential	=	true;
+					}
+				}
+				}
+			}
+			calculate_NodePotential_From_Wellseparated_Clusters_cache_svd(node,tree.rank,tree.nChebNodes);
+			transfer_NodePotential_To_Child(node,tree.R);
+			if(computePotential){
+				tranfer_Potential_To_Potential_Tree(node, potential);
+			}
+			for(unsigned short k=0;k<4;++k){
+				calculate_Potential_cache_svd(node->child[k], potential,tree);
+			}
+		}
+	}
+}
+
+void kernel_Base::calculate_Potential_cache_svd(H2_2D_Tree& tree, double* potential) {
+    MatrixXd potentialMatrix;
+    potentialMatrix = MatrixXd::Zero(tree.N,tree.m);
+    set_Tree_Potential_Zero(tree.root);
+//    std::cout << "Calculating potential caching..." << std::endl;
+    calculate_Potential_cache_svd(tree.root,potentialMatrix,tree);
+    Map<MatrixXd>(potential, potentialMatrix.rows(), potentialMatrix.cols()) = potentialMatrix;
+//    std::cout << "Calculated potential caching at storage of "<< cache.size() << "." << std::endl;
+}
+
+void kernel_Base::calculate_NodePotential_From_Wellseparated_Clusters_cache_svd(
+		H2_2D_Node*& node, unsigned short rank,unsigned short nChebNodes) {
+	MatrixXd tempK = MatrixXd::Zero(rank, rank);
+	for(unsigned short k=0; k<4; ++k){
+		if(!node->child[k]->isEmpty){
+			for(unsigned short i=0; i<node->child[k]->nInteraction; ++i){
+				if (node->child[k]->interaction[i] != NULL && !node->child[k]->interaction[i]->isEmpty) {
+					kernel_Cheb_2D(nChebNodes,node->child[k]->scaledCnode,nChebNodes,node->child[k]->interaction[i]->scaledCnode,tempK);
+
+					const int row = int(tempK.rows() * scal);
+					JacobiSVD<MatrixXd> svd(tempK, ComputeThinU | ComputeThinV);
+					MatrixXd u = svd.matrixU().leftCols(row);
+					MatrixXd v = svd.matrixV().leftCols(row);
+					VectorXd s = svd.singularValues().head(row);
+					cache.push_back(u);
+					cache.push_back(v);
+					sigma.push_back(s);
+
+					node->child[k]->nodePotential += u *
+							(s.asDiagonal() *
+							(v.transpose() *
+							node->child[k]->interaction[i]->nodeCharge));
+
+				}
+			}
+		}
+	}
+}
+
+
+void kernel_Base::calculate_Potential_fast_svd(H2_2D_Node*& node, MatrixXd& potential,H2_2D_Tree& tree, int*& index) {
+    if(!node->isEmpty){
+		if(node->isLeaf){
+			for(unsigned short k=0;k<8;++k){
+				if(node->neighbor[k]!=NULL){
+					if(!node->neighbor[k]->isEmpty){
+                    //	Potential from neighbors
+					tree.get_Charge(node->neighbor[k]);
+					node->potential+=
+							cache[(*index) * 2] *
+							sigma[(*index)].asDiagonal() *
+							cache[(*index) * 2 + 1].transpose()*node->neighbor[k]->charge;
+					(*index) = (*index) + 1;
+				}
+				}
+			}
+            //			Potential from Chebyshev nodes
+			node->potential+=node->R*node->nodePotential;
+
+			node->potential+=(cache[(*index) * 2] *
+					sigma[(*index)].asDiagonal() *
+					cache[(*index) * 2 + 1].transpose())*node->charge;
+
+			(*index) = (*index) + 1;
+
+
+			tranfer_Potential_To_Potential_Tree(node, potential);
+		}
+		else{
+			bool computePotential	=	false;
+			for(unsigned short k=0;k<8;++k){
+				if(node->neighbor[k]!=NULL){
+					if(!node->neighbor[k]->isEmpty){
+					if(node->neighbor[k]->isLeaf){
+						tree.get_Charge(node->neighbor[k]);
+						node->potential+=(cache[(*index) * 2] *
+								sigma[(*index)].asDiagonal() *
+								cache[(*index) * 2 + 1].transpose() )* node->neighbor[k]->charge;
+
+						(*index) = (*index) + 1;
+						computePotential	=	true;
+					}
+				}
+				}
+			}
+			// inc index by 1
+			calculate_NodePotential_From_Wellseparated_Clusters_fast_svd(node,tree.rank,tree.nChebNodes, index);
+			transfer_NodePotential_To_Child(node,tree.R);
+			if(computePotential){
+				tranfer_Potential_To_Potential_Tree(node, potential);
+			}
+			for(unsigned short k=0;k<4;++k){
+				calculate_Potential_fast_svd(node->child[k], potential,tree, index);
+			}
+		}
+	}
+}
+void kernel_Base::calculate_Potential_fast_svd(H2_2D_Tree& tree, double* potential) {
+	int index = 0;
+	int* index_ptr = &index;
+    MatrixXd potentialMatrix;
+    potentialMatrix = MatrixXd::Zero(tree.N,tree.m);
+    set_Tree_Potential_Zero(tree.root);
+    calculate_Potential_fast_svd(tree.root, potentialMatrix,tree, index_ptr);
+    Map<MatrixXd>(potential, potentialMatrix.rows(), potentialMatrix.cols()) = potentialMatrix;
+
+}
+void kernel_Base::calculate_NodePotential_From_Wellseparated_Clusters_fast_svd(
+		H2_2D_Node*& node, unsigned short rank,unsigned short nChebNodes, int*& index) {
+
+	for(unsigned short k=0; k<4; ++k){
+		if(!node->child[k]->isEmpty){
+			for(unsigned short i=0; i<node->child[k]->nInteraction; ++i){
+				if (node->child[k]->interaction[i] != NULL && !node->child[k]->interaction[i]->isEmpty) {
+					node->child[k]->nodePotential	+= ( cache[(*index) * 2] *
+						sigma[(*index)].asDiagonal() *
+						cache[(*index) * 2 + 1].transpose() )*node->child[k]->interaction[i]->nodeCharge;
+
+					(*index) = (*index) + 1;
+
+				}
+			}
+		}
+	}
+}
+
+
+
+
 void kernel_Base::calculate_Potential_cache(H2_2D_Node*& node, MatrixXd& potential,H2_2D_Tree& tree) {
     if(!node->isEmpty){
 		if(node->isLeaf){
@@ -21,7 +241,6 @@ void kernel_Base::calculate_Potential_cache(H2_2D_Node*& node, MatrixXd& potenti
 					// cached, copied.
 					cache.push_back(tempK);
 
-                    //	Potential from neighbors
 					tree.get_Charge(node->neighbor[k]);
 					node->potential+=tempK*node->neighbor[k]->charge;
 					}
@@ -233,7 +452,7 @@ void kernel_Base::calculate_NodePotential_From_Wellseparated_Clusters_cache(H2_2
 					cache.push_back(K);
 
 
-					node->child[k]->nodePotential	=	node->child[k]->nodePotential+K*node->child[k]->interaction[i]->nodeCharge;
+					node->child[k]->nodePotential	+= K*node->child[k]->interaction[i]->nodeCharge;
 
 				}
 			}
@@ -248,7 +467,7 @@ void kernel_Base::calculate_NodePotential_From_Wellseparated_Clusters_fast(
 		if(!node->child[k]->isEmpty){
 		for(unsigned short i=0; i<node->child[k]->nInteraction; ++i){
             if (node->child[k]->interaction[i] != NULL && !node->child[k]->interaction[i]->isEmpty) {
-                node->child[k]->nodePotential	=	node->child[k]->nodePotential+
+                node->child[k]->nodePotential	+=
                 		cache[*index]*node->child[k]->interaction[i]->nodeCharge;
                 (*index) = (*index) + 1;
 

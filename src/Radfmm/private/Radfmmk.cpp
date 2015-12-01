@@ -103,27 +103,6 @@ MEX_DEFINE(delete) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) 
 	Session<kernel_Radfmm>::destroy(input.get(0));
 }
 
-MEX_DEFINE(calc) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
-	InputArguments input(nrhs, prhs, 5);
-	OutputArguments output(nlhs, plhs, 1);
-
-	auto root = Session<H2_2D_Tree>::get(input.get(1));
-	auto kern = Session<kernel_Radfmm>::get(input.get(0));
-
-	auto N_p = mxGetPr(prhs[2]);
-	auto m_p = mxGetPr(prhs[3]);
-	auto mu_t_ptr = mxGetPr(prhs[4]);
-
-	plhs[0] = mxCreateNumericMatrix((unsigned long)*N_p, (unsigned)*m_p,mxDOUBLE_CLASS, mxREAL);
-
-	kern->mu_t = mu_t_ptr;
-	kern->side = (unsigned long)(sqrt(*N_p));
-	kern->start_x = 0.;
-	kern->start_y = 0.;
-	kern->calculate_Potential(*root, mxGetPr(plhs[0]));
-
-}
-
 MEX_DEFINE(calc_cache) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	InputArguments input(nrhs, prhs, 7);
 	OutputArguments output(nlhs, plhs, 1);
@@ -165,6 +144,53 @@ MEX_DEFINE(calc_cache) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs
 	kern->start_x = 0.;
 	kern->start_y = 0.;
 	kern->calculate_Potential_cache(*root, mxGetPr(plhs[0]));
+
+	delete root;
+
+}
+
+
+MEX_DEFINE(calc_cache_svd) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 7);
+	OutputArguments output(nlhs, plhs, 1);
+
+	auto kern = Session<kernel_Radfmm>::get(input.get(0));
+
+	auto ncheb_ptr = mxGetPr(prhs[1]);
+	auto charges_ptr = mxGetPr(prhs[2]);
+
+	auto location_ptr = mxGetPr(prhs[3]);
+	auto numberoflocation = mxGetN(prhs[3]);
+
+	auto N_ptr = mxGetPr(prhs[4]);
+	auto m_ptr = mxGetPr(prhs[5]);
+
+	auto mu_t_ptr = mxGetPr(prhs[6]);
+
+	vector<Point> location;
+
+	location.resize(numberoflocation);
+
+	for(size_t i = 0; i < numberoflocation; i++) {
+		location[i].x = location_ptr[2 * i];
+		location[i].y = location_ptr[2 * i + 1];
+	}
+
+	auto root = new H2_2D_Tree(
+				(unsigned short)*ncheb_ptr,
+				charges_ptr,
+				location,
+				(unsigned long)*N_ptr,
+				(unsigned)*m_ptr);
+
+	plhs[0] = mxCreateNumericMatrix((unsigned long)*N_ptr, (unsigned)*m_ptr,mxDOUBLE_CLASS, mxREAL);
+
+
+	kern->mu_t = mu_t_ptr;
+	kern->side = (unsigned long)(sqrt(*N_ptr));
+	kern->start_x = 0.;
+	kern->start_y = 0.;
+	kern->calculate_Potential_cache_svd(*root, mxGetPr(plhs[0]));
 
 	delete root;
 
@@ -217,16 +243,68 @@ MEX_DEFINE(calc_fast) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[
 
 }
 
+
+MEX_DEFINE(calc_fast_svd) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 7);
+	OutputArguments output(nlhs, plhs, 1);
+
+	auto kern = Session<kernel_Radfmm>::get(input.get(0));
+
+	auto ncheb_ptr = mxGetPr(prhs[1]);
+	auto charges_ptr = mxGetPr(prhs[2]);
+
+	auto location_ptr = mxGetPr(prhs[3]);
+	auto numberoflocation = mxGetN(prhs[3]);
+
+	auto N_ptr = mxGetPr(prhs[4]);
+	auto m_ptr = mxGetPr(prhs[5]);
+	auto mu_t_ptr = mxGetPr(prhs[6]);
+
+	vector<Point> location;
+
+	location.resize(numberoflocation);
+
+	for(size_t i = 0; i < numberoflocation; i++) {
+		location[i].x = location_ptr[2 * i];
+		location[i].y = location_ptr[2 * i + 1];
+	}
+
+	auto root = new H2_2D_Tree(
+				(unsigned short)*ncheb_ptr,
+				charges_ptr,
+				location,
+				(unsigned long)*N_ptr,
+				(unsigned)*m_ptr);
+
+
+
+	plhs[0] = mxCreateNumericMatrix((unsigned long)*N_ptr, (unsigned)*m_ptr,mxDOUBLE_CLASS, mxREAL);
+
+
+	kern->mu_t = mu_t_ptr;
+	kern->side = (unsigned long)(sqrt(*N_ptr));
+	kern->start_x = 0.;
+	kern->start_y = 0.;
+	kern->calculate_Potential_fast_svd(*root, mxGetPr(plhs[0]));
+
+	delete root;
+
+}
+
 MEX_DEFINE(disp) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	InputArguments input(nrhs, prhs, 1);
 	OutputArguments output(nlhs, plhs, 0);
 
 	auto kern = Session<kernel_Radfmm>::get(input.get(0));
 
-	std::cout << "Storage of Matrices : " << kern->cache.size() << std::endl;
+	std::cout << "Storage of Matrices : " << kern->cache.size() << "+" << kern->sigma.size() << std::endl;
 
 	size_t sum = 0;
 	for (auto& m : kern->cache) {
+		sum += m.size();
+	}
+
+	for (auto& m : kern->sigma) {
 		sum += m.size();
 	}
 

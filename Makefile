@@ -20,7 +20,7 @@ CXX_INCLUDE = -I./include/mexplus \
 
 MATLAB_LINKS = $(Opt) -pthread -shared\
 			   -Wl,--version-script,$(MATLAB_ROOT)extern/lib/glnxa64/mexFunction.map \
-			   -Wl,--no-undefined 
+			   -Wl,--no-undefined -lblas -llapack
 			   
 CXX_LIBS = -Wl,-rpath-link,$(MATLAB_ROOT)bin/glnxa64 \
 		   -L$(MATLAB_ROOT)bin/glnxa64 -lmx -lmex -lmat -lm -fopenmp
