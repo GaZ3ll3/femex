@@ -297,7 +297,7 @@ MEX_DEFINE(disp) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 
 	auto kern = Session<kernel_Radfmm>::get(input.get(0));
 
-	std::cout << "Storage of Matrices : " << kern->cache.size() << "+" << kern->sigma.size() << std::endl;
+	std::cout << "Storage of Matrices : cache: " << kern->cache.size() << " | sigma: " << kern->sigma.size() << std::endl;
 
 	size_t sum = 0;
 	for (auto& m : kern->cache) {
