@@ -11,7 +11,7 @@
 #include"kernel_Base.hpp"
 #include <omp.h>
 
-#define scal  0.1
+#define scal  0.2
 
 void kernel_Base::calculate_Potential_cache_svd(H2_2D_Node*& node, MatrixXd& potential,H2_2D_Tree& tree) {
     if(!node->isEmpty){
@@ -33,9 +33,7 @@ void kernel_Base::calculate_Potential_cache_svd(H2_2D_Node*& node, MatrixXd& pot
 					cache.push_back(v);
 					sigma.push_back(s);
 					tree.get_Charge(node->neighbor[k]);
-					node->potential+=u *
-							(s.asDiagonal() *
-							(v.transpose() *node->neighbor[k]->charge));
+					node->potential+=tempK*node->neighbor[k]->charge;
 
 					}
 				}
@@ -55,9 +53,7 @@ void kernel_Base::calculate_Potential_cache_svd(H2_2D_Node*& node, MatrixXd& pot
 			sigma.push_back(s);
 
 
-			node->potential+=u *
-					(s.asDiagonal() *
-					(v.transpose() *node->charge));
+			node->potential+=tempK *node->charge;
 			tranfer_Potential_To_Potential_Tree(node, potential);
 		}
 		else{
@@ -80,9 +76,7 @@ void kernel_Base::calculate_Potential_cache_svd(H2_2D_Node*& node, MatrixXd& pot
 						sigma.push_back(s);
 
 						tree.get_Charge(node->neighbor[k]);
-						node->potential+=u *
-								(s.asDiagonal() *
-								(v.transpose() *node->neighbor[k]->charge));
+						node->potential+=tempK *node->neighbor[k]->charge;
 						computePotential	=	true;
 					}
 				}
@@ -128,10 +122,8 @@ void kernel_Base::calculate_NodePotential_From_Wellseparated_Clusters_cache_svd(
 					cache.push_back(v);
 					sigma.push_back(s);
 
-					node->child[k]->nodePotential += u *
-							(s.asDiagonal() *
-							(v.transpose() *
-							node->child[k]->interaction[i]->nodeCharge));
+					node->child[k]->nodePotential += tempK*
+							node->child[k]->interaction[i]->nodeCharge;
 
 				}
 			}
