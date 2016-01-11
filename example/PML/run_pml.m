@@ -4,7 +4,7 @@ u0 = zeros(l , 1);
 ut0 = zeros(l, 1);
 m = 10; n = 1; 
 for i = 1:l
-    if (abs(h.fem.Promoted.nodes(1,i) - 0.2) + abs(h.fem.Promoted.nodes(2,i) - 0.2) < m)
+    if (abs(h.fem.Promoted.nodes(1,i)) + abs(h.fem.Promoted.nodes(2,i) ) < m)
     m = abs(h.fem.Promoted.nodes(1,i)) + abs(h.fem.Promoted.nodes(2,i));
     n = i;
     end

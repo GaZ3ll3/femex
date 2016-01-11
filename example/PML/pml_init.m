@@ -53,7 +53,7 @@ hobj.Qy = sparse(J, I, Wy);
     end
 
     function ret = mu_xy(x, y)
-        ret = 1;
+        ret = 1 + 0.2 * (abs(x) <=0.5) .* (abs(y)<=0.5) .* sin(4* pi * x) .* sin(4* pi * y);
     end
 
 
