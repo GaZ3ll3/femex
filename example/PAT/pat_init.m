@@ -2,7 +2,7 @@ function hobj = pat_init(prec, min_area)
 
 %addpath(genpath('../../'));
 L = 0.1;
-sigma0 = 80;
+sigma0 = 90;
 
 hobj.fem = FEM([-0.5, -.5, .5, -.5, .5, .5, -.5, .5]', ...
     prec, min_area, [-0.5-L, -0.5-L, .5+L, -.5-L, .5+L, .5+L, -.5-L, .5+L]');
@@ -53,7 +53,7 @@ hobj.Qy = sparse(J, I, Wy);
     end
 
     function ret = mu_xy(x, y)
-        ret = 2.0 + cos(2* pi * x);
+        ret = 1.00;
     end
 
 

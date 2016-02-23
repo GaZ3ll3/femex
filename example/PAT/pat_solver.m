@@ -1,4 +1,4 @@
-function [T, Y] = pat_solver(hobj,U0, Ut0, n)
+function [T, Y] = pat_solver(hobj,U0, Ut0)
 
 
 length = size(hobj.fem.Promoted.nodes, 2);
@@ -56,7 +56,7 @@ options = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'NormControl', 'on');
         
         u = V;
         v = -(hobj.Sm + hobj.Mxy)*U - (hobj.Mx + hobj.My)*V + ...
-            hobj.P*W + hobj.Q*Z + g(t);
+            hobj.P*W + hobj.Q*Z ;
         w = -(hobj.Mx)*W + hobj.Px*U;
         z = -(hobj.My)*Z + hobj.Qy*U;
         % this step consumes most of the time.
@@ -71,16 +71,6 @@ options = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'NormControl', 'on');
 %         v = hobj.M\v;
 %         w = hobj.M\w;
 %         z = hobj.M\z;
-    end
-
-    function theta = g(t)
-        
-        f0 = 10;
-        theta = zeros(length, 1);
-        theta(n) = ...
-            -exp(-pi^2 * (f0 * t - 1)^2) * ...
-            (pi*pi)* 2*f0*(f0 * t- 1);
-        
     end
 
 end
