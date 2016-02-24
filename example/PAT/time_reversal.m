@@ -1,4 +1,4 @@
-function [Z] = time_reversal(hobj, Y)
+function [Z] = time_reversal(hobj, Y, dt, tl)
 
 % hobj handle stores all geometry information
 % Y stores the measurement
@@ -61,25 +61,19 @@ length = size(inner_part, 1);
 
 options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8, 'NormControl', 'on');
 
- 
- tl = 1.5;
- T = size(Y, 1);
- dt = 0.005;
+T = size(Y, 1);
 
- tmp1 = Y(T, 1:len_nodes)';
- tmp2 = Y(T, len_nodes + 1:2*len_nodes)';
- 
+tmp1 = Y(T, 1:len_nodes)';
+tmp2 = Y(T, len_nodes + 1:2*len_nodes)';
 
- % back propagate
- q0 = tmp1(inner_part);
- p0 = -tmp2(inner_part);
+
+% back propagate
+q0 = tmp1(inner_part);
+p0 = -tmp2(inner_part);
+
+[~, Z] = ode113(@rigid, 0:dt:(T - 1)*dt, [q0;p0], options); 
  
- tic;
- [~, Z] = ode113(@rigid, 0:dt:(T - 1)*dt, [q0;p0], options); 
- toc;
- 
- 
- disp(norm(Y(1, inner_part) - Z(T,1:size(Z, 2)/2), inf));
+fprintf('inf error of time reversal is %f\n', norm(Y(1, inner_part) - Z(T,1:size(Z, 2)/2), inf));
 
 
     function dy = rigid(t, y)

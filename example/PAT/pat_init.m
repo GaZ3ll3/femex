@@ -1,7 +1,7 @@
 function hobj = pat_init(prec, min_area)
 
 %addpath(genpath('../../'));
-L = 1.0;
+L = 0.1;
 sigma0 = 80;
 
 hobj.fem = FEM([-0.5, -.5, .5, -.5, .5, .5, -.5, .5]', ...

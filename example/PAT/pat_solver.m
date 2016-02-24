@@ -1,4 +1,4 @@
-function [T, Y] = pat_solver(hobj,U0, Ut0)
+function [T, Y] = pat_solver(hobj,U0, Ut0, dt, tl)
 
 
 length = size(hobj.fem.Promoted.nodes, 2);
@@ -20,7 +20,7 @@ z0 = zeros(length, 1);
 options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8, 'NormControl', 'on');
 
 %[T, Y] = ode45(@rigid, [0, 0.5, 1], [u0;v0;w0;z0], options); 
- [T, Y] = ode113(@rigid, 0:0.005:1.5, [u0;v0;w0;z0], options); 
+ [T, Y] = ode113(@rigid, 0:dt:tl, [u0;v0;w0;z0], options); 
 
     
 
