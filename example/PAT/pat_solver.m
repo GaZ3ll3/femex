@@ -1,4 +1,4 @@
-function [T, Y] = pml_solver(hobj,U0, Ut0, n)
+function [T, Y] = pat_solver(hobj,U0, Ut0)
 
 
 length = size(hobj.fem.Promoted.nodes, 2);
@@ -19,8 +19,10 @@ z0 = zeros(length, 1);
 
 options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8, 'NormControl', 'on');
 
-% [T, Y] = ode45(@rigid, [0, 0.5, 1], [u0;v0;w0;z0], options); 
-[T, Y] = ode113(@rigid, 0:0.005:1.5, [u0;v0;w0;z0], options); 
+%[T, Y] = ode45(@rigid, [0, 0.5, 1], [u0;v0;w0;z0], options); 
+ [T, Y] = ode113(@rigid, 0:0.005:1.5, [u0;v0;w0;z0], options); 
+
+    
 
 
     function dy = rigid(t, y)
@@ -45,7 +47,7 @@ options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8, 'NormControl', 'on');
 
     
 % todo: use pre-allocated array to hold u, v, w, z, tmp instead of doing so
-% for each round. Have to compare the timig.
+% for each round. Have to compare the timing.
 
 % update: almost 90% time is consumed at the function below, the mldivide
 % function. it is kind of impossible to avoid such a huge amount of time of
@@ -53,10 +55,11 @@ options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8, 'NormControl', 'on');
 
 
     function [u, v, w ,z] = f(t, U, V, W, Z) 
+       
         
         u = V;
         v = -(hobj.Sm + hobj.Mxy)*U - (hobj.Mx + hobj.My)*V + ...
-            hobj.P*W + hobj.Q*Z + g(t);
+            hobj.P*W + hobj.Q*Z ;
         w = -(hobj.Mx)*W + hobj.Px*U;
         z = -(hobj.My)*Z + hobj.Qy*U;
         % this step consumes most of the time.
@@ -72,16 +75,5 @@ options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8, 'NormControl', 'on');
 %         w = hobj.M\w;
 %         z = hobj.M\z;
     end
-
-    function theta = g(t)
-        
-        f0 = 10;
-        theta = zeros(length, 1);
-        theta(n) = ...
-            -exp(-pi^2 * (f0 * t - 1)^2) * ...
-            (pi*pi)* 2*f0*(f0 * t- 1);
-        
-    end
-
 end
 

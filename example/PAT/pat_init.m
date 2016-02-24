@@ -1,7 +1,7 @@
-function hobj = pml_init(prec, min_area)
+function hobj = pat_init(prec, min_area)
 
 %addpath(genpath('../../'));
-L = 0.5;
+L = 1.0;
 sigma0 = 80;
 
 hobj.fem = FEM([-0.5, -.5, .5, -.5, .5, .5, -.5, .5]', ...
@@ -25,7 +25,7 @@ hobj.M  = hobj.fem.assema(1);
 
 
 % lump mass matrix
-hobj.M = diag(sum(hobj.M));
+hobj.M = sparse(diag(sum(hobj.M)));
 
 
 hobj.Sm = hobj.fem.assems(mu_xy_of_qnodes);
@@ -59,7 +59,7 @@ hobj.Qy = sparse(J, I, Wy);
     end
 
     function ret = mu_xy(x, y)
-        ret = 1 + 0.2 * (abs(x) <=0.5) .* (abs(y)<=0.5) .* sin(4* pi * x) .* sin(4* pi * y);
+        ret = 1.00;
     end
 
 
