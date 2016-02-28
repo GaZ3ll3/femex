@@ -59,7 +59,7 @@ hobj.Qy = sparse(J, I, Wy);
     end
 
     function ret = mu_xy(x, y)
-        ret = 1.25 - sin(2 * pi*sqrt(x.^2 + y.^2));
+        ret = 1.0 + 0.2 * sin(2 * pi* x) + 0.1 * cos(2*pi* y);
     end
 
 

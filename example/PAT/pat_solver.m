@@ -10,19 +10,10 @@ z0 = zeros(length, 1);
 
 % solve dy/dt = f(y), using RK4
 
-% opt=[];
-% opt.RelTol=1e-3;opt.AbsTol=1e-6;
-
-
-% [T, Y, ~]=dopri5Mex(@rigid,[0, 0.5, 1.5],[u0; v0; w0; z0],opt);
-% [T, Y, ~]=dop853Mex(@rigid,[0, 0.5, 1.5],[u0; v0; w0; z0],opt);
-
 options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8, 'NormControl', 'on');
 
 %[T, Y] = ode45(@rigid, [0, 0.5, 1], [u0;v0;w0;z0], options); 
- [T, Y] = ode113(@rigid, 0:dt:tl, [u0;v0;w0;z0], options); 
-
-    
+[T, Y] = ode113(@rigid, 0:dt:tl, [u0;v0;w0;z0], options); 
 
 
     function dy = rigid(t, y)
