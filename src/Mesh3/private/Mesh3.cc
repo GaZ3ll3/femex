@@ -30,9 +30,9 @@ Mesh3::Mesh3(MatlabPtr _Vertices, MatlabPtr _PML, MatlabPtr _Vol) noexcept {
 		input.pointlist[3 * i + 2] = _VerticesPtr[3 * i + 2];
 	}
 
-	tetrahedralize("pczQ", &input, &mid, (tetgenio*)nullptr, (tetgenio*)nullptr);
+	tetrahedralize("pzcQ", &input, &mid, (tetgenio*)nullptr, (tetgenio*)nullptr);
 	tetrahedralize(
-			const_cast<char*>(("prq1.20/18a" + std::to_string(min_vol) + "QeznBC").c_str()),\
+			const_cast<char*>(("prq1.20/18a" + std::to_string(min_vol) + "QzenBC").c_str()),\
 			&mid, &_meshdata,(tetgenio*)nullptr, (tetgenio*)nullptr);
 
 	return;
@@ -51,6 +51,28 @@ void Mesh3::Info() noexcept{
   std::cout << "number of trifaces: " << _meshdata.numberoftrifaces << std::endl;
   std::cout << "number of tetrahedra: " << _meshdata.numberoftetrahedra << std::endl;
   std::cout << "number of corners: " << _meshdata.numberofcorners << std::endl;
+
+//  for (int i = 0; i < _meshdata.numberoftetrahedra; i++) {
+//	  std::cout << i << ": " <<
+//			  _meshdata.neighborlist[4 * i]  << ", " <<
+//			  _meshdata.neighborlist[4 * i + 1] << "," <<
+//			  _meshdata.neighborlist[4 * i + 2] << "," <<
+//			  _meshdata.neighborlist[4 * i + 3] << std::endl;
+//  }
+
+  for (int i = 0; i < _meshdata.numberoftetrahedra; i++) {
+	  std::cout <<  _meshdata.tetrahedronlist[4 * i] << " "
+			  <<  _meshdata.tetrahedronlist[4 * i + 1] << " "
+			  <<  _meshdata.tetrahedronlist[4 * i + 2] << " "
+			  <<  _meshdata.tetrahedronlist[4 * i + 3] << std::endl;
+  }
+
+  for (int i = 0; i < _meshdata.numberofpoints; i++) {
+	  std::cout << _meshdata.pointlist[3 * i] << " "
+			  << _meshdata.pointlist[3 * i + 1] << " "
+			  << _meshdata.pointlist[3 * i + 2] << std::endl;
+  }
+
 }
 
 void Mesh3::Promote(int32_t _deg) noexcept{
@@ -86,6 +108,21 @@ MEX_DEFINE(report)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	OutputArguments output(nlhs, plhs, 0);
 	auto mesh3 = Session<Mesh3>::get(input.get(0));
 	mesh3->Info();
+}
+
+MEX_DEFINE(meshdata)(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 1);
+	OutputArguments output(nlhs, plhs, 2);
+	auto mesh3 = Session<Mesh3>::get(input.get(0));
+	/*
+	 * todo: export information
+	 */
+	plhs[0] = mxCreateNumericMatrix(3, mesh3->_meshdata.numberofpoints, mxDOUBLE_CLASS, mxREAL);
+	memcpy(mxGetPr(plhs[0]), mesh3->_meshdata.pointlist, 3 * mesh3->_meshdata.numberofpoints*sizeof(Real_t));
+	plhs[1] = mxCreateNumericMatrix(4, mesh3->_meshdata.numberoftetrahedra, mxINT32_CLASS, mxREAL);
+	memcpy(mxGetPr(plhs[1]), mesh3->_meshdata.tetrahedronlist, 4 * mesh3->_meshdata.numberoftetrahedra*sizeof(int32_t));
+	MatlabPtr temp[] = {plhs[1], mxCreateDoubleScalar(1.0)};
+	mexCallMATLAB(1, &plhs[1], 2, temp, "plus");
 }
 
 }

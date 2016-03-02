@@ -21,5 +21,9 @@ classdef Mesh3 < handle
     function report(this)
       Mesh3_('report',this.id_);
     end
+    
+    function [points,connectivity] = meshdata(this)
+        [points, connectivity] = Mesh3_('meshdata', this.id_);
+    end
   end
 end

@@ -41,7 +41,6 @@ public:
 	void Promote(int32_t _deg) noexcept;
 
 	Real_t min_vol;
-private:
 	tetgenio _meshdata;
 
 };
