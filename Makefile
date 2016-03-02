@@ -58,6 +58,32 @@ $(TRIANGLELIB)triangle.o:$(TRIANGLELIB)triangle.c $(TRIANGLELIB)triangle.h
 	$(CC) $(CSWITCHES) $(TRILIBDEFS) -c -o $(TRIANGLELIB)triangle.o \
 	$(TRIANGLELIB)triangle.c 
 
+# Mesh3
+MESH3 = $(SRC)Mesh3/private/
+TETGENLIB = $(MESH3)tetgen/
+MESH3_SRCS = $(wildcard $(MESH3)*.cc)
+MESH3_OBJS = $(patsubst $(MESH3)%.cc, %.mesh3.o, $(MESH3_SRCS))
+MESH3_BINS = $(patsubst $(MESH3)%.cc, $(MESH3)%_.mexa64, $(MESH3_SRCS))
+
+%.mesh3.o: $(MESH3)%.cc 
+	$(CXX) -c $(TETLIBDEFS) $(CXX_INCLUDE) $(CXX_FLAGS) $< -o $@
+
+$(MESH3)%_.mexa64: %.mesh3.o $(TETGENLIB)tetgen.o $(TETGENLIB)predicates.o
+	$(CXX) $(MATLAB_LINKS) -o $@ $< $(TETGENLIB)tetgen.o $(TETGENLIB)predicates.o $(CXX_LIBS)
+
+# Tetgen build
+
+CSWITHCES3 = $(Opt) -DLINUX -fPIC -shared 
+TETLIBDEFS = -DTETLIBRARY
+
+$(TETGENLIB)tetgen.o:$(TETGENLIB)tetgen.cxx
+	$(CXX) $(CSWITHCES3) $(TETLIBDEFS) -c -o $(TETGENLIB)tetgen.o \
+	$(TETGENLIB)tetgen.cxx 
+	
+$(TETGENLIB)predicates.o:$(TETGENLIB)predicates.cxx
+	$(CXX) $(CSWITHCES3) $(TETLIBDEFS) -c -o $(TETGENLIB)predicates.o \
+	$(TETGENLIB)predicates.cxx 
+
 # Integrator build
 
 INT = $(SRC)Integrator/private/
@@ -201,9 +227,9 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 
 ##############################################################	
 # The action starts here.
-all: $(MESH_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) \
-$(DOM_BINS) $(CEL_BINS) $(QUA_BINS) $(TRE_BINS) $(RAD_BINS) $(RADK_BINS)
-	rm -rf $(TRIANGLELIB)triangle.o \
+all: $(MESH_BINS) $(MESH3_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) \
+$(DOM_BINS) $(CEL_BINS) $(QUA_BINS) $(TRE_BINS) $(RAD_BINS) $(RADK_BINS) 
+	rm -rf $(TRIANGLELIB)triangle.o\
 	rm -rf *.o
 
 distclean:

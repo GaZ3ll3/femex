@@ -82,7 +82,7 @@ function run_pat()
         result(inner_part) = result(inner_part) + inc;
         
         err = norm(result(inner_part) - Y(1, inner_part)',2)/norm(Y(1, inner_part)', 2);
-        
+        disp(err);
         
         filename = sprintf('data-%d', j);
         save(filename, 'result', 'err');
