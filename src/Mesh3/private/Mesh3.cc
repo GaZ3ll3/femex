@@ -51,28 +51,6 @@ void Mesh3::Info() noexcept{
   std::cout << "number of trifaces: " << _meshdata.numberoftrifaces << std::endl;
   std::cout << "number of tetrahedra: " << _meshdata.numberoftetrahedra << std::endl;
   std::cout << "number of corners: " << _meshdata.numberofcorners << std::endl;
-
-//  for (int i = 0; i < _meshdata.numberoftetrahedra; i++) {
-//	  std::cout << i << ": " <<
-//			  _meshdata.neighborlist[4 * i]  << ", " <<
-//			  _meshdata.neighborlist[4 * i + 1] << "," <<
-//			  _meshdata.neighborlist[4 * i + 2] << "," <<
-//			  _meshdata.neighborlist[4 * i + 3] << std::endl;
-//  }
-
-  for (int i = 0; i < _meshdata.numberoftetrahedra; i++) {
-	  std::cout <<  _meshdata.tetrahedronlist[4 * i] << " "
-			  <<  _meshdata.tetrahedronlist[4 * i + 1] << " "
-			  <<  _meshdata.tetrahedronlist[4 * i + 2] << " "
-			  <<  _meshdata.tetrahedronlist[4 * i + 3] << std::endl;
-  }
-
-  for (int i = 0; i < _meshdata.numberofpoints; i++) {
-	  std::cout << _meshdata.pointlist[3 * i] << " "
-			  << _meshdata.pointlist[3 * i + 1] << " "
-			  << _meshdata.pointlist[3 * i + 2] << std::endl;
-  }
-
 }
 
 void Mesh3::Promote(int32_t _deg) noexcept{
