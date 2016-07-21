@@ -16,8 +16,8 @@ boundary.setDirichlet(bc3);
 boundary.setDirichlet(bc4);
 
 
-sigma_a_fcn = @(x, y) (sigma_a  + 0.2.*abs(cos(2*pi*x)));
-sigma_s_fcn = @(x, y) (sigma_s  + 0.2.*abs(sin(2*pi*x)));
+sigma_a_fcn = @(x, y) (sigma_a  +  0.0.*abs(cos(2*pi*x)));
+sigma_s_fcn = @(x, y) (sigma_s  +  0.0.*abs(sin(2*pi*x)));
 
 
 
