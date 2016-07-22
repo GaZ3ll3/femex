@@ -177,7 +177,7 @@ $(TRE)Treecode_.mexa64: $(TRE)quadtree.cpp $(TRE)treecode.cpp $(TRE)Treecode_.cp
 	
 RAD = $(SRC)Radfmm/private/
 RAD_SRCS = $(wildcard $(RAD)*.cpp)
-RAD_OBJS = $(patsubst $(RAD)%.cpp, %.rad.o, $(RAD_SRCS))4
+RAD_OBJS = $(patsubst $(RAD)%.cpp, %.rad.o, $(RAD_SRCS))
 RADK_BINS = $(RAD)Radfmmk_.mexa64
 
 
@@ -188,6 +188,13 @@ $(RAD)Radfmmk_.mexa64: $(RAD)H2_2D_Node.cpp $(RAD)H2_2D_Tree.cpp $(RAD)kernel_Ba
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(RAD)kernel_Types.cpp -o kernel_Types.rad.o
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(RAD)Radfmmk.cpp -o Radfmmk.rad.o
 	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.rad.o H2_2D_Tree.rad.o kernel_Base.rad.o kernel_Types.rad.o  Radfmmk.rad.o $(CXX_LIBS)
+	
+MCR = $(SRC)/MCRT/private/
+MCR_BINS = $(MCR)MCRT_.mexa64
+	
+$(MCR)MCRT_.mexa64: $(MCR)MCRT.cc 
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(MCR)MCRT.cc -o MCRT.mcr.o
+	$(CXX) $(MATLAB_LINKS) -o $@ MCRT.mcr.o  $(CXX_LIBS)
 	
 #ADJ = $(SRC)Adjoint/private/
 #ADJ_SRCS = $(wildcard $(ADJ)*.cc)
@@ -228,16 +235,16 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 ##############################################################	
 # The action starts here.
 all: $(MESH_BINS) $(MESH3_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) \
-$(DOM_BINS) $(CEL_BINS) $(QUA_BINS) $(TRE_BINS) $(RAD_BINS) $(RADK_BINS) 
+$(DOM_BINS) $(CEL_BINS) $(QUA_BINS) $(TRE_BINS) $(RAD_BINS) $(RADK_BINS) $(MCR_BINS)
 	rm -rf $(TRIANGLELIB)triangle.o\
 	rm -rf *.o
 
 distclean:
 	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 $(ASE)*_.mexa64 \
 	 $(MSE)*_.mexa64 $(TRIANGLELIB)triangle.o $(ILUPACK_PATH)*.mexa64 $(Optimize)ipopt/ipopt.mexa64 \
-	 $(DOM)*_.mexa64 $(CEL)*_.mexa64 $(QUA)*_.mexa64 $(TRE)*_.mexa64 $(RAD)*_.mexa64
+	 $(DOM)*_.mexa64 $(CEL)*_.mexa64 $(QUA)*_.mexa64 $(TRE)*_.mexa64 $(RAD)*_.mexa64 $(MCR)*_.mexa64
 
 clean:
 	rm -rf $(MESH)*_.mexa64 $(INT)*_.mexa64 $(ASR)*_.mexa64 $(BOD)*_.mexa64 $(SLR)*_.mexa64 \
 	$(ASE)*_.mexa64 $(MSE)*_.mexa64  $(DOM)*_.mexa64 $(CEL)*_.mexa64 $(TRIANGLELIB)triangle.o \
-	$(QUA)*_.mexa64 $(TRE)*_.mexa64 $(RAD)*_.mexa64
+	$(QUA)*_.mexa64 $(TRE)*_.mexa64 $(RAD)*_.mexa64 $(MCR)*_.mexa64

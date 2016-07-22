@@ -12,11 +12,12 @@
 
 #include <mexplus.h>
 #include <cstdlib>
+#include <cassert>
 #include <ctime>
 #include "utils.h"
 
-using namespace std;
 using namespace mexplus;
+using namespace std;
 
 typedef struct photon {
 	double x;
@@ -33,8 +34,8 @@ class MCRT {
 public:
 	MCRT(size_t n_photons, size_t n, double mu_s, double mu_t);
 	virtual ~MCRT();
-	vector<vector<size_t>> intensity;
-	vector<vector<double>> charge;
+	vector<vector<double> > intensity;
+	vector<vector<double> > charge;
 	size_t n_nodes;
 	size_t n_photons;
 	double albedo;
@@ -44,6 +45,8 @@ public:
 	double random();
 	void simulate();
 	void scatter(photon& p);
+	void write(char* filename);
 };
 
 #endif /* SRC_MCRT_PRIVATE_MCRT_H_ */
+
