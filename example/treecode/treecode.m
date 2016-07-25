@@ -61,7 +61,7 @@ lhs = rhs - tree.fast_apply(theta_, s'.*rhs/(2 * pi));
 end
 
 function val = sigma_t(x, y)
-    val = 5.1 * ones(size(x));
+    val = 5.2 * ones(size(x));
 end
 
 function val = sigma_s(x, y)

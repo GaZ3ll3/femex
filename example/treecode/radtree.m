@@ -22,7 +22,7 @@ N = size(x, 2)^2;
 charge = ring(z(1,:), z(2,:));
 
 % mu_s = 10.0 * (1 + z(1,:).^2 + z(2, :).^2)';
-mu_s = 10.0 * ones(N, 1);
+mu_s = 5.0 * ones(N, 1);
 
 mu_t = 0.2 + mu_s;
 
@@ -43,13 +43,14 @@ fprintf('2. Caching necessary kernel evaluations ... with time %f\n', t);
 % 
 
 tic;
-[ret, ~, ~, ~, ~] = gmres(@forward, rhs, 30, 1e-12, 30, [],[], rhs);
+[ret,~,~,~,~] = gmres(@forward, rhs, 30, 1e-12, 30, [],[], rhs);
+
 t = toc;
 fprintf('3. GMRES takes time %f\n', t);
 
-[X, Y] = meshgrid(1/n : 2/n:(n-1)/n);
-surf(X,Y,reshape(ret, n/2,n/2), 'EdgeColor','None');
-shading interp;colorbar; colormap jet;view(2);
+% [X, Y] = meshgrid(1/n : 2/n:(n-1)/n);
+% surf(X,Y,reshape(ret, n/2,n/2), 'EdgeColor','None');
+% shading interp;colorbar; colormap jet;view(2);
 
 % export_fig result.png
 
