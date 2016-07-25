@@ -60,10 +60,14 @@ tree.preprocess(s'.*rhs/(2 * pi));
 lhs = rhs - tree.fast_apply(theta_, s'.*rhs/(2 * pi));
 end
 
-function val = sigma_t(x, y)
-    val = 5.2 * ones(size(x));
+function val = sigma_s(x, y)
+%     val = 5.0 * ones(size(x));
+    val = 10.0 * (1 + x.^2 + y.^2);
 end
 
-function val = sigma_s(x, y)
-    val = 5.0 * ones(size(x));
+function val = sigma_t(x, y)
+    %val = 5.2 * ones(size(x));
+    val = 0.2 + sigma_s(x, y);
 end
+
+

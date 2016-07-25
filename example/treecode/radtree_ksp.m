@@ -8,7 +8,8 @@ m = 1;
 
 [z, charge, N] = build_grid(n);
 
-mu_s = 5.0 * ones(N, 1);
+mu_s = 10.0 * (1 + z(1,:).^2 + z(2, :).^2)';
+% mu_s = 5.0 * ones(N, 1);
 mu_t = 0.2 + mu_s;
 
 
@@ -16,12 +17,13 @@ mu_t = 0.2 + mu_s;
 tic;
 kerp = Radfmmk();
 [zp, chargep, Np] = build_grid(64);
+% some approx coefficients
 mu_sp = 10.0 * ones(Np, 1);
 mu_tp = 0.2 + mu_sp;
-rhsp= kerp.calcc(4, chargep, zp, Np, m, mu_tp);
+rhsp= mu_sp.*kerp.calcc(4, chargep, zp, Np, m, mu_tp);
 [retp,~,~,~,~] = gmres(@forwardp, rhsp, 30, 1e-5, 30, [],[], rhsp);
 
-
+% retp shoul not be scaled.
 
 % enhance retp to higher level.
 
@@ -45,7 +47,7 @@ t = toc;
 fprintf('2. Initialization kernel ... with time %f\n', t);
 
 tic;
-rhs = ker.calcc(ncheb, charge, z, N, m, mu_t) - ...
+rhs = mu_s .* ker.calcc(ncheb, charge, z, N, m, mu_t) - ...
     (ret_ap - mu_s.*ker.calcf(ncheb, ret_ap, z, N, m, mu_t));
 t = toc;
 fprintf('3. Caching necessary kernel evaluations ... with time %f\n', t);
@@ -54,7 +56,7 @@ tic;
 [ret,~,~,~,~] = gmres(@forward, rhs, 30, 1e-12, 30, [], [], rhs);
 t = toc;
 fprintf('4. GMRES takes time %f\n', t);
-ret = ret + ret_ap;
+ret = (ret + ret_ap)./mu_s;
 
 end
 
