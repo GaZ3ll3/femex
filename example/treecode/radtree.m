@@ -34,7 +34,7 @@ t = toc;
 fprintf('1. Initialization kernel ... with time %f\n', t);
 
 tic;
-rhs = mu_s.* ker.calcc(ncheb, charge, z, N, m, mu_t);
+rhs = mu_s .* ker.calcc(ncheb, charge, z, N, m, mu_t);
 t = toc;
 
 ker.disp();

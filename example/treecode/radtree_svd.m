@@ -34,7 +34,7 @@ t = toc;
 fprintf('1. Initialization kernel ... with time %f\n', t);
 
 tic;
-rhs = ker.calccs(ncheb, charge, z, N, m, mu_t);
+rhs = mu_s .* ker.calccs(ncheb, charge, z, N, m, mu_t);
 t = toc;
 
 ker.disp();
@@ -44,6 +44,7 @@ fprintf('2. Caching necessary kernel evaluations ... with time %f\n', t);
 
 tic;
 [ret, ~, ~, ~, ~] = gmres(@forward, rhs, 30, 1e-12, 30, [],[], rhs);
+ret = ret./mu_s;
 t = toc;
 fprintf('3. GMRES takes time %f\n', t);
 

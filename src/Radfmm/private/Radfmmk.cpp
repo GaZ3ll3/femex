@@ -57,7 +57,9 @@ public:
 	}
 
 	double integral(double x0, double y0, double x1, double y1) noexcept {
-	    if (distance(x0, y0, x1, y1) < 1.0/side) return integral_helper(x0, y0, x1, y1);
+	    if (distance(x0, y0, x1, y1) < 1.0/side) {
+                return integral_helper(x0, y0, x1, y1);
+        }
 	    else {
 	        auto xm = (x0 + x1)/2;
 	        auto ym = (y0 + y1)/2;
