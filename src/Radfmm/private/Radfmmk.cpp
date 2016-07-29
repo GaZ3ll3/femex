@@ -56,7 +56,121 @@ public:
 	    return distance(x0, y0, x1, y1) * this->getAttribute((x0 + x1)/2 , (y0 + y1)/2);
 	}
 
+	size_t getRow(double y) noexcept {
+		return size_t(floor(side * y));
+	}
+
+	size_t getCol(double x) noexcept {
+		return size_t(floor(side * x));
+	}
+
 	double integral(double x0, double y0, double x1, double y1) noexcept {
+		auto col0 = getRow(x0);
+		auto col1 = getRow(x1);
+		auto row0 = getCol(y0);
+		auto row1 = getCol(y1);
+
+		// 9 cases
+		if ((row0 == row1) && (col0 == col1)) {
+			return integral_helper(x0, y0, x1, y1);
+		}
+		else if ((row0 == row1 + 1) && (col0 == col1)) {
+			auto row0 = getCol(y0);
+			double ybar = double(row0)/side;
+			double xbar = ((y1 - ybar) * x0 + (ybar - y0) * x1)/(y1 - y0);
+			return integral_helper(x0, y0, xbar, ybar) + integral_helper(xbar, ybar, x1, y1);
+		}
+		else if ((row0 == row1 - 1) && (col0 == col1)) {
+			auto row1 = getCol(y1);
+			double ybar = double(row1)/side;
+			double xbar = ((y1 - ybar) * x0 + (ybar - y0) * x1)/(y1 - y0);
+			return integral_helper(x0, y0, xbar, ybar) + integral_helper(xbar, ybar, x1, y1);
+		}
+		else if ((col0 == col1 + 1) && (row0 == row1)) {
+			auto col0 = getCol(x0);
+			double xbar = double(col0)/side;
+			double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+			return integral_helper(x0, y0, xbar, ybar) + integral_helper(xbar, ybar, x1, y1);
+		}
+		else if ((col0 == col1 - 1) && (row0 == row1)) {
+			auto col1 = getCol(x1);
+			double xbar = double(col1)/side;
+			double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+			return integral_helper(x0, y0, xbar, ybar) + integral_helper(xbar, ybar, x1, y1);
+		}
+		else if ((col0 == col1 + 1) && (row0 == row1 + 1)) {
+			double xbar = double(col0)/side;
+			double ybar2 = double(row0)/side;
+			double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+			double xbar2 = ((y1 - ybar2) * x0 + (ybar2 - y0) * x1)/(y1 - y0);
+
+			if (xbar < xbar2) {
+				return integral_helper(x1, y1, xbar, ybar) + \
+						integral_helper(xbar, ybar, xbar2, ybar2) + integral_helper(xbar2, ybar2, x0, y0);
+			}
+			else {
+				return integral_helper(x1, y1, xbar2, ybar2) + \
+						integral_helper(xbar, ybar, xbar2, ybar2) + integral_helper(xbar, ybar, x0, y0);
+
+			}
+		}
+		else if ((col0 == col1 + 1) && (row0 == row1 - 1)) {
+			double xbar = double(col0)/side;
+			double ybar2 = double(row1)/side;
+			double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+			double xbar2 = ((y1 - ybar2) * x0 + (ybar2 - y0) * x1)/(y1 - y0);
+
+			if (xbar < xbar2) {
+				return integral_helper(x1, y1, xbar, ybar) + \
+						integral_helper(xbar, ybar, xbar2, ybar2) + integral_helper(xbar2, ybar2, x0, y0);
+			}
+			else {
+				return integral_helper(x1, y1, xbar2, ybar2) + \
+						integral_helper(xbar, ybar, xbar2, ybar2) + integral_helper(xbar, ybar, x0, y0);
+
+			}
+
+		}
+		else if ((col0 == col1 - 1) && (row0 == row1 + 1)) {
+			double xbar = double(col1)/side;
+			double ybar2 = double(row0)/side;
+			double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+			double xbar2 = ((y1 - ybar2) * x0 + (ybar2 - y0) * x1)/(y1 - y0);
+
+			if (xbar > xbar2) {
+				return integral_helper(x1, y1, xbar, ybar) + \
+						integral_helper(xbar, ybar, xbar2, ybar2) + integral_helper(xbar2, ybar2, x0, y0);
+			}
+			else {
+				return integral_helper(x1, y1, xbar2, ybar2) + \
+						integral_helper(xbar, ybar, xbar2, ybar2) + integral_helper(xbar, ybar, x0, y0);
+			}
+		}
+		else if ((col0 == col1 - 1) && (row0 == row1 - 1)) {
+			double xbar = double(col1)/side;
+			double ybar2 = double(row1)/side;
+			double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+			double xbar2 = ((y1 - ybar2) * x0 + (ybar2 - y0) * x1)/(y1 - y0);
+
+			if (xbar > xbar2) {
+				return integral_helper(x1, y1, xbar, ybar) + \
+						integral_helper(xbar, ybar, xbar2, ybar2) + integral_helper(xbar2, ybar2, x0, y0);
+			}
+			else {
+				return integral_helper(x1, y1, xbar2, ybar2) + \
+						integral_helper(xbar, ybar, xbar2, ybar2) + integral_helper(xbar, ybar, x0, y0);
+
+			}
+		}
+		else {
+			double xm = (x0 + x1)/2;
+			double ym = (y0 + y1)/2;
+			return integral(x0, y0, xm, ym) + integral(xm, ym, x1, y1);
+		}
+	}
+
+	double integral_approximate(double x0, double y0, double x1, double y1) noexcept {
+		// use precise integral.
 	    if (distance(x0, y0, x1, y1) < 1.0/side) {
                 return integral_helper(x0, y0, x1, y1);
         }

@@ -128,7 +128,123 @@ inline scalar_t integral_helper(treecode *tree, scalar_t x0, scalar_t y0, scalar
  * @x1 : x coordinate
  * @y1 : y coordinate
  */
-inline scalar_t integral(treecode *tree, scalar_t x0, scalar_t y0, scalar_t x1, scalar_t y1) noexcept {
+
+inline size_t getRow(treecode *tree, double y) noexcept {
+	return size_t(floor(tree->size * y));
+}
+
+inline size_t getCol(treecode *tree, double x) noexcept {
+	return size_t(floor(tree->size * x));
+}
+
+inline double integral(treecode *tree, double x0, double y0, double x1, double y1) noexcept {
+	auto side = tree->size;
+	auto col0 = getRow(tree, x0);
+	auto col1 = getRow(tree, x1);
+	auto row0 = getCol(tree, y0);
+	auto row1 = getCol(tree, y1);
+
+	// 9 cases
+	if ((row0 == row1) && (col0 == col1)) {
+		return integral_helper(tree, x0, y0, x1, y1);
+	}
+	else if ((row0 == row1 + 1) && (col0 == col1)) {
+		auto row0 = getCol(tree, y0);
+		double ybar = double(row0)/side;
+		double xbar = ((y1 - ybar) * x0 + (ybar - y0) * x1)/(y1 - y0);
+		return integral_helper(tree, x0, y0, xbar, ybar) + integral_helper(tree, xbar, ybar, x1, y1);
+	}
+	else if ((row0 == row1 - 1) && (col0 == col1)) {
+		auto row1 = getCol(tree, y1);
+		double ybar = double(row1)/side;
+		double xbar = ((y1 - ybar) * x0 + (ybar - y0) * x1)/(y1 - y0);
+		return integral_helper(tree, x0, y0, xbar, ybar) + integral_helper(tree, xbar, ybar, x1, y1);
+	}
+	else if ((col0 == col1 + 1) && (row0 == row1)) {
+		auto col0 = getCol(tree, x0);
+		double xbar = double(col0)/side;
+		double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+		return integral_helper(tree, x0, y0, xbar, ybar) + integral_helper(tree, xbar, ybar, x1, y1);
+	}
+	else if ((col0 == col1 - 1) && (row0 == row1)) {
+		auto col1 = getCol(tree, x1);
+		double xbar = double(col1)/side;
+		double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+		return integral_helper(tree, x0, y0, xbar, ybar) + integral_helper(tree, xbar, ybar, x1, y1);
+	}
+	else if ((col0 == col1 + 1) && (row0 == row1 + 1)) {
+		double xbar = double(col0)/side;
+		double ybar2 = double(row0)/side;
+		double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+		double xbar2 = ((y1 - ybar2) * x0 + (ybar2 - y0) * x1)/(y1 - y0);
+
+		if (xbar < xbar2) {
+			return integral_helper(tree, x1, y1, xbar, ybar) + \
+					integral_helper(tree, xbar, ybar, xbar2, ybar2) + integral_helper(tree, xbar2, ybar2, x0, y0);
+		}
+		else {
+			return integral_helper(tree, x1, y1, xbar2, ybar2) + \
+					integral_helper(tree, xbar, ybar, xbar2, ybar2) + integral_helper(tree, xbar, ybar, x0, y0);
+
+		}
+	}
+	else if ((col0 == col1 + 1) && (row0 == row1 - 1)) {
+		double xbar = double(col0)/side;
+		double ybar2 = double(row1)/side;
+		double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+		double xbar2 = ((y1 - ybar2) * x0 + (ybar2 - y0) * x1)/(y1 - y0);
+
+		if (xbar < xbar2) {
+			return integral_helper(tree, x1, y1, xbar, ybar) + \
+					integral_helper(tree, xbar, ybar, xbar2, ybar2) + integral_helper(tree, xbar2, ybar2, x0, y0);
+		}
+		else {
+			return integral_helper(tree, x1, y1, xbar2, ybar2) + \
+					integral_helper(tree, xbar, ybar, xbar2, ybar2) + integral_helper(tree, xbar, ybar, x0, y0);
+
+		}
+
+	}
+	else if ((col0 == col1 - 1) && (row0 == row1 + 1)) {
+		double xbar = double(col1)/side;
+		double ybar2 = double(row0)/side;
+		double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+		double xbar2 = ((y1 - ybar2) * x0 + (ybar2 - y0) * x1)/(y1 - y0);
+
+		if (xbar > xbar2) {
+			return integral_helper(tree, x1, y1, xbar, ybar) + \
+					integral_helper(tree, xbar, ybar, xbar2, ybar2) + integral_helper(tree, xbar2, ybar2, x0, y0);
+		}
+		else {
+			return integral_helper(tree, x1, y1, xbar2, ybar2) + \
+					integral_helper(tree, xbar, ybar, xbar2, ybar2) + integral_helper(tree, xbar, ybar, x0, y0);
+		}
+	}
+	else if ((col0 == col1 - 1) && (row0 == row1 - 1)) {
+		double xbar = double(col1)/side;
+		double ybar2 = double(row1)/side;
+		double ybar = ((x1 - xbar) * y0 + (xbar - x0) * y1)/(x1 - x0);
+		double xbar2 = ((y1 - ybar2) * x0 + (ybar2 - y0) * x1)/(y1 - y0);
+
+		if (xbar > xbar2) {
+			return integral_helper(tree, x1, y1, xbar, ybar) + \
+					integral_helper(tree, xbar, ybar, xbar2, ybar2) + integral_helper(tree,  xbar2, ybar2, x0, y0);
+		}
+		else {
+			return integral_helper(tree, x1, y1, xbar2, ybar2) + \
+					integral_helper(tree, xbar, ybar, xbar2, ybar2) + integral_helper(tree, xbar, ybar, x0, y0);
+
+		}
+	}
+	else {
+		double xm = (x0 + x1)/2;
+		double ym = (y0 + y1)/2;
+		return integral(tree, x0, y0, xm, ym) + integral(tree, xm, ym, x1, y1);
+	}
+}
+
+
+inline scalar_t integral_approximate(treecode *tree, scalar_t x0, scalar_t y0, scalar_t x1, scalar_t y1) noexcept {
 
     if (distance(x0, y0, x1, y1) < 1.0/tree->size) return integral_helper(tree, x0, y0, x1, y1);
     else {

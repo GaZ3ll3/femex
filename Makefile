@@ -167,7 +167,7 @@ $(QUA)QuadTree_.mexa64: $(QUA)Quadtree_.cc $(QUA)QuadTree.cc
 TRE = $(SRC)/Treecode/private/
 TRE_BINS = $(TRE)Treecode_.mexa64
 	
-$(TRE)Treecode_.mexa64: $(TRE)quadtree.cpp $(TRE)treecode.cpp $(TRE)Treecode_.cpp
+$(TRE)Treecode_.mexa64: $(TRE)quadtree.cpp $(TRE)treecode.cpp $(TRE)Treecode_.cpp $(TRE)treecode.h
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(TRE)quadtree.cpp -o quadtree.tre.o
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(TRE)treecode.cpp -o treecode.tre.o
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(TRE)Treecode_.cpp -o Treecode_.tre.o
