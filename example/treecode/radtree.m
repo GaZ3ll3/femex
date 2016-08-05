@@ -22,7 +22,7 @@ N = size(x, 2)^2;
 charge = ring(z(1,:), z(2,:));
 
 % mu_s = 10.0 * (1 + z(1,:).^2 + z(2, :).^2)';
-mu_s = 0.0001 * ones(N, 1);
+mu_s = 5.0 * ones(N, 1);
 
 mu_t = 0.2 + mu_s;
 
