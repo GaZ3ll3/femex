@@ -189,6 +189,71 @@ $(RAD)Radfmmk_.mexa64: $(RAD)H2_2D_Node.cpp $(RAD)H2_2D_Tree.cpp $(RAD)kernel_Ba
 	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(RAD)Radfmmk.cpp -o Radfmmk.rad.o
 	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.rad.o H2_2D_Tree.rad.o kernel_Base.rad.o kernel_Types.rad.o  Radfmmk.rad.o $(CXX_LIBS)
 	
+	
+EDN = $(SRC)Eddington/private/
+EDN_SRCS=$(wildcard $(EDN)*.cpp)
+EDN_OBJS=$(patsubst $(EDN)%.cpp, %.edn.o, $(EDN_SRCS))
+EDN_UU_BINS=$(EDN)RadfmmUU_.mexa64
+EDN_UC_BINS=$(EDN)RadfmmUC_.mexa64
+EDN_US_BINS=$(EDN)RadfmmUS_.mexa64
+EDN_CC_BINS=$(EDN)RadfmmCC_.mexa64
+EDN_CS_BINS=$(EDN)RadfmmCS_.mexa64
+EDN_SS_BINS=$(EDN)RadfmmSS_.mexa64	
+
+
+$(EDN)RadfmmUU_.mexa64: $(EDN)H2_2D_Node.cpp $(EDN)H2_2D_Tree.cpp $(EDN)kernel_Base.cpp $(EDN)kernel_Types.cpp $(EDN)RadfmmUU.cpp
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Node.cpp -o H2_2D_Node.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Tree.cpp -o H2_2D_Tree.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Base.cpp -o kernel_Base.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Types.cpp -o kernel_Types.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)RadfmmUU.cpp -o RadfmmUU.edn.o
+	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.edn.o H2_2D_Tree.edn.o kernel_Base.edn.o kernel_Types.edn.o  RadfmmUU.edn.o $(CXX_LIBS)
+
+
+$(EDN)RadfmmUC_.mexa64: $(EDN)H2_2D_Node.cpp $(EDN)H2_2D_Tree.cpp $(EDN)kernel_Base.cpp $(EDN)kernel_Types.cpp $(EDN)RadfmmUC.cpp
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Node.cpp -o H2_2D_Node.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Tree.cpp -o H2_2D_Tree.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Base.cpp -o kernel_Base.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Types.cpp -o kernel_Types.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)RadfmmUC.cpp -o RadfmmUC.edn.o
+	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.edn.o H2_2D_Tree.edn.o kernel_Base.edn.o kernel_Types.edn.o  RadfmmUC.edn.o $(CXX_LIBS)
+	
+	
+$(EDN)RadfmmUS_.mexa64: $(EDN)H2_2D_Node.cpp $(EDN)H2_2D_Tree.cpp $(EDN)kernel_Base.cpp $(EDN)kernel_Types.cpp $(EDN)RadfmmUS.cpp
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Node.cpp -o H2_2D_Node.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Tree.cpp -o H2_2D_Tree.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Base.cpp -o kernel_Base.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Types.cpp -o kernel_Types.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)RadfmmUS.cpp -o RadfmmUS.edn.o
+	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.edn.o H2_2D_Tree.edn.o kernel_Base.edn.o kernel_Types.edn.o  RadfmmUS.edn.o $(CXX_LIBS)
+	
+
+$(EDN)RadfmmCC_.mexa64: $(EDN)H2_2D_Node.cpp $(EDN)H2_2D_Tree.cpp $(EDN)kernel_Base.cpp $(EDN)kernel_Types.cpp $(EDN)RadfmmCC.cpp
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Node.cpp -o H2_2D_Node.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Tree.cpp -o H2_2D_Tree.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Base.cpp -o kernel_Base.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Types.cpp -o kernel_Types.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)RadfmmCC.cpp -o RadfmmCC.edn.o
+	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.edn.o H2_2D_Tree.edn.o kernel_Base.edn.o kernel_Types.edn.o  RadfmmCC.edn.o $(CXX_LIBS)
+
+
+$(EDN)RadfmmCS_.mexa64: $(EDN)H2_2D_Node.cpp $(EDN)H2_2D_Tree.cpp $(EDN)kernel_Base.cpp $(EDN)kernel_Types.cpp $(EDN)RadfmmCS.cpp
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Node.cpp -o H2_2D_Node.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Tree.cpp -o H2_2D_Tree.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Base.cpp -o kernel_Base.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Types.cpp -o kernel_Types.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)RadfmmCS.cpp -o RadfmmCS.edn.o
+	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.edn.o H2_2D_Tree.edn.o kernel_Base.edn.o kernel_Types.edn.o  RadfmmCS.edn.o $(CXX_LIBS)
+
+
+$(EDN)RadfmmSS_.mexa64: $(EDN)H2_2D_Node.cpp $(EDN)H2_2D_Tree.cpp $(EDN)kernel_Base.cpp $(EDN)kernel_Types.cpp $(EDN)RadfmmSS.cpp
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Node.cpp -o H2_2D_Node.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)H2_2D_Tree.cpp -o H2_2D_Tree.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Base.cpp -o kernel_Base.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)kernel_Types.cpp -o kernel_Types.edn.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(EDN)RadfmmSS.cpp -o RadfmmSS.edn.o
+	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.edn.o H2_2D_Tree.edn.o kernel_Base.edn.o kernel_Types.edn.o  RadfmmSS.edn.o $(CXX_LIBS)
+
 MCR = $(SRC)/MCRT/private/
 MCR_BINS = $(MCR)MCRT_.mexa64
 	
@@ -235,7 +300,8 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 ##############################################################	
 # The action starts here.
 all: $(MESH_BINS) $(MESH3_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) \
-$(DOM_BINS) $(CEL_BINS) $(QUA_BINS) $(TRE_BINS) $(RAD_BINS) $(RADK_BINS) $(MCR_BINS)
+$(DOM_BINS) $(CEL_BINS) $(QUA_BINS) $(TRE_BINS) $(RAD_BINS) $(RADK_BINS) $(MCR_BINS) $(EDN_UU_BINS) \
+$(EDN_UC_BINS) $(EDN_US_BINS) $(EDN_CC_BINS) $(EDN_CS_BINS) $(EDN_SS_BINS)
 	rm -rf $(TRIANGLELIB)triangle.o\
 	rm -rf *.o
 
