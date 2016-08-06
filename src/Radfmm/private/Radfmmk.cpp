@@ -184,6 +184,15 @@ public:
 	double getAttribute(double x, double y);
     virtual double kernel_Func(Point r0, Point r1);
 };
+
+/*
+ * some notes:
+ *
+ * Chebyshev nodes inside I box's evaluation is fine between different nodes.
+ *
+ * on the same nodes, the average value is taken instead using zero only.
+ *
+ */
 double kernel_Radfmm::kernel_Func(Point r0, Point r1){
     double rSquare	= distance(r0.x, r0.y, r1.x, r1.y) ;
     if (rSquare == 0){
