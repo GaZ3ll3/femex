@@ -1,11 +1,9 @@
-function [ret] = radtree(n, nc)
-%RADFMM Summary of this function goes here
-%   Detailed explanation goes here
+function [ret] = kifmm_rad(n, np, rank)
 global m N z ncheb mu_s mu_t ker
 
-ncheb = nc;
+ncheb = np;
 
-m = 1;
+m = rank;
 
 x = 1/n:2/n:(n-1)/n;
 y = 1/n:2/n:(n-1)/n;
@@ -28,16 +26,15 @@ mu_t = 0.2 + mu_s;
 
 
 tic;
-ker = Radfmmk();
+ker = kifmm();
 t = toc;
 
 fprintf('1. Initialization kernel ... with time %f\n', t);
 
 tic;
 rhs = mu_s .*ker.calcc(ncheb, charge, z, N, m, mu_t);
-t = toc;
 
-ker.disp();
+t= toc;
 
 fprintf('2. Caching necessary kernel evaluations ... with time %f\n', t);
 % 
@@ -54,6 +51,8 @@ fprintf('3. GMRES takes time %f\n', t);
 surf(X,Y,reshape(ret, n/2,n/2), 'EdgeColor','None');
 shading interp;colorbar; colormap jet;view(2);
 
+
+% ker.debug();
 % export_fig result.png
 
 end
@@ -62,11 +61,10 @@ function ret = forward(x)
 global m N z ncheb mu_s mu_t ker
 
 
-ret = ker.calcf(ncheb,x, z, N, m, mu_t);
+ret = ker.calcc(ncheb,x, z, N, m, mu_t);
 
 
 ret = x - mu_s .* ret;
 
 
 end
-

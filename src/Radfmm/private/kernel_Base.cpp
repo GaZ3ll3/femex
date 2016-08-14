@@ -269,6 +269,7 @@ void kernel_Base::calculate_Potential_cache(H2_2D_Node*& node, MatrixXd& potenti
 			calculate_NodePotential_From_Wellseparated_Clusters_cache(node,tree.rank,tree.nChebNodes);
 			transfer_NodePotential_To_Child(node,tree.R);
 			if(computePotential){
+				// not doing this when uniform grid is adopted.
 				tranfer_Potential_To_Potential_Tree(node, potential);
 			}
 			for(unsigned short k=0;k<4;++k){

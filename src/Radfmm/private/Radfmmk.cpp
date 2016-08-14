@@ -196,6 +196,7 @@ public:
 double kernel_Radfmm::kernel_Func(Point r0, Point r1){
     double rSquare	= distance(r0.x, r0.y, r1.x, r1.y) ;
     if (rSquare == 0){
+    	//return 0.;
     	return (1.0 - exp(- this->getAttribute(r0.x, r0.y)/side/2.0))/ this->getAttribute(r0.x, r0.y) +
     			integral_corner(this->getAttribute(r0.x, r0.y), 1.0/side)/(2*M_PI);
     }

@@ -175,6 +175,7 @@ $(TRE)Treecode_.mexa64: $(TRE)quadtree.cpp $(TRE)treecode.cpp $(TRE)Treecode_.cp
 	
 	
 	
+
 RAD = $(SRC)Radfmm/private/
 RAD_SRCS = $(wildcard $(RAD)*.cpp)
 RAD_OBJS = $(patsubst $(RAD)%.cpp, %.rad.o, $(RAD_SRCS))
@@ -190,6 +191,18 @@ $(RAD)Radfmmk_.mexa64: $(RAD)H2_2D_Node.cpp $(RAD)H2_2D_Tree.cpp $(RAD)kernel_Ba
 	$(CXX) $(MATLAB_LINKS) -o $@ H2_2D_Node.rad.o H2_2D_Tree.rad.o kernel_Base.rad.o kernel_Types.rad.o  Radfmmk.rad.o $(CXX_LIBS)
 	
 	
+
+KIF = $(SRC)KIFMM2D/private/
+KIF_SRCS = $(wildcard $(KIF)*.cpp)
+KIF_OBJS = $(patsubst $(KIF)%.cpp, %.kif.o, $(KIF_SRCS))
+KIF_BINS = $(KIF)kifmm_.mexa64
+
+$(KIF)kifmm_.mexa64: $(KIF)LET.cpp $(KIF)LET_Node.cpp $(KIF)kifmm.cpp
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(KIF)LET_Node.cpp -o LET_Node.kif.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(KIF)LET.cpp -o LET.kif.o
+	$(CXX) -c $(CXX_INCLUDE) $(CXX_FLAGS) $(KIF)kifmm.cpp -o kifmm.kif.o
+	$(CXX) $(MATLAB_LINKS) -o $@ LET_Node.kif.o LET.kif.o kifmm.kif.o $(CXX_LIBS)
+
 EDN = $(SRC)Eddington/private/
 EDN_SRCS=$(wildcard $(EDN)*.cpp)
 EDN_OBJS=$(patsubst $(EDN)%.cpp, %.edn.o, $(EDN_SRCS))
@@ -301,7 +314,7 @@ $(ILUPACK_PATH)%.mexa64: $(ILUPACK_PATH)%.o
 # The action starts here.
 all: $(MESH_BINS) $(MESH3_BINS) $(ASR_BINS) $(INT_BINS) $(BOD_BINS) $(SLR_BINS) $(ILUPACK_BINS) \
 $(DOM_BINS) $(CEL_BINS) $(QUA_BINS) $(TRE_BINS) $(RAD_BINS) $(RADK_BINS) $(MCR_BINS) $(EDN_UU_BINS) \
-$(EDN_UC_BINS) $(EDN_US_BINS) $(EDN_CC_BINS) $(EDN_CS_BINS) $(EDN_SS_BINS)
+$(EDN_UC_BINS) $(EDN_US_BINS) $(EDN_CC_BINS) $(EDN_CS_BINS) $(EDN_SS_BINS) $(KIF_BINS)
 	rm -rf $(TRIANGLELIB)triangle.o\
 	rm -rf *.o
 
