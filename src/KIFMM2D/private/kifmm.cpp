@@ -193,7 +193,7 @@ double kernel_kifmm::kernelFunction(Point& r0, Point& r1){
 
 double kernel_kifmm::getAttribute(double x, double y) {
     if (x < start_x || x >= 1 + start_x || y < start_y || y >= 1 + start_y) {
-        return 0.0;
+        return 0.;
     }
 
 
@@ -348,7 +348,11 @@ MEX_DEFINE(debug)  (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]){
 			cout << cur.second[k] << " ";
 		}
 
-		cout << "== position (" <<  cur.first->center.x <<", "<< cur.first->center.y << ")" << endl;
+		for (int k = 0; k < kern->maxLevel - length + 1; ++k) {
+			cout << "  ";
+		}
+
+		cout << "at position (" <<  cur.first->center.x <<", "<< cur.first->center.y << ") particles: " << cur.first->N << endl;
 
 		for (int i = 0; i < 4; ++i) {
 			if (cur.first->child[i] != nullptr) {

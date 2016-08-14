@@ -41,10 +41,10 @@ void LET::initialize(const index_t nSurface, const vector<Point> &location, doub
     standardDownCheckSurface.resize(nSurface);
     standardDownEquivalentSurface.resize(nSurface);
 
-    getStandardSurface(nSurface, 2.85, standardUpCheckSurface);
+    getStandardSurface(nSurface, 2.95, standardUpCheckSurface);
     getStandardSurface(nSurface, 1.05, standardUpEquivalentSurface);
     getStandardSurface(nSurface, 1.05, standardDownCheckSurface);
-    getStandardSurface(nSurface, 2.85, standardDownEquivalentSurface);
+    getStandardSurface(nSurface, 2.95, standardDownEquivalentSurface);
 
     getCenterRadius(location, center, radius);
 
@@ -91,7 +91,7 @@ void LET::assignChildren(LET_Node *&node) {
          * when particles inside current box is beyond 4 * rank, split it into 4 children.
          * else it is a leaf.
          */
-        if (node->N <= (ulong) 4 * rank) {
+        if (node->N < (ulong) 4 * rank) {
             node->isLeaf = true;
             /*
              * 1. at leaf node, calculate upward equivalent density at each upwardEquivalentSurface.
@@ -939,7 +939,7 @@ void LET::pseudoInverse(MatrixXd &K, VectorXd &rhs, VectorXd& lhs) {
 		return;
 	}
 
-    double tolerance=1.e-10; // choose your tolerance wisely!
+    double tolerance=1.e-8; // choose your tolerance wisely!
 
     JacobiSVD<MatrixXd> svd(K, ComputeThinU | ComputeThinV);
     MatrixXd u = svd.matrixU();
