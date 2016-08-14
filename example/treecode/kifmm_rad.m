@@ -40,7 +40,7 @@ fprintf('2. Caching necessary kernel evaluations ... with time %f\n', t);
 % 
 
 tic;
-[ret,~,~,~,~] = gmres(@forward, rhs, 30, 1e-12, 30, [],[], rhs);
+[ret,~,~,~,~] = gmres(@forward, rhs, 30, 1e-10, 30, [],[], rhs);
 
 ret = ret./mu_s;
 
@@ -61,7 +61,7 @@ function ret = forward(x)
 global m N z ncheb mu_s mu_t ker
 
 
-ret = ker.calcc(ncheb,x, z, N, m, mu_t);
+ret = ker.calcf(ncheb,x, z, N, m, mu_t);
 
 
 ret = x - mu_s .* ret;

@@ -48,6 +48,7 @@ typedef double scalar_t ;
 typedef unsigned short index_t;
 
 enum Identity {UE= 0, UC = 1, DE = 2, DC = 3};
+enum Option {Cache = 0, Fast = 1};
 
 
 

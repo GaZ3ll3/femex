@@ -254,11 +254,75 @@ MEX_DEFINE(calc_cache) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs
 	kern->start_x = 0.;
 	kern->start_y = 0.;
 	kern->mu_t = mu_t_ptr;
-	kern->initialize((unsigned short)*ncheb_ptr , location, charges_ptr, (unsigned long)*N_ptr, (unsigned)*rank_ptr);
+
+	//kern->tic();
+	kern->initialize((unsigned short)*ncheb_ptr , location, charges_ptr, (unsigned long)*N_ptr, (unsigned)*rank_ptr, Option::Cache);
+	//kern->toc();
+
+
+    //std::cout << "Up  : elapsed time at " << kern-> elapsed << " seconds"  << endl;
     kern->resetPotential(kern->root);
     VectorXd potentialMatrix;
     potentialMatrix = VectorXd::Zero(kern->N);
+
+    //kern->tic();
     kern->downPass(kern->root, potentialMatrix);
+
+    //kern->toc();
+    //std::cout << "Down: elapsed time at " << kern-> elapsed << " seconds"  << endl;
+    Map<VectorXd>(mxGetPr(plhs[0]), potentialMatrix.rows()) = potentialMatrix;
+
+}
+
+MEX_DEFINE(calc_fast) (int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
+	InputArguments input(nrhs, prhs, 7);
+	OutputArguments output(nlhs, plhs, 1);
+
+	auto kern = Session<kernel_kifmm>::get(input.get(0));
+
+	auto ncheb_ptr = mxGetPr(prhs[1]);
+	auto charges_ptr = mxGetPr(prhs[2]);
+
+	auto location_ptr = mxGetPr(prhs[3]);
+	auto numberoflocation = mxGetN(prhs[3]);
+
+	auto N_ptr = mxGetPr(prhs[4]);
+	auto rank_ptr = mxGetPr(prhs[5]);
+
+	auto mu_t_ptr = mxGetPr(prhs[6]);
+
+	vector<Point> location;
+
+	location.resize(numberoflocation);
+
+	for(size_t i = 0; i < numberoflocation; i++) {
+		location[i].x = location_ptr[2 * i];
+		location[i].y = location_ptr[2 * i + 1];
+	}
+
+	plhs[0] = mxCreateNumericMatrix((unsigned long)*N_ptr, 1 ,mxDOUBLE_CLASS, mxREAL);
+
+
+	kern->side = (unsigned long)(sqrt(*N_ptr));
+	kern->start_x = 0.;
+	kern->start_y = 0.;
+	kern->mu_t = mu_t_ptr;
+
+//	kern->tic();
+	kern->initialize((unsigned short)*ncheb_ptr , location, charges_ptr, (unsigned long)*N_ptr, (unsigned)*rank_ptr, Option::Fast);
+//	kern->toc();
+
+
+//    std::cout << "Up  : elapsed time at " << kern-> elapsed << " seconds"  << endl;
+    kern->resetPotential(kern->root);
+    VectorXd potentialMatrix;
+    potentialMatrix = VectorXd::Zero(kern->N);
+
+//    kern->tic();
+    kern->downPass(kern->root, potentialMatrix);
+
+//    kern->toc();
+//    std::cout << "Down: elapsed time at " << kern-> elapsed << " seconds"  << endl;
     Map<VectorXd>(mxGetPr(plhs[0]), potentialMatrix.rows()) = potentialMatrix;
 
 }

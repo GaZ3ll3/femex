@@ -3,9 +3,8 @@
 //
 
 #include "LET.h"
+#include <ctime>
 
-
-#define d 0.1
 
 using namespace Eigen;
 using namespace std;
@@ -18,9 +17,11 @@ LET::LET() {
 	nSurface = 0;
 	N = 0;
 	maxLevel = 0;
+	cacheIndex = 0;
+	option = Option::Cache;
 }
 
-void LET::initialize(const index_t nSurface, const vector<Point> &location, double *const charge, const ulong N, const index_t rank) {
+void LET::initialize(const index_t nSurface, const vector<Point> &location, double *const charge, const ulong N, const index_t rank, Option option) {
     this->rank = rank;
     this->N = N;
     this->m = 1;
@@ -28,6 +29,12 @@ void LET::initialize(const index_t nSurface, const vector<Point> &location, doub
     this->nSurface = nSurface;
     this->chargeTree = Map<MatrixXd>(charge, N, size_t(1));
     this->locationTree = location;
+    this->option = option;
+    /*
+     * important for acceleration
+     */
+    this->cacheIndex = 0;
+
 
     standardUpCheckSurface.resize(nSurface);
     standardUpEquivalentSurface.resize(nSurface);
@@ -93,11 +100,20 @@ void LET::assignChildren(LET_Node *&node) {
 
             VectorXd contribution; contribution = VectorXd::Zero(nSurface);
 
-            getUpwardEquivalent_acc(nSurface, node->location,
-                                node->shiftedUpCheckSurface, node->charge, contribution);
+            if (option == Option::Cache) {
+				getUpwardEquivalent_acc_cache(nSurface, node->location,
+									node->shiftedUpCheckSurface, node->charge, contribution);
 
-            getUpwardEquivalent_inv(nSurface, node->shiftedUpEquivalentSurface,node->shiftedUpCheckSurface, contribution, node->upwardEquivalent);
+				getUpwardEquivalent_inv_cache(nSurface, node->shiftedUpEquivalentSurface,
+						node->shiftedUpCheckSurface, contribution, node->upwardEquivalent);
+            }
+            else {
+				getUpwardEquivalent_acc_fast(nSurface, node->location,
+									node->shiftedUpCheckSurface, node->charge, contribution);
 
+				getUpwardEquivalent_inv_fast(nSurface, node->shiftedUpEquivalentSurface,
+						node->shiftedUpCheckSurface, contribution, node->upwardEquivalent);
+            }
 
 
             if (this->maxLevel < node->nLevel) {this->maxLevel = node->nLevel;}
@@ -150,12 +166,25 @@ void LET::assignChildren(LET_Node *&node) {
                     /*
                      * 2. each child's upward equivalent density will contribute to parent upward equivalent density.
                      */
-                    getUpwardEquivalent_acc(nSurface, node->child[k]->shiftedUpEquivalentSurface,
+                	if (option == Option::Cache) {
+                		getUpwardEquivalent_acc_cache(nSurface, node->child[k]->shiftedUpEquivalentSurface,
                                         node->shiftedUpCheckSurface, node->child[k]->upwardEquivalent, contribution);
+                	}
+                	else {
+                		getUpwardEquivalent_acc_fast(nSurface, node->child[k]->shiftedUpEquivalentSurface,
+                		                                        node->shiftedUpCheckSurface, node->child[k]->upwardEquivalent, contribution);
+                	}
 
                 }
             }
-            getUpwardEquivalent_inv(nSurface,  node->shiftedUpEquivalentSurface, node->shiftedUpCheckSurface, contribution, node->upwardEquivalent);
+            if (option == Option::Cache) {
+            	getUpwardEquivalent_inv_cache(nSurface,  node->shiftedUpEquivalentSurface,
+            			node->shiftedUpCheckSurface, contribution, node->upwardEquivalent);
+            }
+            else {
+            	getUpwardEquivalent_inv_fast(nSurface,  node->shiftedUpEquivalentSurface,
+            	            			node->shiftedUpCheckSurface, contribution, node->upwardEquivalent);
+            }
         }
     }
 }
@@ -493,6 +522,27 @@ void LET:: assignCousin(LET_Node*& node, index_t neighorIndex){
 }
 
 
+void LET::getUpwardEquivalent_acc_cache(index_t nSurface, vector<Point> &location, vector<Point> &upwardCheckSurface,
+                                  VectorXd &charge, VectorXd &density) {
+    /*
+     *  1. calculate right hand side's potential for this node(leaf node).
+     */
+
+    MatrixXd rhs_K; kernelEvaluate(upwardCheckSurface, location, rhs_K);
+    cache.push_back(rhs_K);
+    density += rhs_K * charge;
+}
+
+void LET::getUpwardEquivalent_acc_fast(index_t nSurface, vector<Point> &location, vector<Point> &upwardCheckSurface,
+                                  VectorXd &charge, VectorXd &density) {
+    /*
+     *  1. calculate right hand side's potential for this node(leaf node).
+     */
+
+    density += cache[cacheIndex] * charge;
+    (cacheIndex)++;
+}
+
 
 
 void LET::getUpwardEquivalent_acc(index_t nSurface, vector<Point> &location, vector<Point> &upwardCheckSurface,
@@ -521,6 +571,31 @@ void LET::getUpwardEquivalent_inv(index_t nSurface,vector<Point> &upwardEquivale
 }
 
 
+void LET::getUpwardEquivalent_inv_cache(index_t nSurface,vector<Point> &upwardEquivalentSurface,
+                                  vector<Point> &upwardCheckSurface, VectorXd &rhs, VectorXd &density) {
+    /*
+     *  2. invert equivalent-check matrix
+     */
+    density = VectorXd::Zero(nSurface);
+
+    MatrixXd equivalentCheck; kernelEvaluate(upwardCheckSurface, upwardEquivalentSurface, equivalentCheck);
+
+    pseudoInverse(equivalentCheck, rhs, density);
+
+}
+
+
+void LET::getUpwardEquivalent_inv_fast(index_t nSurface,vector<Point> &upwardEquivalentSurface,
+                                  vector<Point> &upwardCheckSurface, VectorXd &rhs, VectorXd &density) {
+    /*
+     *  2. invert equivalent-check matrix
+     */
+	MatrixXd equivalentCheck;
+    pseudoInverse(equivalentCheck, rhs, density);
+
+}
+
+
 /*
  * Since there is a single inversion applied to all interaction list. Here output should be just local potential.
  */
@@ -534,6 +609,30 @@ void LET::getDownwardEquivalent_acc(index_t nSurface, vector<Point> &location, v
 
 }
 
+void LET::getDownwardEquivalent_acc_cache(index_t nSurface, vector<Point> &location, vector<Point> &downCheckSurface, VectorXd &charge, VectorXd &density) {
+
+    /*
+     *  for M2L part.
+     */
+    MatrixXd rhs_K; kernelEvaluate(downCheckSurface, location, rhs_K);
+
+    cache.push_back(rhs_K);
+    density += rhs_K * charge;
+
+}
+
+
+void LET::getDownwardEquivalent_acc_fast(index_t nSurface, vector<Point> &location, vector<Point> &downCheckSurface, VectorXd &charge, VectorXd &density) {
+
+    /*
+     *  for M2L part.
+     */
+    density += cache[cacheIndex] * charge;
+    (cacheIndex)++;
+
+}
+
+
 void LET::getDownwardEquivalent_inv(index_t nSurface, vector<Point> &downwardEquivalentSurface, vector<Point> &downCheckSurface,
                                     VectorXd &rhs, VectorXd &density) {
 
@@ -541,6 +640,26 @@ void LET::getDownwardEquivalent_inv(index_t nSurface, vector<Point> &downwardEqu
 
     MatrixXd equivalentCheck; kernelEvaluate(downCheckSurface, downwardEquivalentSurface, equivalentCheck);
 
+    pseudoInverse(equivalentCheck, rhs, density);
+
+}
+
+void LET::getDownwardEquivalent_inv_cache(index_t nSurface, vector<Point> &downwardEquivalentSurface, vector<Point> &downCheckSurface,
+                                    VectorXd &rhs, VectorXd &density) {
+
+    density = VectorXd::Zero(nSurface);
+
+    MatrixXd equivalentCheck; kernelEvaluate(downCheckSurface, downwardEquivalentSurface, equivalentCheck);
+
+    //cache.push_back(equivalentCheck);
+
+    pseudoInverse(equivalentCheck, rhs, density);
+}
+
+void LET::getDownwardEquivalent_inv_fast(index_t nSurface, vector<Point> &downwardEquivalentSurface, vector<Point> &downCheckSurface,
+                                    VectorXd &rhs, VectorXd &density) {
+
+	MatrixXd equivalentCheck;
     pseudoInverse(equivalentCheck, rhs, density);
 
 }
@@ -557,7 +676,14 @@ void LET::downPass(LET_Node *&node, VectorXd &potential) {
                 if (node->neighbor[k]!= nullptr) {
                     if (!node->neighbor[k]->isEmpty) {
                         // each time reset matrix.
-                        kernelEvaluate(node->location, node->neighbor[k]->location, neighborMatrix);
+                    	if (option == Option ::Cache) {
+                    		kernelEvaluate(node->location, node->neighbor[k]->location, neighborMatrix);
+                    		cache.push_back(neighborMatrix);
+                    	}
+                    	else {
+                    		neighborMatrix = cache[cacheIndex];
+                    		cacheIndex++;
+                    	}
 
                         getCharge(node->neighbor[k]);
                         node->potential+= neighborMatrix * node->neighbor[k]->charge;
@@ -567,14 +693,30 @@ void LET::downPass(LET_Node *&node, VectorXd &potential) {
             /*
              * from downward equivalent surface to locations.
              */
+
             MatrixXd K;
-            kernelEvaluate(node->location, node->shiftedDownEquivalentSurface, K);
+            if (option == Option::Cache) {
+            	kernelEvaluate(node->location, node->shiftedDownEquivalentSurface, K);
+            	cache.push_back(K);
+            }
+            else {
+            	K = cache[cacheIndex];
+            	cacheIndex++;
+            }
             node->potential += K * node->downwardEquivalent;
 
             /*
              * self contribution in U list
              */
-            kernelEvaluate(node->location, node->location, K);
+
+            if (option == Option::Cache) {
+				kernelEvaluate(node->location, node->location, K);
+				cache.push_back(K);
+            }
+            else {
+            	K = cache[cacheIndex];
+            	cacheIndex++;
+            }
 
 
             node->potential += K * node->charge;
@@ -589,7 +731,14 @@ void LET::downPass(LET_Node *&node, VectorXd &potential) {
                     if (!node->neighbor[k]->isEmpty) {
                         if (node->neighbor[k]->isLeaf) {
                             MatrixXd neighborMatrix;
-                            kernelEvaluate(node->location, node->neighbor[k]->location, neighborMatrix);
+                            if (option == Option::Cache) {
+                            	kernelEvaluate(node->location, node->neighbor[k]->location, neighborMatrix);
+                            	cache.push_back(neighborMatrix);
+                            }
+                            else {
+                            	neighborMatrix = cache[cacheIndex];
+                            	cacheIndex++;
+                            }
                             getCharge(node->neighbor[k]);
                             node->potential += neighborMatrix * node->neighbor[k]->charge;
                             computePotential = true;
@@ -623,9 +772,14 @@ void LET::parentToChild(LET_Node *&node) {
         if (!node->child[k]->isEmpty) {
             VectorXd contribution; contribution = VectorXd::Zero(nSurface);
             VectorXd result; result = VectorXd::Zero(nSurface);
-            getDownwardEquivalent_acc(nSurface, node->shiftedDownEquivalentSurface, node->child[k]->shiftedDownCheckSurface, node->downwardEquivalent, contribution);
-            getDownwardEquivalent_inv(nSurface, node->child[k]->shiftedDownEquivalentSurface, node->child[k]->shiftedDownCheckSurface, contribution, result);
-
+            if (option == Option::Cache) {
+				getDownwardEquivalent_acc_cache(nSurface, node->shiftedDownEquivalentSurface, node->child[k]->shiftedDownCheckSurface, node->downwardEquivalent, contribution);
+				getDownwardEquivalent_inv_cache(nSurface, node->child[k]->shiftedDownEquivalentSurface, node->child[k]->shiftedDownCheckSurface, contribution, result);
+            }
+            else {
+            	getDownwardEquivalent_acc_fast(nSurface, node->shiftedDownEquivalentSurface, node->child[k]->shiftedDownCheckSurface, node->downwardEquivalent, contribution);
+            	getDownwardEquivalent_inv_fast(nSurface, node->child[k]->shiftedDownEquivalentSurface, node->child[k]->shiftedDownCheckSurface, contribution, result);
+            }
             node->child[k]->downwardEquivalent += result;
         }
 
@@ -644,13 +798,23 @@ void LET::interactionList(LET_Node *&node) {
             VectorXd contribution; contribution = VectorXd::Zero(nSurface);
             for (index_t interactionIndex = 0; interactionIndex < node->child[k]->nInteraction; ++interactionIndex) {
 
-                getDownwardEquivalent_acc(nSurface, node->child[k]->interaction[interactionIndex]->shiftedUpEquivalentSurface,
+            	if (option == Option::Cache) {
+            		getDownwardEquivalent_acc_cache(nSurface, node->child[k]->interaction[interactionIndex]->shiftedUpEquivalentSurface,
                                           node->child[k]->shiftedDownCheckSurface, node->child[k]->interaction[interactionIndex]->upwardEquivalent, contribution);
-
+            	}
+            	else {
+            		getDownwardEquivalent_acc_fast(nSurface, node->child[k]->interaction[interactionIndex]->shiftedUpEquivalentSurface,
+            		                                          node->child[k]->shiftedDownCheckSurface, node->child[k]->interaction[interactionIndex]->upwardEquivalent, contribution);
+            	}
             }
-
-            getDownwardEquivalent_inv(nSurface, node->child[k]->shiftedDownEquivalentSurface,
+            if (option == Option::Cache) {
+            	getDownwardEquivalent_inv_cache(nSurface, node->child[k]->shiftedDownEquivalentSurface,
                                       node->child[k]->shiftedDownCheckSurface, contribution, node->child[k]->downwardEquivalent);
+            }
+            else {
+            	getDownwardEquivalent_inv_fast(nSurface, node->child[k]->shiftedDownEquivalentSurface,
+                                      node->child[k]->shiftedDownCheckSurface, contribution, node->child[k]->downwardEquivalent);
+            }
         }
 
     }
@@ -769,7 +933,13 @@ void LET::kernelEvaluate(vector<Point> &targetLocation, vector<Point> &sourceLoc
 
 void LET::pseudoInverse(MatrixXd &K, VectorXd &rhs, VectorXd& lhs) {
 
-    double tolerance=1.e-8; // choose your tolerance wisely!
+	if (option != Option::Cache) {
+		lhs = cache[cacheIndex] * rhs;
+		cacheIndex++;
+		return;
+	}
+
+    double tolerance=1.e-10; // choose your tolerance wisely!
 
     JacobiSVD<MatrixXd> svd(K, ComputeThinU | ComputeThinV);
     MatrixXd u = svd.matrixU();
@@ -779,6 +949,10 @@ void LET::pseudoInverse(MatrixXd &K, VectorXd &rhs, VectorXd& lhs) {
     for (size_t i=0; i< s.rows(); ++i) {
         s(i) = s(i) > tolerance ? 1.0/s(i) : 0.;
     }
+
+
+    cache.push_back(v*s.asDiagonal()*u.transpose());
+
 
     lhs = v*s.asDiagonal()*u.transpose() * rhs;
 

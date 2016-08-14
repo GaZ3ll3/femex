@@ -18,6 +18,10 @@ methods
     ret =  kifmm_('calc_cache', this.id_,ncheb, charge, z, N, rank, mu_t);
   end
   
+  function ret = calcf(this, ncheb, charge, z, N, rank, mu_t) 
+    ret =  kifmm_('calc_fast', this.id_,ncheb, charge, z, N, rank, mu_t);
+  end
+  
   function debug(this)
       kifmm_('debug', this.id_);
   end

@@ -35,7 +35,23 @@ public:
     Point center;
     Point radius;
 
-    void initialize(const index_t nSurface, const vector<Point>& location, double* const charge, const ulong N, const index_t rank);
+    /*
+     * utilities variables for timing
+     */
+    struct timespec start, finish;
+    double elapsed = 0;
+    /*
+     * caching matrix for GMRES part
+     */
+    Option option;
+    size_t cacheIndex;
+    vector<MatrixXd> cache;
+
+    void tic() {clock_gettime(CLOCK_MONOTONIC, &start);}
+    void toc() {clock_gettime(CLOCK_MONOTONIC, &finish);elapsed = (finish.tv_sec - start.tv_sec);
+	elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;}
+
+    void initialize(const index_t nSurface, const vector<Point>& location, double* const charge, const ulong N, const index_t rank, Option option);
     void getCenterRadius(const vector<Point>& location, Point& center, Point& radius);
     void maxAndMinCoordinates(const vector<Point>& vec, scalar_t& maxX, scalar_t& maxY, scalar_t& minX, scalar_t& minY);
 
@@ -43,15 +59,31 @@ public:
     void getLocalSurface(const Identity id, Point& center, Point& radius, vector<Point>& surface);
 
     void getUpwardEquivalent_acc(index_t nSurface, vector<Point> &location, vector<Point> &upwardCheckSurface,  VectorXd &charge, VectorXd &density);
+    void getUpwardEquivalent_acc_cache(index_t nSurface, vector<Point> &location, vector<Point> &upwardCheckSurface,  VectorXd &charge, VectorXd &density);
+    void getUpwardEquivalent_acc_fast(index_t nSurface, vector<Point> &location, vector<Point> &upwardCheckSurface,  VectorXd &charge, VectorXd &density);
+
+
 
     void getUpwardEquivalent_inv(index_t nSurface,vector<Point> &upwardEquivalentSurface,
                                  vector<Point> &upwardCheckSurface, VectorXd &rhs, VectorXd &density);
+    void getUpwardEquivalent_inv_cache(index_t nSurface,vector<Point> &upwardEquivalentSurface,
+                                     vector<Point> &upwardCheckSurface, VectorXd &rhs, VectorXd &density);
+    void getUpwardEquivalent_inv_fast(index_t nSurface,vector<Point> &upwardEquivalentSurface,
+                                     vector<Point> &upwardCheckSurface, VectorXd &rhs, VectorXd &density);
 
 
     void getDownwardEquivalent_acc(index_t nSurface, vector<Point>& location, vector<Point>& downCheckSurface,
                                VectorXd& charge, VectorXd& density);
+    void getDownwardEquivalent_acc_cache(index_t nSurface, vector<Point>& location, vector<Point>& downCheckSurface,
+                               VectorXd& charge, VectorXd& density);
+    void getDownwardEquivalent_acc_fast(index_t nSurface, vector<Point>& location, vector<Point>& downCheckSurface,
+                               VectorXd& charge, VectorXd& density);
 
     void getDownwardEquivalent_inv(index_t nSurface, vector<Point> &downwardEquivalentSurface, vector<Point> &downCheckSurface,
+                                   VectorXd &rhs, VectorXd &density);
+    void getDownwardEquivalent_inv_cache(index_t nSurface, vector<Point> &downwardEquivalentSurface, vector<Point> &downCheckSurface,
+                                   VectorXd &rhs, VectorXd &density);
+    void getDownwardEquivalent_inv_fast(index_t nSurface, vector<Point> &downwardEquivalentSurface, vector<Point> &downCheckSurface,
                                    VectorXd &rhs, VectorXd &density);
 
 
