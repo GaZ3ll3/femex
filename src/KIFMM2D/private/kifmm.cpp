@@ -186,7 +186,7 @@ double kernel_kifmm::kernelFunction(Point& r0, Point& r1){
                integral_corner(this->getAttribute(r0.x, r0.y), 1.0/side)/(2*M_PI);
     }
     else{
-       return exp(-this->integral_approximate(r0.x, r0.y, r1.x, r1.y))/rSquare/(2*M_PI)/side/side;
+       return exp(-this->integral(r0.x, r0.y, r1.x, r1.y))/rSquare/(2*M_PI)/side/side;
     }
 
 }
