@@ -41,10 +41,10 @@ void LET::initialize(const index_t nSurface, const vector<Point> &location, doub
     standardDownCheckSurface.resize(nSurface);
     standardDownEquivalentSurface.resize(nSurface);
 
-    getStandardSurface(nSurface, 2.95, standardUpCheckSurface);
-    getStandardSurface(nSurface, 1.05, standardUpEquivalentSurface);
-    getStandardSurface(nSurface, 1.05, standardDownCheckSurface);
-    getStandardSurface(nSurface, 2.95, standardDownEquivalentSurface);
+    getStandardSurface(nSurface, 3.0, standardUpCheckSurface);
+    getStandardSurface(nSurface, 1.0, standardUpEquivalentSurface);
+    getStandardSurface(nSurface, 1.0 , standardDownCheckSurface);
+    getStandardSurface(nSurface, 3.0, standardDownEquivalentSurface);
 
     getCenterRadius(location, center, radius);
 
@@ -54,7 +54,7 @@ void LET::initialize(const index_t nSurface, const vector<Point> &location, doub
     root->nNeighbor = 0; root->nInteraction = 0;
     root->N = N;
     root->center = center;
-    root->radius = radius;
+    root->radius = {0.5, 0.5};
     root->index.setLinSpaced(N, 0, N-1);
 
     assignChildren(root);
@@ -73,12 +73,12 @@ void LET::assignChildren(LET_Node *&node) {
         node->upwardEquivalent = VectorXd::Zero(nSurface);
         node->downwardEquivalent = VectorXd::Zero(nSurface);
 
+
+
         getLocalSurface(UE, node->center, node->radius, node->shiftedUpEquivalentSurface);
         getLocalSurface(UC, node->center, node->radius, node->shiftedUpCheckSurface);
         getLocalSurface(DE, node->center, node->radius, node->shiftedDownEquivalentSurface);
         getLocalSurface(DC, node->center, node->radius, node->shiftedDownCheckSurface);
-
-
 
 
         for (size_t k = 0; k < node->N; ++k) {
@@ -887,6 +887,15 @@ void LET::getStandardSurface(const index_t nSurface, scalar_t radius, vector<Poi
         surface[k + 2 * each_side] = {-radius, radius - k * (2 * radius)/each_side};
         surface[k + 3 * each_side] = {-radius + k * (2 * radius)/each_side,-radius};
     }
+
+//    index_t each_side = nSurface/4;
+//    for (index_t k = 0; k < each_side; ++k) {
+//        surface[k] = {radius, -radius * cos(k * 2 * M_PI/each_side)};
+//        surface[k + each_side] = {radius * cos(k * 2 * M_PI/each_side), radius};
+//        surface[k + 2 * each_side] = {-radius, radius * cos(k * 2 * M_PI/each_side)};
+//        surface[k + 3 * each_side] = {-radius * cos(k * 2 * M_PI/each_side),-radius};
+//    }
+
 }
 
 

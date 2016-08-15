@@ -177,8 +177,8 @@ public:
 	    else {
 	        auto xm = (x0 + x1)/2;
 	        auto ym = (y0 + y1)/2;
-	        return integral( x0, y0, xm, ym) +
-	               integral( xm, ym, x1, y1);
+	        return integral_approximate( x0, y0, xm, ym) +
+	               integral_approximate( xm, ym, x1, y1);
 	    }
 	}
 	double getAttribute(double x, double y);
@@ -196,12 +196,12 @@ public:
 double kernel_Radfmm::kernel_Func(Point r0, Point r1){
     double rSquare	= distance(r0.x, r0.y, r1.x, r1.y) ;
     if (rSquare == 0){
-    	//return 0.;
+//    	return 0.;
     	return (1.0 - exp(- this->getAttribute(r0.x, r0.y)/side/2.0))/ this->getAttribute(r0.x, r0.y) +
     			integral_corner(this->getAttribute(r0.x, r0.y), 1.0/side)/(2*M_PI);
     }
     else{
-        return exp(-this->integral(r0.x, r0.y, r1.x, r1.y))/rSquare/(2*M_PI)/side/side;
+        return exp(-this->integral_approximate(r0.x, r0.y, r1.x, r1.y))/rSquare/(2*M_PI)/side/side;
     }
 }
 

@@ -40,7 +40,7 @@ fprintf('2. Caching necessary kernel evaluations ... with time %f\n', t);
 % 
 
 tic;
-[ret,~,~,~,~] = gmres(@forward, rhs, 30, 1e-10, 30, [],[], rhs);
+[ret,~,~,~,~] = gmres(@forward, rhs, 40, 1e-12, 40, [],[], rhs);
 
 ret = ret./mu_s;
 
