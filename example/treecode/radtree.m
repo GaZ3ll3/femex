@@ -22,7 +22,8 @@ N = size(x, 2)^2;
 charge = ring(z(1,:), z(2,:));
 %charge = ones(N, 1);
 % mu_s = 10.0 * (1 + z(1,:).^2 + z(2, :).^2)';
-mu_s = 5.0 * ones(N, 1);
+% mu_s = 5.0 * ones(N, 1);
+mu_s = gaussFunc(z(1,:), z(2,:))';
 
 mu_t = 0.2 + mu_s;
 
@@ -68,5 +69,10 @@ ret = ker.calcf(ncheb,x, z, N, m, mu_t);
 ret = x - mu_s .* ret;
 
 
+end
+
+function ret = gaussFunc(x, y)
+sq = (x - 0.5).^2 + (y - 0.5).^2;
+ret = 3.0 + 2.0 * exp(-sq./4.0);
 end
 
