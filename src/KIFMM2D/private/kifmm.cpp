@@ -192,8 +192,12 @@ double kernel_kifmm::kernelFunction(Point& r0, Point& r1){
 }
 
 double kernel_kifmm::getAttribute(double x, double y) {
+	/*
+	 * when getting attribute from outside of domain, set to zero here.
+	 * maybe can be changed later to adjust to mu_t's formulation.
+	 */
     if (x < start_x || x >= 1 + start_x || y < start_y || y >= 1 + start_y) {
-        return 5.2;
+        return 0.;
     }
 
 

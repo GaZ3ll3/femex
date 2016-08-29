@@ -250,8 +250,8 @@ inline scalar_t integral_approximate(treecode *tree, scalar_t x0, scalar_t y0, s
     else {
         auto xm = (x0 + x1)/2;
         auto ym = (y0 + y1)/2;
-        return integral(tree, x0, y0, xm, ym) +
-               integral(tree, xm, ym, x1, y1);
+        return integral_approximate(tree, x0, y0, xm, ym) +
+               integral_approximate(tree, xm, ym, x1, y1);
     }
 }
 
