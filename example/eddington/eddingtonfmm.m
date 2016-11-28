@@ -19,7 +19,7 @@ end
 
 N = size(x, 2)^2;
                                                     
-charge = ring(z(1,:), z(2,:));
+charge = period(z(1,:), z(2,:));
 
 %mu_s = 10.0 * (1 + z(1,:).^2 + z(2, :).^2)';
 lambda = (t/3) / (1 - t/3);
@@ -61,7 +61,14 @@ t = toc;
 fprintf('3. GMRES takes time %f\n', t);
 
 [X, Y] = meshgrid(1/n : 2/n:(n-1)/n);
+figure(1);
 surf(X,Y,reshape(ret(1:l), n/2,n/2), 'EdgeColor','None');
+shading interp;colorbar; colormap jet;view(2);
+figure(2);
+surf(X,Y,reshape(ret(l+1:2*l), n/2,n/2), 'EdgeColor','None');
+shading interp;colorbar; colormap jet;view(2);
+figure(3);
+surf(X,Y,reshape(ret(2*l+1:3*l), n/2,n/2), 'EdgeColor','None');
 shading interp;colorbar; colormap jet;view(2);
 
 end
