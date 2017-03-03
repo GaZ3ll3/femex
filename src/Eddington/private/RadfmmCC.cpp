@@ -33,15 +33,23 @@ inline double distance(double x0, double y0, double x1, double y1) noexcept {
 }
 
 inline double integral_corner(double sigma_t, double length) {
-    double ret = 0.;
-    double mid = (sqrt(2) + 1.0) * length/4.0;
-    double rad = (sqrt(2) - 1.0) * length/4.0;
-    for (int i = 0; i < X.size(); ++i) {
-        double val = (mid + rad * X[i]);
-        ret += exp(-sigma_t * val) * (M_PI/2.0 - 2 * acos(length/2.0/val)) * W[i];
-    }
-    ret *= 4.0 * rad;
-    return ret;
+	double r = length / 2.0;
+	double mid = r / 2.0;
+	double rad = r / 2.0;
+	double tmp;
+
+	double ret = 0.;
+	for (int i = 0; i < X.size(); ++i) {
+		double x = (mid + rad * X[i]);
+		for (int j = 0; j < X.size(); ++j) {
+			double y = (mid + rad * X[j]);
+			double yl = y / r;
+			double slope = sqrt(1 + yl * yl);
+			ret += exp(-sigma_t * x * slope) / slope * W[i] * W[j];
+		}
+	}
+
+	return ret * 2 * r;
 }
 
 class kernel_RadfmmCC: public kernel_Base {
@@ -187,8 +195,7 @@ public:
 double kernel_RadfmmCC::kernel_Func(Point r0, Point r1){
     double rSquare	= distance(r0.x, r0.y, r1.x, r1.y) ;
     if (rSquare == 0){
-    	return (1.0 - exp(- this->getAttribute(r0.x, r0.y)/side/2.0))/ this->getAttribute(r0.x, r0.y) +
-    			integral_corner(this->getAttribute(r0.x, r0.y), 1.0/side)/(2*M_PI)/2.0;
+    	return integral_corner(this->getAttribute(r0.x, r0.y), 1.0/side)/(2*M_PI)/2.0;
     }
     else{
         return exp(-this->integral(r0.x, r0.y, r1.x, r1.y)) * (r0.x - r1.x) * (r0.x - r1.x)/rSquare/rSquare/rSquare/(2*M_PI)/side/side;

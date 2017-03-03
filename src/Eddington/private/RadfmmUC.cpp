@@ -33,15 +33,23 @@ inline double distance(double x0, double y0, double x1, double y1) noexcept {
 }
 
 inline double integral_corner(double sigma_t, double length) {
-    double ret = 0.;
-    double mid = (sqrt(2) + 1.0) * length/4.0;
-    double rad = (sqrt(2) - 1.0) * length/4.0;
-    for (int i = 0; i < X.size(); ++i) {
-        double val = (mid + rad * X[i]);
-        ret += exp(-sigma_t * val) * (M_PI/2.0 - 2 * acos(length/2.0/val)) * W[i];
-    }
-    ret *= 4.0 * rad;
-    return ret;
+	double r = length / 2.0;
+	double mid = r / 2.0;
+	double rad = r / 2.0;
+	double tmp;
+
+	double ret = 0.;
+	for (int i = 0; i < X.size(); ++i) {
+		double x = (mid + rad * X[i]);
+		for (int j = 0; j < X.size(); ++j) {
+			double y = (mid + rad * X[j]);
+			double yl = y / r;
+			double slope = sqrt(1 + yl * yl);
+			ret += exp(-sigma_t * x * slope) / slope * W[i] * W[j];
+		}
+	}
+
+	return ret * 2 * r;
 }
 
 class kernel_RadfmmUC: public kernel_Base {
