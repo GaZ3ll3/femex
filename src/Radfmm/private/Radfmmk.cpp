@@ -209,6 +209,11 @@ double kernel_Radfmm::kernel_Func(Point r0, Point r1){
     	return integral_corner(this->getAttribute(r0.x, r0.y), 1.0/side)/(2*M_PI);
     }
     else{
+    	// this is where we need to change to adapt second order scheme.
+    	/*
+    	 * our method is still using the piecewise constant function to calculate the weight.
+    	 * but the weight is not associated with target only.
+    	 */
         return exp(-this->integral(r0.x, r0.y, r1.x, r1.y))/rSquare/(2*M_PI)/side/side;
     }
 }
