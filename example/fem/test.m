@@ -144,7 +144,7 @@ fprintf('The L2 norm of error is %6.8f.\n', norm(fem.Solution(1:numofnodes) -...
 
 
 
-
+% 
 % solver = Solver('agmg');
 % tic;
 % fem.Solution(dofs) = - solver.solve(A, b);
