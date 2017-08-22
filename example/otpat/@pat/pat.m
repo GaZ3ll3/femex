@@ -44,10 +44,12 @@ classdef pat < handle
         % these information should not be modified during computation, they
         % are used for updating.
         matrices
+
+    end
+    properties (Access = public)        
         local_parameters
         local_measurements
-    end
-    properties (Access = public)
+        
         measurements
         parameters 
         kappa % kappa for Neumann condition.
@@ -78,7 +80,7 @@ classdef pat < handle
             % model utilizes finite element method on unit square mesh.
             % todo: use new version of meshing function.
             %
-            this.model= FEM([0 0 1 0 1 1 0 1]', 2, 1.0/2/40/40, []', 6);
+            this.model= FEM([0 0 1 0 1 1 0 1]', 1, 1.0/2/60/60, []', 3);
             bnd_eq = {'x-1', 'y-1', 'x', 'y'};
             
             boundary = Boundary();

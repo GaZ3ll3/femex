@@ -11,7 +11,6 @@ function [f,g] = objective_gradient(this, pv)
     this.local_parameters.sigma     = pv(1:this.geometry.N);
     this.local_parameters.D = pv((this.geometry.N + 1): 2 * this.geometry.N);
 
-
     % construct adjoint solver.
 
     p = this.local_parameters;
@@ -57,50 +56,62 @@ function [f,g] = objective_gradient(this, pv)
     h_D = zeros(N ,1);
     
     % regularization coefficients.
-    alpha = 0.;
-    beta = 1e-5;
-
-
+    alpha = 1e-2;
+    beta = 0;
+    
     % skip first measurement for quotient use.
-    for l_id = 2:length(this.loads)
-        feedback = (this.local_measurements.H{l_id}./ this.local_measurements.H{1} -...
-            this.measurements.H{l_id}./ this.measurements.H{1}) ;
+    for l_id = 1:length(this.loads)
+        feedback = this.local_measurements.H{l_id}.* this.measurements.H{1} - ...
+            this.measurements.H{l_id}.* this.local_measurements.H{1};
+        
         mismatch = this.local_measurements.J{l_id} - this.measurements.J{l_id}; 
         
         % objective functionals
-        obj_pat = obj_pat + 0.5 * (feedback'* feedback);
+        obj_pat = obj_pat + 0.5 * (feedback'* feedback);        
         obj_ot = obj_ot   + 0.5 * (mismatch' * mismatch);
         
-        % gradient for PAT.
-%         g_s = g_s + p.Gamma .* fluence{l_id} .* feedback;    
-        u = assemb_pat \ (feedback ./ fluence{1});
-        v = assemb_pat \ (feedback .* fluence{l_id} ./ fluence{1} ./ fluence{1});
+        % gradient for PAT.                
+        g_s = g_s + p.Gamma .* (fluence{l_id} .* this.measurements.H{1} - fluence{1} .* this.measurements.H{l_id}) .* feedback;
         
-        g_D = g_D - ...
-            this.model.assemnode(u, fluence{l_id}, ones(size(feedback)), zeros(size(feedback))  ) + ...
-            this.model.assemnode(v, fluence{1}, ones(size(feedback)), zeros(size(feedback))  );
-        g_s = g_s -...
-            this.model.assemnode(u, fluence{l_id}, zeros(size(feedback)), ones(size(feedback)) ) + ...
-            this.model.assemnode(v, fluence{1}, zeros(size(feedback)), ones(size(feedback)) );
+        phi = assemb_pat \ (p.sigma .* p.Gamma .* this.measurements.H{1} .* feedback);
+        psi = assemb_pat \ (p.sigma .* p.Gamma .* this.measurements.H{l_id} .* feedback);
+        
+        g_D = g_D - this.model.assemnode(phi, fluence{l_id}, ones(N,1), zeros(N,1)) +...
+            this.model.assemnode(psi, fluence{1}, ones(N,1), zeros(N,1));
+        g_s = g_s - this.model.assemnode(phi, fluence{l_id}, zeros(N,1),  ones(N,1)) + ...
+            this.model.assemnode(psi, fluence{1}, zeros(N,1),  ones(N,1));
         
         % gradient for OT.
         load = zeros(N, 1);
         load(ndofs) = conj(mismatch);
         phi = assemb_ot\load;
         
-        h_D = h_D - this.model.assemnode(phi, current{l_id},  ones(size(feedback)), zeros(size(feedback)) );
-        h_s = h_s - this.model.assemnode(phi, current{l_id}, zeros(size(feedback)), ones(size(feedback)) ) ;
+        h_D = h_D - this.model.assemnode(real(phi), real(current{l_id}),  ones(N,1), zeros(N,1) ) +...
+            this.model.assemnode(imag(phi), imag(current{l_id}),  ones(N,1), zeros(N,1) );
+        h_s = h_s - this.model.assemnode(real(phi), real(current{l_id}), zeros(N,1), ones(N,1) ) + ...
+            this.model.assemnode(imag(phi), imag(current{l_id}), zeros(N,1), ones(N,1) );
         
     end
 
-    f =  obj_pat + obj_ot + ...
-        0.5*alpha *( this.local_parameters.D' * this.matrices.Stiff * this.local_parameters.D ) + ...
+    reg = 0.5*alpha *( this.local_parameters.D' * this.matrices.Stiff * this.local_parameters.D ) + ...
         0.5*beta *( this.local_parameters.sigma' * this.matrices.Stiff * this.local_parameters.sigma );
     
-    grad_s = g_s + h_s + beta * this.matrices.Stiff *this.local_parameters.sigma;
-    grad_D = g_D + h_D + alpha * this.matrices.Stiff *this.local_parameters.D;
+
+    pp = 1/norm(this.measurements.H{1})^4;
+    
+    f = ...% pp * obj_pat +
+    obj_ot + reg;
+    
+    grad_s =  h_s + beta * this.matrices.Stiff *this.local_parameters.sigma;
+    grad_D =  h_D + alpha * this.matrices.Stiff *this.local_parameters.D;
+
     
     grad_D(this.geometry.ndofs) = 0;
     grad_s(this.geometry.ndofs) = 0;
+    
+%     disp(obj_pat);
+%     disp( obj_ot);
+%     disp(reg)
+
     g = [grad_s;grad_D];
 end

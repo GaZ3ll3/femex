@@ -132,7 +132,6 @@ public:
 			MatlabPtr RefY, MatlabPtr Weights, MatlabPtr Fcn_s, MatlabPtr Fcn_a,
 			MatlabPtr u, MatlabPtr v);
 
-
 };
 
 #endif /* ASSEMBLER_PRIVATE_ASSEMBLER_C_ */

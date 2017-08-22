@@ -1,0 +1,9 @@
+function visualize(o, var)
+    figure;
+    trisurf(o.model.TriMesh', ...
+        o.model.Promoted.nodes(1,:)', ...
+        o.model.Promoted.nodes(2,:)', ...
+        var, 'EdgeColor', 'none' ); shading interp; colormap jet; colorbar;view(2);
+end
+        
+

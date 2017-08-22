@@ -12,9 +12,6 @@ function visualize(this, var, n, m)
             var{i}, 'EdgeColor', 'none' ); shading interp; colormap jet; colorbar;view(2);
         end
     end
-        
-    
-        
 end
         
 
